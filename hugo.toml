@@ -1,0 +1,39 @@
+baseURL = ''
+languageCode = 'en-us'
+title = 'Demo'
+theme = 'PaperMod'
+
+[params]
+  [params.homeInfoParams]
+    Title = "Hi there 👋"
+    Content = "Can be Info, links, about..."
+  [[params.socialIcons]]
+    name = "twitter"
+    url = "<link>"
+  [[params.socialIcons]]
+    name = "github"
+    url = "<link>"
+
+[menus]
+  [[menus.main]]
+    name = 'Services'
+    pageRef = '/services'
+    weight = 10
+  [[menus.main]]
+    name = 'About'
+    pageRef = '/about'
+    weight = 20
+  [[menus.main]]
+    name = 'Archives'
+    pageRef = '/archives'
+    weight = 30
+  [[menus.main]]
+    name = 'Contact'
+    pageRef = '/contact'
+    weight = 40
+  [[menus.main]]
+    name = 'Hugo'
+    url = 'https://gohugo.io'
+    weight = 30
+    [menus.main.params]
+      rel = 'external'
