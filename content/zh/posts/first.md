@@ -1,5 +1,5 @@
 +++
-lang = "cn"
+lang = "zh"
 title = "第一篇文章"
 date = 2024-10-08T20:40:17+09:00
 draft = false

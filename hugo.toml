@@ -1,105 +1,139 @@
-baseURL = 'http://localhost:1313/'
-languageCode = 'en-US'
-title = 'Demo'
+baseURL = 'https://www.deux.top'
+title = '二重奏'
 theme = 'PaperMod'
-defaultContentLanguage = "cn"
+defaultContentLanguage = "zh"
 defaultContentLanguageInSubdir = true
 
+hasCJKLanguage = true
+enableInlineShortcodes = true
+enableEmoji = true
+enableRobotsTXT = true
+
 [outputs]
-home = [ "HTML", "RSS", "JSON" ]
+home = ["HTML", "RSS", "JSON"]
 
 [languages]
-  [languages.en]
-    languageCode = "en-US"
-    languageName = "English"
-    contentDir = "content/en"
-    weight = 3
-    [languages.en.menu]
-      [[languages.en.menu.main]]
-        name = 'Categories'
-        pageRef = '/categories'
-        weight = 10
-      [[languages.en.menu.main]]
-        name = 'Tags'
-        pageRef = '/tags'
-        weight = 20
-      [[languages.en.menu.main]]
-        name = 'Archives'
-        pageRef = '/archives'
-        weight = 30
-      [[languages.en.menu.main]]
-        name = 'Library'
-        pageRef = '/library'
-        weight = 40
-      [[languages.en.menu.main]]
-        name = 'Explore'
-        pageRef = '/explore'
-        weight = 50
+  [languages.zh]
+    languageCode = "zh-CN"
+    languageName = "简体中文"
+    contentDir = "content/zh"
+    weight = 1
+
+    [languages.zh.params.profileMode]
+      enabled = true
+      title = "精神与思想的二重奏"
+      subtitle = "自由与独立的交响曲"
+      imageUrl = "images/logo.jpg"
+      imageWidth = 120
+      imageHeight = 120
+
+    [[languages.zh.params.profileMode.buttons]]
+      name = "Archive"
+      url = "/archive"
+
+    [[languages.zh.params.profileMode.buttons]]
+      name = "Github"
+      url = "https://github.com/"
+
+    [[languages.zh.params.socialIcons]]
+      name = "youtube"
+      url = "<link>"
+
+    [[languages.zh.params.socialIcons]]
+      name = "twitter"
+      url = "<link2>"
+
+    [[languages.zh.params.socialIcons]]
+      name = "github"
+      url = "<link3>"
+
+    [[languages.zh.menu.main]]
+      name = '分类'
+      pageRef = '/categories'
+      weight = 10
+    [[languages.zh.menu.main]]
+      name = '标签'
+      pageRef = '/tags'
+      weight = 20
+    [[languages.zh.menu.main]]
+      name = '时间轴'
+      pageRef = '/archives'
+      weight = 30
+    [[languages.zh.menu.main]]
+      name = '资料库'
+      pageRef = '/library'
+      weight = 40
+    [[languages.zh.menu.main]]
+      name = '探索发现'
+      pageRef = '/explore'
+      weight = 50
 
   [languages.ja]
     languageCode = "ja-JP"
     languageName = "日本語"
     contentDir = "content/ja"
     weight = 2
-    [languages.ja.menu]
-      [[languages.ja.menu.main]]
-        name = 'カテゴリ'
-        pageRef = '/categories'
-        weight = 10
-      [[languages.ja.menu.main]]
-        name = 'タグ'
-        pageRef = '/tags'
-        weight = 20
-      [[languages.ja.menu.main]]
-        name = 'アーカイブ'
-        pageRef = '/archives'
-        weight = 30
-      [[languages.ja.menu.main]]
-        name = 'ライブラリ'
-        pageRef = '/library'
-        weight = 40
-      [[languages.ja.menu.main]]
-        name = 'エクスプローラ'
-        pageRef = '/explore'
-        weight = 50
 
-  [languages.cn]
-    languageCode = "zh-CN"
-    languageName = "简体中文"
-    contentDir = "content/cn"
-    weight = 1
-    [languages.cn.menu]
-      [[languages.cn.menu.main]]
-        name = '分类'
-        pageRef = '/categories'
-        weight = 10
-      [[languages.cn.menu.main]]
-        name = '标签'
-        pageRef = '/tags'
-        weight = 20
-      [[languages.cn.menu.main]]
-        name = '时间轴'
-        pageRef = 'archives'
-        weight = 30
-      [[languages.cn.menu.main]]
-        name = '资料库'
-        pageRef = '/library'
-        weight = 40
-      [[languages.cn.menu.main]]
-        name = '探索发现'
-        pageRef = '/explore'
-        weight = 50
+    [languages.ja.params.profileMode]
+      enabled = true
+      title = "精神と思考の二重奏"
+      subtitle = "自由と独立の交響曲"
+      imageUrl = "images/logo.jpg"
+      imageWidth = 120
+      imageHeight = 120
 
-[params]
-  [params.homeInfoParams]
-    Title = "Hi there 👋"
-    Content = "Can be Info, links, about..."
-  [[params.socialIcons]]
-    name = "youtube"
-    url = "<link>"
-  [[params.socialIcons]]
-    name = "twitter"
-    url = "<link>"
-  [[params.socialIcons]]
-    name = "github"
-    url = "<link>"
+    [[languages.ja.menu.main]]
+      name = 'カテゴリ'
+      pageRef = '/categories'
+      weight = 10
+    [[languages.ja.menu.main]]
+      name = 'タグ'
+      pageRef = '/tags'
+      weight = 20
+    [[languages.ja.menu.main]]
+      name = 'アーカイブ'
+      pageRef = '/archives'
+      weight = 30
+    [[languages.ja.menu.main]]
+      name = 'ライブラリ'
+      pageRef = '/library'
+      weight = 40
+    [[languages.ja.menu.main]]
+      name = 'エクスプローラ'
+      pageRef = '/explore'
+      weight = 50
+
+  [languages.en]
+    languageCode = "en-US"
+    languageName = "English"
+    contentDir = "content/en"
+    weight = 3
+
+    [languages.en.params.profileMode]
+      enabled = true
+      title = "A duet of spirit and thought"
+      subtitle = "a symphony of freedom and independence"
+      imageUrl = "images/logo.jpg"
+      imageWidth = 120
+      imageHeight = 120
+
+    [[languages.en.menu.main]]
+      name = 'Categories'
+      pageRef = '/categories'
+      weight = 10
+    [[languages.en.menu.main]]
+      name = 'Tags'
+      pageRef = '/tags'
+      weight = 20
+    [[languages.en.menu.main]]
+      name = 'Archives'
+      pageRef = '/archives'
+      weight = 30
+    [[languages.en.menu.main]]
+      name = 'Library'
+      pageRef = '/library'
+      weight = 40
+    [[languages.en.menu.main]]
+      name = 'Explore'
+      pageRef = '/explore'
+      weight = 50
