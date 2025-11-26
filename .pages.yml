@@ -1,1 +1,71 @@
-media: static/images
+media:
+  - name: images
+    label: 图片
+    input: static/images
+    output: /images
+    extensions: [jpg, png, webp]
+  - name: files
+    label: 附件
+    input: static/files
+    output: /files
+    categories: [document]
+
+content:
+  - name: posts
+    label: 文章
+    type: collection
+    path: content/posts
+    fields:
+      - name: title
+        label: 标题
+        type: string
+        required: true
+      - name: date
+        label: 日期
+        type: date
+        required: true
+      - name: author
+        label: 作者
+        type: string
+      - name: tags
+        label: 标签
+        type: string
+        list: true
+      - name: body
+        label: 正文
+        type: text
+        required: true
+    filename: '{year}-{month}-{day}-{primary}.md'
+    view:
+      fields: [title, date, author]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+
+  - name: pages
+    label: 独立页面
+    type: collection
+    path: content/
+    fields:
+      - name: title
+        label: 标题
+        type: string
+        required: true
+      - name: body
+        label: 正文
+        type: text
+
+components:
+  seo:
+    label: SEO信息
+    type: object
+    fields:
+      - name: description
+        label: 描述
+        type: string
+      - name: keywords
+        label: 关键词
+        type: string
+        list: true
