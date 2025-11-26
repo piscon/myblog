@@ -3,7 +3,7 @@ lang = 'zh'
 title = '你好，世界'
 date = '2025-11-26'
 draft = false
-cover.image = 'images/net_grass.jpg'
+cover.image = '/images/net_grass.jpg'
 cover.caption = '网之外'
 cover.alt = '网之外'
 +++
