@@ -3,9 +3,7 @@ lang = 'zh'
 title = '你好，世界'
 date = '2025-11-26'
 draft = false
-cover.image = 'images/images.jpg'
-cover.alt = 'This is a post image'
-cover.caption = 'This is a post caption'
+cover.image = 'images/banner.jpg'
 +++
 ## 这是我的第一篇博客文章，以此纪念
 
