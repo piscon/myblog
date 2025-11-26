@@ -1,12 +1,11 @@
 +++
-lang = "zh"
-title = "第一篇文章"
-date = 2024-10-08T20:40:17+09:00
+lang = 'zh'
+title = '第一篇文章'
+date = '2025-11-26'
 draft = false
-[cover]
-    image = "images/images.jpg"
-    alt = "This is a post image"
-    caption = "This is a post caption"
+cover.image = 'images/images.jpg'
+cover.alt = 'This is a post image'
+cover.caption = 'This is a post caption'
 +++
 ## Introduction
 
