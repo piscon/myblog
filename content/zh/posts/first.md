@@ -1,14 +1,14 @@
 +++
 lang = 'zh'
-title = '第一篇文章'
+title = '你好，世界'
 date = '2025-11-26'
 draft = false
 cover.image = 'images/images.jpg'
 cover.alt = 'This is a post image'
 cover.caption = 'This is a post caption'
 +++
-## Introduction
+## 这是我的第一篇博客文章，以此纪念
 
-This is **bold** text, and this is *emphasized* text.
+新的开始，新的出发
 
-Visit the [Hugo](https://gohugo.io) website!
+感谢 [Hugo](https://gohugo.io) 提供博客源代码支持
