@@ -29,7 +29,7 @@ home = ["HTML", "RSS", "JSON"]
 
     [[languages.zh.params.profileMode.buttons]]
       name = "Archive"
-      url = "/archive"
+      url = "/zh/archive"
     [[languages.zh.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
