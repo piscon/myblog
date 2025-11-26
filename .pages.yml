@@ -159,7 +159,7 @@ content:
         order: desc
 
 components:
-  cover
+  cover:
     label: 通用封面
     type: object
     fields:
