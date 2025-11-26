@@ -28,8 +28,8 @@ home = ["HTML", "RSS", "JSON"]
       imageHeight = 120
 
     [[languages.zh.params.profileMode.buttons]]
-      name = "Archive"
-      url = "/zh/archive"
+      name = "时间轴"
+      url = "/zh/archives"
     [[languages.zh.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
