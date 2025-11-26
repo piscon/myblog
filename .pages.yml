@@ -3,7 +3,7 @@ media:
     label: 图片
     input: static/images
     output: /images
-    extensions: [jpg, png, webp]
+    extensions: [jpg, jpeg, png, webp, gif, svg]
   - name: files
     label: 附件
     input: static/files
@@ -11,10 +11,10 @@ media:
     categories: [document]
 
 content:
-  - name: posts
-    label: 文章
+  - name: zh-posts
+    label: 中文文章
     type: collection
-    path: content/posts
+    path: content/zh/posts
     fields:
       - name: title
         label: 标题
@@ -44,28 +44,102 @@ content:
         sort: date
         order: desc
 
-  - name: pages
-    label: 独立页面
+  - name: ja-posts
+    label: 日本語記事
     type: collection
-    path: content/
+    path: content/ja/posts
     fields:
       - name: title
-        label: 标题
+        label: タイトル
         type: string
         required: true
+      - name: date
+        label: 日付
+        type: date
+        required: true
+      - name: author
+        label: 著者
+        type: string
+      - name: tags
+        label: タグ
+        type: string
+        list: true
       - name: body
-        label: 正文
+        label: 本文
         type: text
+        required: true
+    filename: '{year}-{month}-{day}-{primary}.md'
+    view:
+      fields: [title, date, author]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+
+  - name: en-posts
+    label: English Posts
+    type: collection
+    path: content/en/posts
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: date
+        label: Date
+        type: date
+        required: true
+      - name: author
+        label: Author
+        type: string
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+      - name: body
+        label: Body
+        type: text
+        required: true
+    filename: '{year}-{month}-{day}-{primary}.md'
+    view:
+      fields: [title, date, author]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+
+  # 可选：如果有首页/About等单页面，可以再加
+  # - name: zh-page
+  #   label: 中文独立页面
+  #   type: collection
+  #   path: content/zh
+  #   fields:
+  #     - name: title
+  #       label: 标题
+  #       type: string
+  #       required: true
+  #     - name: body
+  #       label: 正文
+  #       type: text
+  #   view:
+  #     fields: [title]
+  #     primary: title
 
 components:
   seo:
-    label: SEO信息
+    label: SEO
     type: object
     fields:
       - name: description
-        label: 描述
+        label: 描述/説明/Description
         type: string
       - name: keywords
-        label: 关键词
+        label: 关键词/キーワード/Keywords
         type: string
         list: true
+
+settings:
+  content:
+    merge: true
