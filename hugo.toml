@@ -1,4 +1,4 @@
-baseURL = 'https://www.deux.top'
+baseURL = 'https://www.deux.top/'
 title = '二重奏'
 theme = 'PaperMod'
 defaultContentLanguage = "zh"
@@ -30,40 +30,41 @@ home = ["HTML", "RSS", "JSON"]
     [[languages.zh.params.profileMode.buttons]]
       name = "Archive"
       url = "/archive"
-
     [[languages.zh.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
-
     [[languages.zh.params.socialIcons]]
       name = "youtube"
-      url = "<link>"
-
+      url = "https://youtube.com/"
     [[languages.zh.params.socialIcons]]
       name = "twitter"
-      url = "<link2>"
-
+      url = "https://twitter.com/"
     [[languages.zh.params.socialIcons]]
       name = "github"
-      url = "<link3>"
+      url = "https://github.com/"
 
     [[languages.zh.menu.main]]
+      identifier = "categories"
       name = '分类'
       pageRef = '/categories'
       weight = 10
     [[languages.zh.menu.main]]
+      identifier = "tags"
       name = '标签'
       pageRef = '/tags'
       weight = 20
     [[languages.zh.menu.main]]
+      identifier = "archives"
       name = '时间轴'
       pageRef = '/archives'
       weight = 30
     [[languages.zh.menu.main]]
+      identifier = "library"
       name = '资料库'
       pageRef = '/library'
       weight = 40
     [[languages.zh.menu.main]]
+      identifier = "explore"
       name = '探索发现'
       pageRef = '/explore'
       weight = 50
@@ -83,22 +84,27 @@ home = ["HTML", "RSS", "JSON"]
       imageHeight = 120
 
     [[languages.ja.menu.main]]
+      identifier = "categories"
       name = 'カテゴリ'
       pageRef = '/categories'
       weight = 10
     [[languages.ja.menu.main]]
+      identifier = "tags"
       name = 'タグ'
       pageRef = '/tags'
       weight = 20
     [[languages.ja.menu.main]]
+      identifier = "archives"
       name = 'アーカイブ'
       pageRef = '/archives'
       weight = 30
     [[languages.ja.menu.main]]
+      identifier = "library"
       name = 'ライブラリ'
       pageRef = '/library'
       weight = 40
     [[languages.ja.menu.main]]
+      identifier = "explore"
       name = 'エクスプローラ'
       pageRef = '/explore'
       weight = 50
@@ -118,22 +124,27 @@ home = ["HTML", "RSS", "JSON"]
       imageHeight = 120
 
     [[languages.en.menu.main]]
+      identifier = "categories"
       name = 'Categories'
       pageRef = '/categories'
       weight = 10
     [[languages.en.menu.main]]
+      identifier = "tags"
       name = 'Tags'
       pageRef = '/tags'
       weight = 20
     [[languages.en.menu.main]]
+      identifier = "archives"
       name = 'Archives'
       pageRef = '/archives'
       weight = 30
     [[languages.en.menu.main]]
+      identifier = "library"
       name = 'Library'
       pageRef = '/library'
       weight = 40
     [[languages.en.menu.main]]
+      identifier = "explore"
       name = 'Explore'
       pageRef = '/explore'
       weight = 50
