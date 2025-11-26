@@ -23,7 +23,7 @@ home = ["HTML", "RSS", "JSON"]
       enabled = true
       title = "精神与思想的二重奏"
       subtitle = "自由与独立的交响曲"
-      imageUrl = "images/logo.jpg"
+      imageUrl = "images/logo.gif"
       imageWidth = 120
       imageHeight = 120
 
@@ -79,7 +79,7 @@ home = ["HTML", "RSS", "JSON"]
       enabled = true
       title = "精神と思考の二重奏"
       subtitle = "自由と独立の交響曲"
-      imageUrl = "images/logo.jpg"
+      imageUrl = "images/logo.gif"
       imageWidth = 120
       imageHeight = 120
 
@@ -119,7 +119,7 @@ home = ["HTML", "RSS", "JSON"]
       enabled = true
       title = "A duet of spirit and thought"
       subtitle = "a symphony of freedom and independence"
-      imageUrl = "images/logo.jpg"
+      imageUrl = "images/logo.gif"
       imageWidth = 120
       imageHeight = 120
 
