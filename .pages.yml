@@ -41,15 +41,12 @@ content:
           - name: image
             label: 图片路径
             type: string
-          - name: alt
-            label: 图像说明
-            type: string
           - name: caption
             label: 图片标题
             type: string
       - name: body
         label: 正文
-        type: text
+        type: markdown
         required: true
     filename: '{year}-{month}-{day}-{primary}.md'
     view:
@@ -90,15 +87,12 @@ content:
           - name: image
             label: 画像パス
             type: string
-          - name: alt
-            label: 画像説明
-            type: string
           - name: caption
             label: キャプション
             type: string
       - name: body
         label: 本文
-        type: text
+        type: markdown
         required: true
     filename: '{year}-{month}-{day}-{primary}.md'
     view:
@@ -139,15 +133,12 @@ content:
           - name: image
             label: Image path
             type: string
-          - name: alt
-            label: Alt text
-            type: string
           - name: caption
             label: Caption
             type: string
       - name: body
         label: Body
-        type: text
+        type: markdown
         required: true
     filename: '{year}-{month}-{day}-{primary}.md'
     view:
@@ -165,9 +156,6 @@ components:
     fields:
       - name: image
         label: 图片路径
-        type: string
-      - name: alt
-        label: 图像说明
         type: string
       - name: caption
         label: 图片标题
