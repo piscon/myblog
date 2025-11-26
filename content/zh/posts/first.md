@@ -5,6 +5,7 @@ date = '2025-11-26'
 draft = false
 cover.image = 'images/banner.jpg'
 cover.caption = '网之外'
+cover.alt = '网之外'
 +++
 新的开始，新的出发！
 
