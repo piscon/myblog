@@ -8,9 +8,6 @@ draft = false
   image = '/images/ai-writing.jpg?v=1'
   alt = 'AI 协作写作'
   caption = 'AI 协作写作'
-  hidden = false
-  hiddenInList = false
-  hiddenInSingle = false
 +++
 你不需要自己打开编辑器、手动写 Markdown、再 git commit。
 

@@ -8,9 +8,6 @@ draft = false
   image = '/images/ai-writing.jpg?v=1'
   alt = 'Writing with AI'
   caption = 'Writing with AI'
-  hidden = false
-  hiddenInList = false
-  hiddenInSingle = false
 +++
 You don't need to open an editor, write Markdown by hand, and run git commit yourself.
 

@@ -8,9 +8,6 @@ draft = false
   image = '/images/ai-writing.jpg?v=1'
   alt = 'AIとの共同執筆'
   caption = 'AIとの共同執筆'
-  hidden = false
-  hiddenInList = false
-  hiddenInSingle = false
 +++
 エディタを開いて Markdown を手で書いて、git commit する必要はありません。
 

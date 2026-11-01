@@ -10,12 +10,6 @@ enableInlineShortcodes = true
 enableEmoji = true
 enableRobotsTXT = true
 
-[params]
-  [params.cover]
-    hidden = false
-    hiddenInList = false
-    hiddenInSingle = false
-
 [outputs]
 home = ["HTML", "RSS", "JSON"]
 
