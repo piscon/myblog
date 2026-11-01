@@ -3,6 +3,8 @@ lang = 'zh'
 title = '如何使用 AI 来更新博客'
 date = '2026-11-01'
 draft = false
+categories = ['技术']
+tags = ['AI', 'Hugo', '博客']
 
 [cover]
   image = '/images/ai-writing.jpg?v=1'
