@@ -3,7 +3,7 @@ lang = 'zh'
 title = '如何使用 AI 来更新博客'
 date = '2026-11-01'
 draft = false
-cover.image = '/images/logo.jpg'
+cover.image = '/images/ai-writing.jpg'
 cover.caption = 'AI 协作写作'
 cover.alt = 'AI 协作写作'
 +++

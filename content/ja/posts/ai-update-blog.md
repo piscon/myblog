@@ -3,7 +3,7 @@ lang = 'ja'
 title = 'AIを使ってブログを更新する方法'
 date = '2026-11-01'
 draft = false
-cover.image = '/images/logo.jpg'
+cover.image = '/images/ai-writing.jpg'
 cover.caption = 'AIとの共同執筆'
 cover.alt = 'AIとの共同執筆'
 +++
