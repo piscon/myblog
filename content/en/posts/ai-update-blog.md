@@ -1,7 +1,7 @@
 +++
 lang = 'en'
 title = 'How to Use AI to Update Your Blog'
-date = '2026-11-02'
+date = '2026-11-01'
 draft = false
 cover.image = '/images/logo.jpg'
 cover.caption = 'Writing with AI'
