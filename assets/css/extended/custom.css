@@ -1,0 +1,10 @@
+/* Force show entry covers */
+.entry-cover {
+  display: block !important;
+}
+
+.entry-cover img {
+  display: block !important;
+  max-width: 100%;
+  height: auto;
+}
