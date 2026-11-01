@@ -1,8 +1,8 @@
-/* Fixed cover size for consistent display */
+/* Fixed cover size for consistent display (1.91:1 Open Graph standard) */
 .entry-cover {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1.91 / 1;
   overflow: hidden;
   margin-bottom: var(--gap);
 }
@@ -17,5 +17,5 @@
 
 /* Optional: slightly tighter on list pages */
 .post-entry .entry-cover {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1.91 / 1;
 }
