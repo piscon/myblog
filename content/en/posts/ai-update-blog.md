@@ -3,6 +3,8 @@ lang = 'en'
 title = 'How to Use AI to Update Your Blog'
 date = '2026-11-01'
 draft = false
+categories = ['Tech']
+tags = ['AI', 'Hugo', 'Blog']
 
 [cover]
   image = '/images/ai-writing.jpg?v=1'

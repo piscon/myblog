@@ -3,6 +3,8 @@ lang = 'ja'
 title = 'AIを使ってブログを更新する方法'
 date = '2026-11-01'
 draft = false
+categories = ['技術']
+tags = ['AI', 'Hugo', 'ブログ']
 
 [cover]
   image = '/images/ai-writing.jpg?v=1'
