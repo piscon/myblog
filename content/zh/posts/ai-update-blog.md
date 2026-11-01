@@ -3,9 +3,14 @@ lang = 'zh'
 title = '如何使用 AI 来更新博客'
 date = '2026-11-01'
 draft = false
-cover.image = '/images/ai-writing.jpg'
-cover.caption = 'AI 协作写作'
-cover.alt = 'AI 协作写作'
+
+[cover]
+  image = '/images/ai-writing.jpg'
+  alt = 'AI 协作写作'
+  caption = 'AI 协作写作'
+  hidden = false
+  hiddenInList = false
+  hiddenInSingle = false
 +++
 你不需要自己打开编辑器、手动写 Markdown、再 git commit。
 

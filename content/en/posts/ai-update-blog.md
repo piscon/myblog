@@ -3,9 +3,14 @@ lang = 'en'
 title = 'How to Use AI to Update Your Blog'
 date = '2026-11-01'
 draft = false
-cover.image = '/images/ai-writing.jpg'
-cover.caption = 'Writing with AI'
-cover.alt = 'Writing with AI'
+
+[cover]
+  image = '/images/ai-writing.jpg'
+  alt = 'Writing with AI'
+  caption = 'Writing with AI'
+  hidden = false
+  hiddenInList = false
+  hiddenInSingle = false
 +++
 You don't need to open an editor, write Markdown by hand, and run git commit yourself.
 

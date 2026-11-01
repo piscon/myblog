@@ -3,9 +3,14 @@ lang = 'ja'
 title = 'AIを使ってブログを更新する方法'
 date = '2026-11-01'
 draft = false
-cover.image = '/images/ai-writing.jpg'
-cover.caption = 'AIとの共同執筆'
-cover.alt = 'AIとの共同執筆'
+
+[cover]
+  image = '/images/ai-writing.jpg'
+  alt = 'AIとの共同執筆'
+  caption = 'AIとの共同執筆'
+  hidden = false
+  hiddenInList = false
+  hiddenInSingle = false
 +++
 エディタを開いて Markdown を手で書いて、git commit する必要はありません。
 
