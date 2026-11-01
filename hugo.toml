@@ -3,6 +3,7 @@ title = '二重奏'
 theme = 'PaperMod'
 defaultContentLanguage = "zh"
 defaultContentLanguageInSubdir = true
+timeZone = "Asia/Tokyo"
 
 hasCJKLanguage = true
 enableInlineShortcodes = true
