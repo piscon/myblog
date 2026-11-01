@@ -5,7 +5,7 @@ date = '2026-11-01'
 draft = false
 
 [cover]
-  image = '/images/ai-writing.jpg'
+  image = '/images/ai-writing.jpg?v=1'
   alt = 'AIとの共同執筆'
   caption = 'AIとの共同執筆'
   hidden = false
