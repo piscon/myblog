@@ -29,8 +29,11 @@ home = ["HTML", "RSS", "JSON"]
       imageHeight = 120
 
     [[languages.zh.params.profileMode.buttons]]
-      name = "时间轴"
-      url = "/zh/archives"
+      name = "最新文章"
+      url = "/zh/posts/"
+    [[languages.zh.params.profileMode.buttons]]
+      name = "归档"
+      url = "/zh/archives/"
     [[languages.zh.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
@@ -45,30 +48,35 @@ home = ["HTML", "RSS", "JSON"]
       url = "https://github.com/"
 
     [[languages.zh.menu.main]]
+      identifier = "posts"
+      name = '文章'
+      pageRef = '/posts'
+      weight = 10
+    [[languages.zh.menu.main]]
       identifier = "categories"
       name = '分类'
       pageRef = '/categories'
-      weight = 10
+      weight = 20
     [[languages.zh.menu.main]]
       identifier = "tags"
       name = '标签'
       pageRef = '/tags'
-      weight = 20
-    [[languages.zh.menu.main]]
-      identifier = "archives"
-      name = '时间轴'
-      pageRef = '/archives'
       weight = 30
     [[languages.zh.menu.main]]
-      identifier = "library"
-      name = '资料库'
-      pageRef = '/library'
+      identifier = "archives"
+      name = '归档'
+      pageRef = '/archives'
       weight = 40
     [[languages.zh.menu.main]]
-      identifier = "explore"
-      name = '探索发现'
-      pageRef = '/explore'
+      identifier = "library"
+      name = '资源'
+      pageRef = '/library'
       weight = 50
+    [[languages.zh.menu.main]]
+      identifier = "explore"
+      name = '发现'
+      pageRef = '/explore'
+      weight = 60
 
   [languages.ja]
     languageCode = "ja-JP"
@@ -84,31 +92,55 @@ home = ["HTML", "RSS", "JSON"]
       imageWidth = 120
       imageHeight = 120
 
+    [[languages.ja.params.profileMode.buttons]]
+      name = "最新記事"
+      url = "/ja/posts/"
+    [[languages.ja.params.profileMode.buttons]]
+      name = "アーカイブ"
+      url = "/ja/archives/"
+    [[languages.ja.params.profileMode.buttons]]
+      name = "Github"
+      url = "https://github.com/"
+    [[languages.ja.params.socialIcons]]
+      name = "youtube"
+      url = "https://youtube.com/"
+    [[languages.ja.params.socialIcons]]
+      name = "twitter"
+      url = "https://twitter.com/"
+    [[languages.ja.params.socialIcons]]
+      name = "github"
+      url = "https://github.com/"
+
+    [[languages.ja.menu.main]]
+      identifier = "posts"
+      name = '記事'
+      pageRef = '/posts'
+      weight = 10
     [[languages.ja.menu.main]]
       identifier = "categories"
       name = 'カテゴリ'
       pageRef = '/categories'
-      weight = 10
+      weight = 20
     [[languages.ja.menu.main]]
       identifier = "tags"
       name = 'タグ'
       pageRef = '/tags'
-      weight = 20
+      weight = 30
     [[languages.ja.menu.main]]
       identifier = "archives"
       name = 'アーカイブ'
       pageRef = '/archives'
-      weight = 30
-    [[languages.ja.menu.main]]
-      identifier = "library"
-      name = 'ライブラリ'
-      pageRef = '/library'
       weight = 40
     [[languages.ja.menu.main]]
-      identifier = "explore"
-      name = 'エクスプローラ'
-      pageRef = '/explore'
+      identifier = "library"
+      name = 'リソース'
+      pageRef = '/library'
       weight = 50
+    [[languages.ja.menu.main]]
+      identifier = "explore"
+      name = '発見'
+      pageRef = '/explore'
+      weight = 60
 
   [languages.en]
     languageCode = "en-US"
@@ -124,28 +156,52 @@ home = ["HTML", "RSS", "JSON"]
       imageWidth = 120
       imageHeight = 120
 
+    [[languages.en.params.profileMode.buttons]]
+      name = "Latest Posts"
+      url = "/en/posts/"
+    [[languages.en.params.profileMode.buttons]]
+      name = "Archives"
+      url = "/en/archives/"
+    [[languages.en.params.profileMode.buttons]]
+      name = "Github"
+      url = "https://github.com/"
+    [[languages.en.params.socialIcons]]
+      name = "youtube"
+      url = "https://youtube.com/"
+    [[languages.en.params.socialIcons]]
+      name = "twitter"
+      url = "https://twitter.com/"
+    [[languages.en.params.socialIcons]]
+      name = "github"
+      url = "https://github.com/"
+
+    [[languages.en.menu.main]]
+      identifier = "posts"
+      name = 'Posts'
+      pageRef = '/posts'
+      weight = 10
     [[languages.en.menu.main]]
       identifier = "categories"
       name = 'Categories'
       pageRef = '/categories'
-      weight = 10
+      weight = 20
     [[languages.en.menu.main]]
       identifier = "tags"
       name = 'Tags'
       pageRef = '/tags'
-      weight = 20
+      weight = 30
     [[languages.en.menu.main]]
       identifier = "archives"
       name = 'Archives'
       pageRef = '/archives'
-      weight = 30
-    [[languages.en.menu.main]]
-      identifier = "library"
-      name = 'Library'
-      pageRef = '/library'
       weight = 40
     [[languages.en.menu.main]]
-      identifier = "explore"
-      name = 'Explore'
-      pageRef = '/explore'
+      identifier = "library"
+      name = 'Resources'
+      pageRef = '/library'
       weight = 50
+    [[languages.en.menu.main]]
+      identifier = "explore"
+      name = 'Discover'
+      pageRef = '/explore'
+      weight = 60

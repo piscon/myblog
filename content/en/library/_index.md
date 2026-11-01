@@ -1,5 +1,5 @@
 +++
-title = "Library"
+title = "Resources"
 description = "Tools, links, and resources"
 +++
 A collection of useful tools, links, and resources.

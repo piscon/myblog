@@ -1,5 +1,5 @@
 +++
-title = "Explore"
+title = "Discover"
 description = "Random recommendations and discoveries"
 +++
 A place for exploration and discoveries.
