@@ -1,0 +1,21 @@
+/* Fixed cover size for consistent display */
+.entry-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin-bottom: var(--gap);
+}
+
+.entry-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--radius);
+}
+
+/* Optional: slightly tighter on list pages */
+.post-entry .entry-cover {
+  aspect-ratio: 16 / 9;
+}
