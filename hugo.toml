@@ -28,10 +28,10 @@ home = ["HTML", "RSS", "JSON"]
   tocopen = false
 
   [params.assets]
-    favicon = "image/favicon.png"
-    favicon16x16 = "image/favicon.png"
-    favicon32x32 = "image/favicon.png"
-    apple_touch_icon = "image/favicon.png"
+    favicon = "images/favicon.png"
+    favicon16x16 = "images/favicon.png"
+    favicon32x32 = "images/favicon.png"
+    apple_touch_icon = "images/favicon.png"
 
 [languages]
   [languages.zh]
