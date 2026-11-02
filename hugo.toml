@@ -23,8 +23,15 @@ home = ["HTML", "RSS", "JSON"]
   ShowPostNavLinks = true
   ShowBreadCrumbs = true
   ShowCodeCopyButtons = true
+  ShowShareButtons = true
   showtoc = true
   tocopen = false
+
+  [params.assets]
+    favicon = "/images/logo.jpg"
+    favicon16x16 = "/images/logo.jpg"
+    favicon32x32 = "/images/logo.jpg"
+    apple_touch_icon = "/images/logo.jpg"
 
 [languages]
   [languages.zh]
@@ -47,6 +54,9 @@ home = ["HTML", "RSS", "JSON"]
     [[languages.zh.params.profileMode.buttons]]
       name = "归档"
       url = "/zh/archives/"
+    [[languages.zh.params.profileMode.buttons]]
+      name = "搜索"
+      url = "/zh/search/"
     [[languages.zh.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
@@ -90,6 +100,11 @@ home = ["HTML", "RSS", "JSON"]
       name = '发现'
       pageRef = '/explore'
       weight = 60
+    [[languages.zh.menu.main]]
+      identifier = "search"
+      name = '搜索'
+      pageRef = '/search'
+      weight = 70
 
   [languages.ja]
     languageCode = "ja-JP"
@@ -111,6 +126,9 @@ home = ["HTML", "RSS", "JSON"]
     [[languages.ja.params.profileMode.buttons]]
       name = "アーカイブ"
       url = "/ja/archives/"
+    [[languages.ja.params.profileMode.buttons]]
+      name = "検索"
+      url = "/ja/search/"
     [[languages.ja.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
@@ -154,6 +172,11 @@ home = ["HTML", "RSS", "JSON"]
       name = '発見'
       pageRef = '/explore'
       weight = 60
+    [[languages.ja.menu.main]]
+      identifier = "search"
+      name = '検索'
+      pageRef = '/search'
+      weight = 70
 
   [languages.en]
     languageCode = "en-US"
@@ -175,6 +198,9 @@ home = ["HTML", "RSS", "JSON"]
     [[languages.en.params.profileMode.buttons]]
       name = "Archives"
       url = "/en/archives/"
+    [[languages.en.params.profileMode.buttons]]
+      name = "Search"
+      url = "/en/search/"
     [[languages.en.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
@@ -218,3 +244,8 @@ home = ["HTML", "RSS", "JSON"]
       name = 'Discover'
       pageRef = '/explore'
       weight = 60
+    [[languages.en.menu.main]]
+      identifier = "search"
+      name = 'Search'
+      pageRef = '/search'
+      weight = 70
