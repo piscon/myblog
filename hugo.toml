@@ -13,6 +13,9 @@ enableRobotsTXT = true
 [outputs]
 home = ["HTML", "RSS", "JSON"]
 
+[pagination]
+  pagerSize = 8
+
 [params]
   env = "production"
   description = "精神与思想的二重奏，自由与独立的交响曲"
@@ -26,12 +29,17 @@ home = ["HTML", "RSS", "JSON"]
   ShowShareButtons = true
   showtoc = true
   tocopen = false
+  disableScrollToTop = false
+
+  [params.cover]
+    hiddenInList = false
+    hiddenInSingle = false
 
   [params.assets]
-    favicon = "images/favicon.ico"
-    favicon16x16 = "images/favicon.ico"
-    favicon32x32 = "images/favicon.ico"
-    apple_touch_icon = "images/favicon.ico"
+    favicon = "/favicon.ico"
+    favicon16x16 = "/favicon.ico"
+    favicon32x32 = "/favicon.ico"
+    apple_touch_icon = "/favicon.ico"
 
 [languages]
   [languages.zh]
@@ -52,11 +60,11 @@ home = ["HTML", "RSS", "JSON"]
       name = "最新文章"
       url = "/zh/posts/"
     [[languages.zh.params.profileMode.buttons]]
-      name = "归档"
-      url = "/zh/archives/"
-    [[languages.zh.params.profileMode.buttons]]
       name = "搜索"
       url = "/zh/search/"
+    [[languages.zh.params.profileMode.buttons]]
+      name = "归档"
+      url = "/zh/archives/"
     [[languages.zh.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
@@ -124,11 +132,11 @@ home = ["HTML", "RSS", "JSON"]
       name = "最新記事"
       url = "/ja/posts/"
     [[languages.ja.params.profileMode.buttons]]
-      name = "アーカイブ"
-      url = "/ja/archives/"
-    [[languages.ja.params.profileMode.buttons]]
       name = "検索"
       url = "/ja/search/"
+    [[languages.ja.params.profileMode.buttons]]
+      name = "アーカイブ"
+      url = "/ja/archives/"
     [[languages.ja.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"
@@ -196,11 +204,11 @@ home = ["HTML", "RSS", "JSON"]
       name = "Latest Posts"
       url = "/en/posts/"
     [[languages.en.params.profileMode.buttons]]
-      name = "Archives"
-      url = "/en/archives/"
-    [[languages.en.params.profileMode.buttons]]
       name = "Search"
       url = "/en/search/"
+    [[languages.en.params.profileMode.buttons]]
+      name = "Archives"
+      url = "/en/archives/"
     [[languages.en.params.profileMode.buttons]]
       name = "Github"
       url = "https://github.com/"

@@ -1,0 +1,27 @@
+/* UI / spacing polish */
+.post-entry {
+  margin-bottom: 1.5rem;
+}
+
+.entry-header {
+  margin-bottom: 0.5rem;
+}
+
+.post-content {
+  line-height: 1.75;
+}
+
+.post-content p {
+  margin-bottom: 1.2em;
+}
+
+/* Slightly tighter code blocks */
+.post-content pre {
+  border-radius: var(--radius);
+  margin: 1.2em 0;
+}
+
+/* Profile buttons spacing */
+.buttons {
+  gap: 0.6rem;
+}
