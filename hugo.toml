@@ -29,9 +29,9 @@ home = ["HTML", "RSS", "JSON"]
 
   [params.assets]
     favicon = "/images/favicon.svg"
-    favicon16x16 = "/images/favicon.svg"
-    favicon32x32 = "/images/favicon.svg"
-    apple_touch_icon = "/images/favicon.svg"
+    favicon16x16 = "/images/favicon.png"
+    favicon32x32 = "/images/favicon.png"
+    apple_touch_icon = "/images/favicon.png"
 
 [languages]
   [languages.zh]
