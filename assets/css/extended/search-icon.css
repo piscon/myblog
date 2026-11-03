@@ -1,0 +1,13 @@
+/* Make search menu item icon-only */
+#menu a[href*="/search/"] span {
+  font-size: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#menu a[href*="/search/"] span svg {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
