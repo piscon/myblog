@@ -1,0 +1,78 @@
+name: Update lastmod
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'content/**/*.md'
+
+permissions:
+  contents: write
+
+jobs:
+  update-lastmod:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip-lastmod]') && !contains(github.event.head_commit.message, '[skip-lastmod]')"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update lastmod in changed content files
+        run: |
+          set -euo pipefail
+          
+          # Get list of changed .md files in this push (content only)
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'content/**/*.md' || true)
+          
+          if [ -z "$CHANGED" ]; then
+            echo "No content files changed."
+            exit 0
+          fi
+          
+          echo "Changed files:"
+          echo "$CHANGED"
+          
+          for file in $CHANGED; do
+            # Skip if file no longer exists
+            [ -f "$file" ] || continue
+            
+            # Get the author date of the latest commit that touched this file
+            LAST_COMMIT_DATE=$(git log -1 --format=%aI -- "$file" || true)
+            if [ -z "$LAST_COMMIT_DATE" ]; then
+              continue
+            fi
+            
+            # Convert to date only (YYYY-MM-DD) for front matter
+            DATE_ONLY=$(date -u -d "$LAST_COMMIT_DATE" +%Y-%m-%d)
+            
+            echo "Updating $file -> lastmod = $DATE_ONLY"
+            
+            # Update or insert lastmod in TOML front matter
+            if grep -q '^lastmod' "$file"; then
+              # Replace existing
+              sed -i "s/^lastmod.*/lastmod = '$DATE_ONLY'/" "$file"
+            else
+              # Insert after date line if present, otherwise after first line of front matter
+              if grep -q '^date' "$file"; then
+                sed -i "/^date/a lastmod = '$DATE_ONLY'" "$file"
+              else
+                sed -i "1a lastmod = '$DATE_ONLY'" "$file"
+              fi
+            fi
+          done
+          
+          # Commit back if there are changes
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff --quiet; then
+            echo "No lastmod changes to commit."
+          else
+            git add content/**/*.md
+            git commit -m "chore: update lastmod from git [skip-lastmod]"
+            git push
+          fi

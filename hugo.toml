@@ -9,12 +9,16 @@ hasCJKLanguage = true
 enableInlineShortcodes = true
 enableEmoji = true
 enableRobotsTXT = true
+enableGitInfo = true
 
 [outputs]
 home = ["HTML", "RSS", "JSON"]
 
 [pagination]
   pagerSize = 8
+
+[frontmatter]
+  lastmod = ["lastmod", ":git", "date"]
 
 [params]
   env = "production"
