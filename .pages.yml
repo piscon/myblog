@@ -62,7 +62,7 @@ content:
             type: string
       - name: body
         label: 正文
-        type: markdown
+        type: rich-text # 💡 这里已由 markdown 改为 rich-text
         required: true
     filename: '{slug}.md'
     view:
@@ -126,7 +126,7 @@ content:
             type: string
       - name: body
         label: 本文
-        type: markdown
+        type: rich-text # 💡 这里已由 markdown 改为 rich-text
         required: true
     filename: '{slug}.md'
     view:
@@ -190,7 +190,7 @@ content:
             type: string
       - name: body
         label: Body
-        type: markdown
+        type: rich-text # 💡 这里已由 markdown 改为 rich-text
         required: true
     filename: '{slug}.md'
     view:
