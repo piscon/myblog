@@ -1,0 +1,72 @@
+name: Update PaperMod Submodule
+
+on:
+  schedule:
+    # Every Monday at 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-submodule:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update PaperMod to latest
+        id: update
+        run: |
+          set -euo pipefail
+          cd themes/PaperMod
+          git fetch origin master
+          OLD=$(git rev-parse HEAD)
+          git checkout master
+          git pull origin master
+          NEW=$(git rev-parse HEAD)
+          cd ../..
+          
+          if [ "$OLD" = "$NEW" ]; then
+            echo "No update available."
+            echo "updated=false" >> $GITHUB_OUTPUT
+          else
+            echo "Updated from $OLD to $NEW"
+            echo "updated=true" >> $GITHUB_OUTPUT
+            echo "old_sha=$OLD" >> $GITHUB_OUTPUT
+            echo "new_sha=$NEW" >> $GITHUB_OUTPUT
+            
+            # Collect recent commits for the PR body
+            cd themes/PaperMod
+            git log --oneline ${OLD}..${NEW} > /tmp/changelog.txt || true
+            cd ../..
+          fi
+
+      - name: Create Pull Request
+        if: steps.update.outputs.updated == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update PaperMod submodule"
+          branch: chore/update-papermod
+          base: master
+          title: "chore: update PaperMod submodule"
+          body: |
+            Automatic weekly update of the PaperMod theme submodule.
+            
+            **Old:** `${{ steps.update.outputs.old_sha }}`
+            **New:** `${{ steps.update.outputs.new_sha }}`
+            
+            ### Changelog
+            ```
+            $(cat /tmp/changelog.txt 2>/dev/null || echo "No commit list available")
+            ```
+            
+            Please review the frontend rendering before merging.
+          delete-branch: true
