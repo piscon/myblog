@@ -74,15 +74,6 @@ content:
         order: desc
       filter:
         draft: false
-    actions:
-      - name: update-lastmod-zh
-        label: 更新最后修改时间
-        scope: entry
-        workflow: pages-cms-lastmod.yml
-        confirm:
-          title: 更新 lastmod？
-          message: 将本文章的最后修改时间更新为今天
-          button: 更新
 
   - name: ja-posts
     label: 日本語記事
@@ -147,15 +138,6 @@ content:
         order: desc
       filter:
         draft: false
-    actions:
-      - name: update-lastmod-ja
-        label: 最終更新日時を更新
-        scope: entry
-        workflow: pages-cms-lastmod.yml
-        confirm:
-          title: lastmod を更新？
-          message: この記事の最終更新日時を今日にします
-          button: 更新
 
   - name: en-posts
     label: English Posts
@@ -220,24 +202,6 @@ content:
         order: desc
       filter:
         draft: false
-    actions:
-      - name: update-lastmod-en
-        label: Update last modified
-        scope: entry
-        workflow: pages-cms-lastmod.yml
-        confirm:
-          title: Update lastmod?
-          message: This will set the last modified date of this post to today.
-          button: Update
-
-actions:
-  - name: update-all-lastmod
-    label: 批量更新 lastmod
-    workflow: pages-cms-lastmod.yml
-    confirm:
-      title: 批量更新 lastmod？
-      message: 将所有内容文件的最后修改时间更新为今天
-      button: 更新全部
 
 components:
   cover:
