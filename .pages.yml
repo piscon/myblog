@@ -51,8 +51,9 @@ content:
         type: object
         fields:
           - name: image
-            label: 图片路径
-            type: string
+            label: 封面图
+            type: image
+            path: static/images
           - name: caption
             label: 图片说明
             type: string
@@ -63,14 +64,16 @@ content:
         label: 正文
         type: markdown
         required: true
-    filename: '{year}-{month}-{day}-{primary}.md'
+    filename: '{slug}.md'
     view:
-      fields: [title, date, draft, lang]
+      fields: [title, description, date, draft, lang]
       primary: title
       sort: [date, title]
       default:
         sort: date
         order: desc
+      filter:
+        draft: false
 
   - name: ja-posts
     label: 日本語記事
@@ -112,8 +115,9 @@ content:
         type: object
         fields:
           - name: image
-            label: 画像パス
-            type: string
+            label: カバー画像
+            type: image
+            path: static/images
           - name: caption
             label: キャプション
             type: string
@@ -124,14 +128,16 @@ content:
         label: 本文
         type: markdown
         required: true
-    filename: '{year}-{month}-{day}-{primary}.md'
+    filename: '{slug}.md'
     view:
-      fields: [title, date, draft, lang]
+      fields: [title, description, date, draft, lang]
       primary: title
       sort: [date, title]
       default:
         sort: date
         order: desc
+      filter:
+        draft: false
 
   - name: en-posts
     label: English Posts
@@ -173,8 +179,9 @@ content:
         type: object
         fields:
           - name: image
-            label: Image path
-            type: string
+            label: Cover image
+            type: image
+            path: static/images
           - name: caption
             label: Caption
             type: string
@@ -185,14 +192,16 @@ content:
         label: Body
         type: markdown
         required: true
-    filename: '{year}-{month}-{day}-{primary}.md'
+    filename: '{slug}.md'
     view:
-      fields: [title, date, draft, lang]
+      fields: [title, description, date, draft, lang]
       primary: title
       sort: [date, title]
       default:
         sort: date
         order: desc
+      filter:
+        draft: false
 
 components:
   cover:
@@ -200,8 +209,9 @@ components:
     type: object
     fields:
       - name: image
-        label: 图片路径
-        type: string
+        label: 封面图
+        type: image
+        path: static/images
       - name: caption
         label: 图片说明
         type: string
@@ -212,3 +222,5 @@ components:
 settings:
   content:
     merge: true
+  i18n:
+    locale: auto
