@@ -26,6 +26,10 @@ content:
         label: 标题
         type: string
         required: true
+      - name: description
+        label: 摘要（SEO）
+        type: text
+        description: 120-160字，用于搜索摘要和分享预览
       - name: date
         label: 日期
         type: date
@@ -34,6 +38,14 @@ content:
         label: 草稿
         type: boolean
         default: false
+      - name: categories
+        label: 分类
+        type: string
+        list: true
+      - name: tags
+        label: 标签
+        type: string
+        list: true
       - name: cover
         label: 封面
         type: object
@@ -75,6 +87,10 @@ content:
         label: タイトル
         type: string
         required: true
+      - name: description
+        label: 概要（SEO）
+        type: text
+        description: 120-160文字、検索概要と共有プレビュー用
       - name: date
         label: 日付
         type: date
@@ -83,6 +99,14 @@ content:
         label: 下書き
         type: boolean
         default: false
+      - name: categories
+        label: カテゴリ
+        type: string
+        list: true
+      - name: tags
+        label: タグ
+        type: string
+        list: true
       - name: cover
         label: カバー
         type: object
@@ -124,6 +148,10 @@ content:
         label: Title
         type: string
         required: true
+      - name: description
+        label: Description (SEO)
+        type: text
+        description: 120-160 characters for search snippets and share previews
       - name: date
         label: Date
         type: date
@@ -132,6 +160,14 @@ content:
         label: Draft
         type: boolean
         default: false
+      - name: categories
+        label: Categories
+        type: string
+        list: true
+      - name: tags
+        label: Tags
+        type: string
+        list: true
       - name: cover
         label: Cover
         type: object

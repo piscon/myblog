@@ -20,6 +20,8 @@ home = ["HTML", "RSS", "JSON"]
   env = "production"
   description = "精神与思想的二重奏，自由与独立的交响曲"
   author = "二重奏"
+  keywords = ["二重奏", "deux", "博客", "AI", "Hugo", "技术"]
+  images = ["/images/logo.jpg"]
   defaultTheme = "auto"
   ShowReadingTime = true
   ShowWordCount = true
@@ -36,10 +38,13 @@ home = ["HTML", "RSS", "JSON"]
     hiddenInSingle = false
 
   [params.assets]
-    favicon = "images/favicon.ico"
-    favicon16x16 = "images/favicon.ico"
-    favicon32x32 = "images/favicon.ico"
-    apple_touch_icon = "images/favicon.ico"
+    favicon = "/favicon.ico"
+    favicon16x16 = "/favicon.ico"
+    favicon32x32 = "/favicon.ico"
+    apple_touch_icon = "/favicon.ico"
+
+  [params.schema]
+    publisherType = "Person"
 
 [languages]
   [languages.zh]

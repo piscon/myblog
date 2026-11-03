@@ -3,6 +3,7 @@ lang = 'en'
 title = 'How to Use AI to Update Your Blog'
 date = '2026-11-01'
 draft = false
+description = 'Connect GitHub to an AI, describe what you want in natural language, and the AI will read the repo, write the posts, and commit them for you.'
 categories = ['Tech']
 tags = ['AI', 'Hugo', 'Blog']
 
@@ -43,9 +44,9 @@ For example:
 
 ### 3. AI generates and commits
 The AI creates the files according to your repo structure:
-- `content/zh/posts/...
-- `content/ja/posts/...
-- `content/en/posts/...
+- `content/zh/posts/...`
+- `content/ja/posts/...`
+- `content/en/posts/...`
 
 Then commits them all at once to the `master` branch.
 
