@@ -1,0 +1,46 @@
+{{- define "main" -}}
+<div class="not-found">
+  <div class="not-found-code">404</div>
+  <div class="not-found-title">页面未找到</div>
+  <div class="not-found-subtitle">这里什么都没有……</div>
+  <a class="not-found-home" href="{{ "/" | absLangURL | default "/" | absURL }}">返回首页</a>
+</div>
+<style>
+  .not-found {
+    text-align: center;
+    padding: 6rem 1rem 4rem;
+  }
+  .not-found-code {
+    font-size: 6rem;
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+  .not-found-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .not-found-subtitle {
+    color: var(--secondary);
+    margin-bottom: 2rem;
+  }
+  .not-found-home {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    border: 1px solid var(--primary);
+    border-radius: 999px;
+    color: var(--primary);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .not-found-home:hover {
+    background: var(--primary);
+    color: var(--theme);
+  }
+</style>
+{{- end -}}
