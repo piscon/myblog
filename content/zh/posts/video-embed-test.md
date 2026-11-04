@@ -6,14 +6,14 @@ draft = false
 categories = ['测试']
 tags = ['博客', '媒体']
 youtube_id = 'aqz-KE-bpKQ'
-bilibili_bvid = 'BV1GJ411x7h7'
+bilibili_bvid = 'BV1i24P6rEmt'
 +++
 这篇文章用来手动检验两种视频嵌入的实际效果。两个播放器都在**文末**（默认位置），看完正文往下滚即可。
 
 ## 检查清单
 
 1. **YouTube 播放器**（第一个）：选的是 Big Buck Bunny（4K 开源动画），适合测试清晰度自适应；`nocookie` 隐私模式，不带追踪 cookie
-2. **B 站播放器**（第二个）：已带 `high_quality=1` 参数，未登录观众最高 480p（iframe 的天花板）
+2. **B 站播放器**（第二个）：已带 `high_quality=1` 参数，未登录观众最高 480p（iframe 的天花板）。原测试视频 BV1GJ411x7h7 是版权 MV，有地区限制无法站外播放——这正是选材时要注意的：版权内容（音乐 MV/影视切片）经常无法嵌入，用户投稿类视频基本都能正常嵌入
 3. **响应式**：拖动窗口宽度，播放器应保持 16:9 不变形
 4. **移动端**：手机上 YouTube 建议点全屏；B 站 iframe 可弹回 B 站 App
 
