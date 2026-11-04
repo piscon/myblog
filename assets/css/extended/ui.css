@@ -101,3 +101,16 @@
   color: var(--primary);
   font-weight: 600;
 }
+
+/* Header search item: icon+text alignment (icon tracks font size,
+   flex centers it vertically) */
+#menu a[href*="/search/"] span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+#menu a[href*="/search/"] svg {
+  width: 1em;
+  height: 1em;
+}
