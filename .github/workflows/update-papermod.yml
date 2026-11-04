@@ -5,6 +5,11 @@ on:
     # Every Monday at 09:00 UTC
     - cron: '0 9 * * 1'
   workflow_dispatch:
+    inputs:
+      payload:
+        description: 'Pages CMS payload (JSON), optional'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -98,3 +103,25 @@ jobs:
             
             Please review the frontend rendering before merging.
           delete-branch: true
+
+      - name: Resolve merge mode
+        id: mode
+        env:
+          PAYLOAD: ${{ inputs.payload }}
+        run: |
+          set -euo pipefail
+          MODE="pr"
+          if [ -n "$PAYLOAD" ]; then
+            MODE=$(printf '%s' "$PAYLOAD" | jq -r '.inputs.merge_mode // "pr"')
+          fi
+          echo "Merge mode: $MODE"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+
+      - name: Auto-merge update PR
+        if: steps.update.outputs.updated == 'true' && steps.mode.outputs.mode == 'auto'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh pr merge --squash --delete-branch chore/update-papermod
+          echo "Update PR merged; Netlify will deploy automatically."
