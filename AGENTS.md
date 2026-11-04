@@ -10,7 +10,7 @@
 - 验证 CI 结果：单次延迟调用（`sleep N && gh run view`，N ≥ 预期构建时长）；多数情况不需要验证——工作流失败时 GitHub 自会通知/标红
 - 需要等待配额重置时，用后台任务延迟执行，绝不手动重试
 - **配额按 token 计，不按账号计**：gh CLI PAT、Pages CMS（用户 OAuth token）、CI（GITHUB_TOKEN）各是独立池，打穿互不影响；2026-11-04 CMS 池也打穿过一次——CMS 一次保存≈一串 Git 请求，actions 按钮派发后 CMS 还会查询 run 状态，别连发保存、别高频重跑按钮、别长期多标签页挂着 CMS；owner 池紧张时可让 collaborator 分流编辑（他们走 App installation token，独立池）
-- API 备忘：Pages CMS 按钮派发必带 `payload` 输入 → workflow_dispatch 必须声明它；~~Hugo 对缺失 partial 静默跳过~~（2026-11-04 实测推翻：缺失 partial 直接构建失败；钩子体系的基础是「主题自带空 stub + 站点同名覆盖」）；PaperMod 保留 `audio`/`videos` 参数名（og 模板期待数组）
+- API 备忘：~~Pages CMS 按钮派发必带 `payload` 输入~~（按钮已移除；若日后恢复 action，workflow_dispatch 必须声明 `payload`）；~~Hugo 对缺失 partial 静默跳过~~（2026-11-04 实测推翻：缺失 partial 直接构建失败；钩子体系的基础是「主题自带空 stub + 站点同名覆盖」）；PaperMod 保留 `audio`/`videos` 参数名（og 模板期待数组）
 
 ## 功能分层设计原则（2026-11-04 定案）
 
@@ -31,7 +31,7 @@
 
 - `bash scripts/feature-check.sh`：10 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404）
 - 新增任何依赖主题 DOM/类名/钩子的功能 → 必须同步加断言
-- weekly 主题 PR、build-check、CMS「功能体检」按钮三处都会跑它
+- weekly 主题 PR、build-check 两处会跑它（CMS「功能体检」按钮已于 2026-11-04 移除——action 按钮的孤儿记录会持续烧 GitHub 配额，详见 .zcode/reference/pagescms-capabilities.md §8；手动触发改走 GitHub 界面的 workflow_dispatch）
 
 ## 内容与媒体约定
 
@@ -39,6 +39,7 @@
 - 视频不进 git（Netlify 配额/fair-use）；YouTube 用 `youtube_id`、B 站用 `bilibili_bvid` 字段（CMS 会校验 ID 格式）；自托管仅限小音频（`audio_file`）；外链音视频走 `audio_url`/`video_url`（模板支持但 CMS 不暴露，Git 路径维护）
 - 品牌资产在 `static/branding/`（CMS 不可见）；内容图 `static/images/`；音视频目录 `static/audio|video`
 - 结构性文件（`posts/_index.md` 等板块索引）已用 `.pages.yml` 的 `exclude` 挡在 CMS 外，只走 Git 路径——给它们开草稿会整块下线，CMS 列表里的条目都是真实文章
+- CMS 发表文章的文件名是自动时间戳（`{year}{month}{day}-{hour}{minute}.md`，中文标题无法自动生成 slug）；URL 语义化 = 事后在 CMS 里改文件名（会换 URL，慎用）；CMS actions 按钮已整体移除，防孤儿记录烧配额
 - 主题升级流程见 `.github/workflows/update-papermod.yml` 内联检查；升级后必跑 feature-check
 
 ## 已知边界

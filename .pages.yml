@@ -37,14 +37,6 @@ content:
         label: 标题
         type: string
         required: true
-      - name: slug
-        label: URL 路径（slug）
-        type: string
-        required: true
-        description: 用于文章 URL，如 my-new-post；中文标题请手动配英文 slug
-        pattern:
-          regex: '^[a-z0-9]+(-[a-z0-9]+)*$'
-          message: 只能是小写字母、数字和连字符（如 my-new-post），用于 URL
       - name: description
         label: 摘要（SEO）
         type: text
@@ -112,7 +104,9 @@ content:
         required: true
         options:
           media: images
-    filename: '{fields.slug}.md'
+    filename:
+      template: '{year}{month}{day}-{hour}{minute}.md'
+      field: false
     view:
       fields: [title, description, date, draft, lang]
       primary: title
@@ -137,14 +131,6 @@ content:
         label: タイトル
         type: string
         required: true
-      - name: slug
-        label: URLスラッグ
-        type: string
-        required: true
-        description: '記事URL用（例: my-new-post）。日本語タイトルには英字スラッグを'
-        pattern:
-          regex: '^[a-z0-9]+(-[a-z0-9]+)*$'
-          message: '半角英小文字・数字・ハイフンのみ（例: my-new-post）。URLに使われます'
       - name: description
         label: 概要（SEO）
         type: text
@@ -212,7 +198,9 @@ content:
         required: true
         options:
           media: images
-    filename: '{fields.slug}.md'
+    filename:
+      template: '{year}{month}{day}-{hour}{minute}.md'
+      field: false
     view:
       fields: [title, description, date, draft, lang]
       primary: title
@@ -237,14 +225,6 @@ content:
         label: Title
         type: string
         required: true
-      - name: slug
-        label: URL slug
-        type: string
-        required: true
-        description: Used in the post URL, e.g. my-new-post
-        pattern:
-          regex: '^[a-z0-9]+(-[a-z0-9]+)*$'
-          message: Lowercase letters, digits and hyphens only (e.g. my-new-post); used in the URL
       - name: description
         label: Description (SEO)
         type: text
@@ -312,7 +292,9 @@ content:
         required: true
         options:
           media: images
-    filename: '{fields.slug}.md'
+    filename:
+      template: '{year}{month}{day}-{hour}{minute}.md'
+      field: false
     view:
       fields: [title, description, date, draft, lang]
       primary: title
@@ -343,32 +325,3 @@ settings:
   commit:
     identity: user
 
-actions:
-  - name: check-papermod-update
-    label: 检查主题更新
-    workflow: update-papermod.yml
-    cancelable: false
-    confirm:
-      title: 检查 PaperMod 更新？
-      message: 将拉取上游 master 对比当前版本。若有更新，先做版本门槛和构建检查，再按下方选择的方式处理。
-      button: 开始检查
-    fields:
-      - name: merge_mode
-        label: 发现更新后
-        type: select
-        required: true
-        default: pr
-        options:
-          - label: 开 PR，由我在 GitHub 合并
-            value: pr
-          - label: 自动合并并部署上线
-            value: auto
-
-  - name: feature-health-check
-    label: 功能体检
-    workflow: build-check.yml
-    cancelable: false
-    confirm:
-      title: 运行功能体检？
-      message: 用携带全部自定义功能参数的测试文章构建站点，并断言播放器/置顶/og 标签/品牌引用等锚点是否完好。用于及早发现主题升级导致的静默降级。
-      button: 开始体检

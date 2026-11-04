@@ -168,7 +168,7 @@
 
 - **正则校验**：`youtube_id` 用 `pattern: ^([A-Za-z0-9_-]{11})?$`、`bilibili_bvid` 用 `^(BV[0-9A-Za-z]{10})?$` 形态校验，带中文 `message`——落在官方「string 支持 pattern（字符串或 {regex,message}）」范围内，官方已确认。
 - **audio_file / video_file**：`type: file` + 具名 media source（`audio`/`video`）+ `categories` 限制——官方能力（§4 file 行），小音频自托管走此字段；视频目录在 CMS 可见但仓库约定视频不进 git。
-- **「功能体检」按钮**：根级 `actions`（`feature-health-check` → `build-check.yml`，`cancelable: false` + 自定义 confirm 文案）与「检查主题更新」按钮（带 `fields` select 输入 `merge_mode`）——对应 §8；「派发必带 payload → workflow 必须声明 payload input」与官方文档完全一致。
+- **「功能体检」按钮**：~~根级 `actions`（`feature-health-check` + 「检查主题更新」）~~ **2026-11-04 已整体移除**——action 按钮的孤儿记录熔炉持续烧配额（§8），手动触发改走 GitHub 界面 workflow_dispatch；恢复按钮时 workflow_dispatch 必须声明 `payload` input。
 - **CMS 看不到 static/branding**：`.pages.yml` 的 media/content 只声明了 `static/images|audio|video|files` 与 `content/*`，未声明 `static/branding`——由官方「media/content 仅暴露所配置路径」机制 + 本仓库配置推得的实测事实。
 - **`settings.content.merge: true` + `commit.identity: user`** 已启用：schema 外 frontmatter 键保留、提交署名为编辑者本人（官方能力，本仓库选择）。
 - **rich-text `body` + Hugo shortcode 冲突**：仓库实测 CMS 编辑器会破坏 shortcode 语法；官方文档未描述该行为（§11），故本仓库约定「正文高级排版走 Git 路径、CMS Tiptap/编辑器只做普通 Markdown」。
