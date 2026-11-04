@@ -15,6 +15,11 @@ on:
       - 'assets/**'
       - 'static/**'
   workflow_dispatch:
+    inputs:
+      payload:
+        description: 'Pages CMS payload (JSON), optional'
+        required: false
+        type: string
 
 permissions:
   contents: read
