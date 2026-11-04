@@ -1,7 +1,15 @@
-{{- /* Render audio/video players from page params (set via Pages CMS fields).
-       Placed after post content by the hook; can be pulled above the content
-       per page with media_position = "top" (see extend_head). */ -}}
+{{- /* Render audio/video players and video embeds from page params (set via
+       Pages CMS fields). Placed after post content by the hook; pulled above
+       the content per page with media_position = "top" (see extend_head).
+       Direct-file fields render HTML5 players; youtube_id/bilibili_bvid
+       render privacy-mode iframes. All share the .post-media wrapper so the
+       top-placement CSS applies uniformly. */ -}}
 {{- with .Params.audio_file -}}
+<div class="post-media">
+  <audio src="{{ . }}" controls preload="metadata"></audio>
+</div>
+{{- end -}}
+{{- with .Params.audio_url -}}
 <div class="post-media">
   <audio src="{{ . }}" controls preload="metadata"></audio>
 </div>
@@ -9,5 +17,20 @@
 {{- with .Params.video_file -}}
 <div class="post-media">
   <video src="{{ . }}" controls playsinline preload="metadata"></video>
+</div>
+{{- end -}}
+{{- with .Params.video_url -}}
+<div class="post-media">
+  <video src="{{ . }}" controls playsinline preload="metadata"></video>
+</div>
+{{- end -}}
+{{- with .Params.youtube_id -}}
+<div class="post-media">
+  <iframe src="https://www.youtube-nocookie.com/embed/{{ . }}?rel=0" title="YouTube video player" allowfullscreen loading="lazy"></iframe>
+</div>
+{{- end -}}
+{{- with .Params.bilibili_bvid -}}
+<div class="post-media">
+  <iframe src="https://player.bilibili.com/player.html?bvid={{ . }}&autoplay=0&high_quality=1" title="Bilibili video player" scrolling="no" frameborder="no" framespacing="0" allowfullscreen loading="lazy"></iframe>
 </div>
 {{- end -}}

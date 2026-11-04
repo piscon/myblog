@@ -83,6 +83,20 @@ content:
               label: 文末（默认）
             - name: top
               label: 置顶（标题下方）
+      - name: youtube_id
+        label: YouTube 视频 ID
+        type: string
+        description: 只贴视频 ID（如 dQw4w9WgXcQ），不是完整链接；大陆读者无法加载 YouTube
+        pattern:
+          regex: '^([A-Za-z0-9_-]{11})?$'
+          message: YouTube ID 为 11 位字符（字母数字_-），请只贴 ID 不贴链接
+      - name: bilibili_bvid
+        label: B 站 BV 号
+        type: string
+        description: 只贴 BV 号（如 BV1xx411c7mD），不是完整链接
+        pattern:
+          regex: '^(BV[0-9A-Za-z]{10})?$'
+          message: B 站 BV 号以 BV 开头共 12 位，请只贴 BV 号不贴链接
       - name: body
         label: 正文
         type: rich-text
@@ -162,6 +176,20 @@ content:
               label: 末尾（デフォルト）
             - name: top
               label: 冒頭（タイトル下）
+      - name: youtube_id
+        label: YouTube 動画ID
+        type: string
+        description: 動画IDのみ（dQw4w9WgXcQ）。完全URLは貼らない
+        pattern:
+          regex: '^([A-Za-z0-9_-]{11})?$'
+          message: YouTube ID 为 11 位字符（字母数字_-），请只贴 ID 不贴链接
+      - name: bilibili_bvid
+        label: ビリビリ BV
+        type: string
+        description: BV番号のみ（BV1xx411c7mD）
+        pattern:
+          regex: '^(BV[0-9A-Za-z]{10})?$'
+          message: B 站 BV 号以 BV 开头共 12 位，请只贴 BV 号不贴链接
       - name: body
         label: 本文
         type: rich-text
@@ -241,6 +269,20 @@ content:
               label: Bottom (default)
             - name: top
               label: Top (below title)
+      - name: youtube_id
+        label: YouTube video ID
+        type: string
+        description: Paste the video ID only (e.g. dQw4w9WgXcQ), not the full URL; YouTube is unreachable for mainland-China readers
+        pattern:
+          regex: '^([A-Za-z0-9_-]{11})?$'
+          message: YouTube ID 为 11 位字符（字母数字_-），请只贴 ID 不贴链接
+      - name: bilibili_bvid
+        label: Bilibili BV ID
+        type: string
+        description: Paste the BV ID only (e.g. BV1xx411c7mD), not the full URL
+        pattern:
+          regex: '^(BV[0-9A-Za-z]{10})?$'
+          message: B 站 BV 号以 BV 开头共 12 位，请只贴 BV 号不贴链接
       - name: body
         label: Body
         type: rich-text

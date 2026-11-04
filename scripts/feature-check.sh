@@ -23,6 +23,8 @@ date = '2026-11-04'
 draft = true
 audio_file = '/audio/feature-check.mp3'
 video_file = '/video/feature-check.mp4'
+youtube_id = 'dQw4w9WgXcQ'
+bilibili_bvid = 'BV1xx411c7mD'
 media_position = 'top'
 +++
 test body
@@ -50,6 +52,8 @@ check "og:video meta"          "grep -q 'property=\"og:video\"' '$PAGE'"
 check "品牌 favicon 引用"       "grep -q '/branding/favicon.ico' '$PAGE'"
 check "og:image 品牌图"         "grep -q 'branding/logo.jpg' '$PAGE'"
 check "自定义 404 页存在"        "test -f '$OUT/zh/404.html'"
+check "YouTube nocookie iframe"  "grep -q 'youtube-nocookie.com/embed/dQw4w9WgXcQ' '$PAGE'"
+check "B站 iframe 播放器"         "grep -q 'player.bilibili.com/player.html?bvid=BV1xx411c7mD' '$PAGE'"
 
 FAILED=0
 {
