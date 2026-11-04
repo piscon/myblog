@@ -2,6 +2,7 @@
 lang = 'zh'
 title = '嵌入视频测试：YouTube 与 B 站播放器'
 date = '2026-11-04'
+lastmod = '2026-11-04'
 draft = false
 categories = [
 	'测试',
