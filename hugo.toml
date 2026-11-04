@@ -42,10 +42,11 @@ home = ["HTML", "RSS", "JSON"]
     hiddenInSingle = false
 
   [params.assets]
-    favicon = "/favicon.ico"
-    favicon16x16 = "/favicon.ico"
-    favicon32x32 = "/favicon.ico"
-    apple_touch_icon = "/favicon.ico"
+    favicon = "/images/favicon.ico"
+    favicon16x16 = "/images/favicon.ico"
+    favicon32x32 = "/images/favicon.ico"
+    apple_touch_icon = "/images/favicon.ico"
+    safari_pinned_tab = "/images/favicon.svg"
 
   [params.schema]
     publisherType = "Person"
@@ -74,9 +75,6 @@ home = ["HTML", "RSS", "JSON"]
     [[languages.zh.params.profileMode.buttons]]
       name = "归档"
       url = "/zh/archives/"
-    [[languages.zh.params.profileMode.buttons]]
-      name = "Github"
-      url = "https://github.com/"
     [[languages.zh.params.socialIcons]]
       name = "youtube"
       url = "https://youtube.com/"
@@ -147,9 +145,6 @@ home = ["HTML", "RSS", "JSON"]
     [[languages.ja.params.profileMode.buttons]]
       name = "アーカイブ"
       url = "/ja/archives/"
-    [[languages.ja.params.profileMode.buttons]]
-      name = "Github"
-      url = "https://github.com/"
     [[languages.ja.params.socialIcons]]
       name = "youtube"
       url = "https://youtube.com/"
@@ -220,9 +215,6 @@ home = ["HTML", "RSS", "JSON"]
     [[languages.en.params.profileMode.buttons]]
       name = "Archives"
       url = "/en/archives/"
-    [[languages.en.params.profileMode.buttons]]
-      name = "Github"
-      url = "https://github.com/"
     [[languages.en.params.socialIcons]]
       name = "youtube"
       url = "https://youtube.com/"

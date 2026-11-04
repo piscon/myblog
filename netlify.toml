@@ -7,11 +7,26 @@
   HUGO_ENV = "production"
   TZ = "Asia/Tokyo"
 
+# 默认策略：HTML / RSS / sitemap / JSON 等页面内容 —— 每次都向 CDN 回源校验，
+# 部署后访客立即拿到新内容（配合 ETag，未变更时只产生 304）
 [[headers]]
   for = "/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
-    Cache-Control = "public, max-age=31536000"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# 带内容指纹的主题资源（stylesheet.<hash>.css / search.<hash>.js）——
+# 文件名即版本，内容变更时 URL 必变，可永久缓存
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 静态图片（无指纹）：长缓存但非 immutable；换图时改文件名或加 ?v=N 参数即可
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000, stale-while-revalidate"
 
 [[redirects]]
   from = "/*"
