@@ -1,0 +1,14 @@
+{{- /* og:audio/og:video for pages with media fields (theme's og partial only
+       reads reserved array params, so we emit string-field metas here) */ -}}
+{{- with .Params.audio_file -}}
+<meta property="og:audio" content="{{ . | absURL }}">
+{{- end -}}
+{{- with .Params.video_file -}}
+<meta property="og:video" content="{{ . | absURL }}">
+{{- end -}}
+
+{{- /* Media player top placement: reorder article children via flex when the
+       page opts in. Degrades gracefully to bottom if the theme restructures. */ -}}
+{{- if eq (.Param "media_position") "top" -}}
+<style>.post-single{display:flex;flex-direction:column}.post-single>.page-header{order:0}.post-single>.post-media{order:1;margin:1.5rem 0}.post-single>.post-content{order:2}.post-single>.post-footer{order:3}</style>
+{{- end -}}

@@ -74,6 +74,15 @@ content:
         options:
           media: video
           categories: [video]
+      - name: media_position
+        label: 播放器位置
+        type: select
+        options:
+          values:
+            - name: bottom
+              label: 文末（默认）
+            - name: top
+              label: 置顶（标题下方）
       - name: body
         label: 正文
         type: rich-text
@@ -144,6 +153,15 @@ content:
         options:
           media: video
           categories: [video]
+      - name: media_position
+        label: プレーヤー位置
+        type: select
+        options:
+          values:
+            - name: bottom
+              label: 末尾（デフォルト）
+            - name: top
+              label: 冒頭（タイトル下）
       - name: body
         label: 本文
         type: rich-text
@@ -214,6 +232,15 @@ content:
         options:
           media: video
           categories: [video]
+      - name: media_position
+        label: Player position
+        type: select
+        options:
+          values:
+            - name: bottom
+              label: Bottom (default)
+            - name: top
+              label: Top (below title)
       - name: body
         label: Body
         type: rich-text
@@ -273,3 +300,12 @@ actions:
             value: pr
           - label: 自动合并并部署上线
             value: auto
+
+  - name: feature-health-check
+    label: 功能体检
+    workflow: build-check.yml
+    cancelable: false
+    confirm:
+      title: 运行功能体检？
+      message: 用携带全部自定义功能参数的测试文章构建站点，并断言播放器/置顶/og 标签/品牌引用等锚点是否完好。用于及早发现主题升级导致的静默降级。
+      button: 开始体检

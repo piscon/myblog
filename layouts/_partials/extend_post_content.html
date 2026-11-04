@@ -1,11 +1,13 @@
-{{- /* Render footer audio/video players from page params (set via Pages CMS fields) */ -}}
+{{- /* Render audio/video players from page params (set via Pages CMS fields).
+       Placed after post content by the hook; can be pulled above the content
+       per page with media_position = "top" (see extend_head). */ -}}
 {{- with .Params.audio_file -}}
 <div class="post-media">
-  <audio src="{{ . }}" controls muted loading="lazy"></audio>
+  <audio src="{{ . }}" controls preload="metadata"></audio>
 </div>
 {{- end -}}
 {{- with .Params.video_file -}}
 <div class="post-media">
-  <video src="{{ . }}" controls playsinline loading="lazy"></video>
+  <video src="{{ . }}" controls playsinline preload="metadata"></video>
 </div>
 {{- end -}}

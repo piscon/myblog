@@ -53,3 +53,6 @@ jobs:
 
       - name: Build site
         run: hugo --gc --minify
+
+      - name: Feature health check
+        run: bash scripts/feature-check.sh

@@ -83,6 +83,10 @@ jobs:
         if: steps.update.outputs.updated == 'true'
         run: hugo --gc --minify
 
+      - name: Feature health check with updated theme
+        if: steps.update.outputs.updated == 'true'
+        run: bash scripts/feature-check.sh
+
       - name: Create Pull Request
         if: steps.update.outputs.updated == 'true'
         uses: peter-evans/create-pull-request@v8
