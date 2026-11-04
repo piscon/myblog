@@ -59,6 +59,7 @@ check "404 en 文案分流"         "grep -q 'Page not found' '$OUT/en/404.html'
 check "最后更新时间显示"        "grep -q '最后更新于' '$PAGE'"
 check "相关文章推荐渲染"        "grep -q 'post-related' '$PAGE' && grep -q '你好，世界' '$PAGE'"
 check "站点 JS 加载"            "grep -q '/js/site\.' '$PAGE'"
+check "搜索页输入框存在"        "grep -q 'searchInput' '$OUT/zh/search/index.html' && grep -q '/search/' '$OUT/zh/index.html'"
 check "aliases 跳转页生成"      "test -f '$OUT/zh/posts/alias-test/index.html'"
 check "llms.txt 站点索引生成"    "test -f '$OUT/zh/llms.txt' && grep -q 'Feature health check' '$OUT/zh/llms.txt'"
 check "归档页 zh 本地化(年/月)"  "grep -q 'archive-year-header' '$OUT/zh/archives/index.html' && grep -q '2026年' '$OUT/zh/archives/index.html' && grep -q '11月' '$OUT/zh/archives/index.html'"

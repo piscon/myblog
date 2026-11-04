@@ -1,10 +1,13 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Three self-gating features — each activates only when its DOM exists:
+   Four self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
-   Theme DOM coupling: PaperMod's .post-single / .post-content / .toc
-   classes; regression-guarded by feature-check assertions. */
+   4. Ctrl/Cmd+K — focus the search input on the search page, otherwise
+      jump to the current language's search page (menu link is the
+      language-correct source of truth)
+   Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
+   #menu / #searchInput; regression-guarded by feature-check assertions. */
 (function () {
   'use strict';
 
@@ -102,4 +105,20 @@
       spy();
     }
   }
+
+  /* 4. Ctrl/Cmd+K search shortcut */
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey &&
+        (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      var input = document.getElementById('searchInput');
+      if (input) {
+        input.focus();
+        input.select();
+        return;
+      }
+      var link = document.querySelector('#menu a[href*="/search/"]');
+      if (link) location.href = link.href;
+    }
+  });
 })();

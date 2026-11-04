@@ -19,7 +19,8 @@
 新功能按此顺序选实现层级：
 
 1. **首选**：front matter 字段 + 站点层 Hugo 模板逻辑（如 `youtube_id`/`bilibili_bvid` 模式：CMS 出 ID，渲染全在站点层）
-2. CSS/JS：站点层扩展机制——`assets/css/extended/*.css` + `assets/js/site.js`（经 extend_head 指纹加载，功能自门控于主题 DOM）+ 钩子 partial（`layouts/_partials/extend_head.html` 等；主题自带空 stub、站点同名文件覆盖，天然兼容升级）
+2. CSS/JS：站点层扩展机制——`assets/css/extended/*.css` + `assets/js/site.js`（经 extend_head 指纹加载，功能自门控于主题 DOM：进度条/灯箱/TOC 高亮/**Ctrl+K 搜索快捷键**）+ 钩子 partial（`layouts/_partials/extend_head.html` 等；主题自带空 stub、站点同名文件覆盖，天然兼容升级）
+- **搜索约定**：头部菜单与首页按钮统一为「图标+文字」；搜索权重在 `hugo.toml [params.fuseOpts]`（标题 2 > 摘要 1.5 > 正文 1 > 链接 0.5）；快捷键 Ctrl/Cmd+K（site.js）与主题 Alt+/ 并存；曾经把头部搜索做成 icon-only 的 `search-icon.css` 已删（2026-11-04，与首页文字按钮不一致）
 3. 必须改模板时：拷贝到站点 `layouts/` 覆盖；代价是 weekly PR 碰同名文件需人工 review diff，且 feature-check 必须覆盖该耦合点
 4. **永远不改 submodule 本体**
 
@@ -29,7 +30,7 @@
 
 ## 自定义功能回归
 
-- `bash scripts/feature-check.sh`：18 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/相关文章/站点 JS/aliases/llms）
+- `bash scripts/feature-check.sh`：19 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/相关文章/站点 JS/搜索入口/aliases/llms）
 - 新增任何依赖主题 DOM/类名/钩子的功能 → 必须同步加断言
 - weekly 主题 PR、build-check 两处会跑它（CMS「功能体检」按钮已于 2026-11-04 移除——action 按钮的孤儿记录会持续烧 GitHub 配额，详见 .zcode/reference/pagescms-capabilities.md §8；手动触发改走 GitHub 界面的 workflow_dispatch）
 

@@ -37,6 +37,26 @@ isPlainText = true
   name = "categories"
   weight = 40
 
+# 站内搜索（Fuse.js）：标题命中优先于正文命中；threshold 沿用主题默认 0.4
+[params.fuseOpts]
+  ignoreLocation = true
+
+[[params.fuseOpts.keys]]
+  name = "title"
+  weight = 2
+
+[[params.fuseOpts.keys]]
+  name = "summary"
+  weight = 1.5
+
+[[params.fuseOpts.keys]]
+  name = "content"
+  weight = 1
+
+[[params.fuseOpts.keys]]
+  name = "permalink"
+  weight = 0.5
+
 [frontmatter]
   lastmod = ["lastmod", ":git", "date"]
 
