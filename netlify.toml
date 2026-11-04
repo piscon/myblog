@@ -22,6 +22,13 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# 站点 JS（site.min.<hash>.js）发布在 /js/ 而非 /assets/js/（resources.Get
+# 路径直出），同样内容寻址，同享 immutable
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # 静态图片（无指纹）：长缓存但非 immutable；换图时改文件名或加 ?v=N 参数即可
 [[headers]]
   for = "/images/*"
