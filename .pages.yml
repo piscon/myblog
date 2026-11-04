@@ -37,6 +37,14 @@ content:
         label: 标题
         type: string
         required: true
+      - name: slug
+        label: URL 路径（slug）
+        type: string
+        required: true
+        description: 用于文章 URL，如 my-new-post；中文标题请手动配英文 slug
+        pattern:
+          regex: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          message: 只能是小写字母、数字和连字符（如 my-new-post），用于 URL
       - name: description
         label: 摘要（SEO）
         type: text
@@ -104,7 +112,7 @@ content:
         required: true
         options:
           media: images
-    filename: '{slug}.md'
+    filename: '{fields.slug}.md'
     view:
       fields: [title, description, date, draft, lang]
       primary: title
@@ -129,6 +137,14 @@ content:
         label: タイトル
         type: string
         required: true
+      - name: slug
+        label: URLスラッグ
+        type: string
+        required: true
+        description: '記事URL用（例: my-new-post）。日本語タイトルには英字スラッグを'
+        pattern:
+          regex: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          message: '半角英小文字・数字・ハイフンのみ（例: my-new-post）。URLに使われます'
       - name: description
         label: 概要（SEO）
         type: text
@@ -196,7 +212,7 @@ content:
         required: true
         options:
           media: images
-    filename: '{slug}.md'
+    filename: '{fields.slug}.md'
     view:
       fields: [title, description, date, draft, lang]
       primary: title
@@ -221,6 +237,14 @@ content:
         label: Title
         type: string
         required: true
+      - name: slug
+        label: URL slug
+        type: string
+        required: true
+        description: Used in the post URL, e.g. my-new-post
+        pattern:
+          regex: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          message: Lowercase letters, digits and hyphens only (e.g. my-new-post); used in the URL
       - name: description
         label: Description (SEO)
         type: text
@@ -288,7 +312,7 @@ content:
         required: true
         options:
           media: images
-    filename: '{slug}.md'
+    filename: '{fields.slug}.md'
     view:
       fields: [title, description, date, draft, lang]
       primary: title
