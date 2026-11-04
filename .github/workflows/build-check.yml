@@ -1,0 +1,55 @@
+name: Build check
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+    paths:
+      - 'themes/**'
+      - 'netlify.toml'
+      - 'hugo.toml'
+      - 'layouts/**'
+      - 'assets/**'
+      - 'static/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install Hugo (version pinned in netlify.toml)
+        run: |
+          set -euo pipefail
+          HUGO_VER=$(grep -oP 'HUGO_VERSION\s*=\s*"\K[^"]+' netlify.toml)
+          echo "Installing Hugo extended $HUGO_VER"
+          curl -sSL -o /tmp/hugo.tar.gz "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VER}/hugo_extended_${HUGO_VER}_linux-amd64.tar.gz"
+          mkdir -p /tmp/hugo-extract && tar -xzf /tmp/hugo.tar.gz -C /tmp/hugo-extract
+          sudo install /tmp/hugo-extract/hugo /usr/local/bin/hugo
+          hugo version
+
+      - name: Check Hugo version meets theme minimum
+        run: |
+          set -euo pipefail
+          MIN=$(grep -oP 'min_version\s*=\s*"\K[^"]+' themes/PaperMod/theme.toml)
+          CUR=$(grep -oP 'HUGO_VERSION\s*=\s*"\K[^"]+' netlify.toml)
+          echo "PaperMod min_version: $MIN | netlify.toml HUGO_VERSION: $CUR"
+          LOWEST=$(printf '%s\n%s\n' "$MIN" "$CUR" | sort -V | head -1)
+          if [ "$LOWEST" != "$MIN" ]; then
+            echo "::error::PaperMod requires Hugo >= $MIN but netlify.toml pins $CUR. Bump HUGO_VERSION."
+            exit 1
+          fi
+
+      - name: Build site
+        run: hugo --gc --minify

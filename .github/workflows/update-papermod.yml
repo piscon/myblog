@@ -48,6 +48,34 @@ jobs:
             cd ../..
           fi
 
+      - name: Install Hugo (version pinned in netlify.toml)
+        if: steps.update.outputs.updated == 'true'
+        run: |
+          set -euo pipefail
+          HUGO_VER=$(grep -oP 'HUGO_VERSION\s*=\s*"\K[^"]+' netlify.toml)
+          echo "Installing Hugo extended $HUGO_VER"
+          curl -sSL -o /tmp/hugo.tar.gz "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VER}/hugo_extended_${HUGO_VER}_linux-amd64.tar.gz"
+          mkdir -p /tmp/hugo-extract && tar -xzf /tmp/hugo.tar.gz -C /tmp/hugo-extract
+          sudo install /tmp/hugo-extract/hugo /usr/local/bin/hugo
+          hugo version
+
+      - name: Check Hugo version meets theme minimum
+        if: steps.update.outputs.updated == 'true'
+        run: |
+          set -euo pipefail
+          MIN=$(grep -oP 'min_version\s*=\s*"\K[^"]+' themes/PaperMod/theme.toml)
+          CUR=$(grep -oP 'HUGO_VERSION\s*=\s*"\K[^"]+' netlify.toml)
+          echo "PaperMod min_version: $MIN | netlify.toml HUGO_VERSION: $CUR"
+          LOWEST=$(printf '%s\n%s\n' "$MIN" "$CUR" | sort -V | head -1)
+          if [ "$LOWEST" != "$MIN" ]; then
+            echo "::error::PaperMod now requires Hugo >= $MIN but netlify.toml pins $CUR. Bump HUGO_VERSION before merging this update."
+            exit 1
+          fi
+
+      - name: Verify site builds with updated theme
+        if: steps.update.outputs.updated == 'true'
+        run: hugo --gc --minify
+
       - name: Create Pull Request
         if: steps.update.outputs.updated == 'true'
         uses: peter-evans/create-pull-request@v6
