@@ -18,3 +18,35 @@
        deferred like the theme's own assets. */ -}}
 {{- $siteJs := resources.Get "js/site.js" | resources.Minify | resources.Fingerprint }}
 <script defer src="{{ $siteJs.RelPermalink }}" integrity="{{ $siteJs.Data.Integrity }}" crossorigin="anonymous"></script>
+
+{{- /* RSS autodiscovery on single pages. The theme's head only advertises a
+       feed where the page itself has an RSS output format (home/lists);
+       singles have none, so point at the parent section's feed instead.
+       (home keeps the theme's own link — we don't duplicate it) */ -}}
+{{- if .IsPage -}}
+{{- $feedTitle := printf "%s · %s" .Parent.Title site.Title -}}
+{{- with .Parent.OutputFormats.Get "rss" -}}
+<link rel="alternate" type="application/rss+xml" title="{{ $feedTitle }}" href="{{ .Permalink }}">
+{{- end -}}
+{{- end -}}
+
+{{- /* hreflang x-default → the default-language version of the same page
+       (theme only emits per-language alternates). Only on translated pages,
+       where an hreflang cluster actually applies. */ -}}
+{{- if .IsTranslated -}}
+{{- range .AllTranslations -}}
+{{- if eq .Language.Lang hugo.Sites.Default.Language.Lang -}}
+<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* theme-color per system color scheme. The theme emits a single static
+       meta near the top of <head> (fed by params.assets.theme_color = dark
+       baseline); these two media-scoped metas appear later, and user agents
+       pick the last matching one, so light/dark both get a matching browser
+       chrome. Colors mirror the theme's --theme backgrounds (white /
+       rgb(29,30,32)); they follow the system preference, not the manual
+       toggle — same limitation as any static meta. */ -}}
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1d1e20">

@@ -78,6 +78,10 @@ isPlainText = true
   ShowCodeCopyButtons = true
   ShowShareButtons = true
   ShareButtons = ["x", "telegram"]
+  # 列表/分类/标签/归档页标题旁的 RSS 订阅按钮（list.html 与归档覆盖版共同消费）
+  ShowRssButtonInSectionTermList = true
+  # RSS 全文输出（PaperMod rss.xml 的 content:encoded 开关；摘要仍在 description）
+  ShowFullTextinRSS = true
   # 语言切换器与文章页翻译列表显示全名（简体中文/日本語/English），而非 Ja/En 缩写
   displayFullLangName = true
   showtoc = true
@@ -94,6 +98,9 @@ isPlainText = true
     favicon32x32 = "/branding/favicon.ico"
     apple_touch_icon = "/branding/favicon.ico"
     safari_pinned_tab = "/branding/favicon.svg"
+    # 浏览器 UI 兜底色（深底基线，与 dark 模式 --theme 背景一致）；
+    # light/dark 按 prefers-color-scheme 的双 meta 由 extend_head 补发
+    theme_color = "#1d1e20"
 
   [params.schema]
     publisherType = "Person"
@@ -107,8 +114,9 @@ isPlainText = true
     categoryId = ""
 
   # 「在 GitHub 编辑」链接（公开仓库）；URL + 文件路径拼成具体文件链接
+  # 分支必须与仓库默认分支一致（master）——此前写成 main 导致文章页链接 404
   [params.editPost]
-    URL = "https://github.com/piscon/myblog/blob/main"
+    URL = "https://github.com/piscon/myblog/blob/master"
     appendFilePath = true
 
 [languages]
@@ -135,16 +143,7 @@ isPlainText = true
     [[languages.zh.params.profileMode.buttons]]
       name = "归档"
       url = "/zh/archives/"
-    [[languages.zh.params.socialIcons]]
-      name = "youtube"
-      url = "https://youtube.com/"
-    [[languages.zh.params.socialIcons]]
-      name = "twitter"
-      url = "https://twitter.com/"
-    [[languages.zh.params.socialIcons]]
-      name = "github"
-      url = "https://github.com/"
-
+    # 社交图标占位死链已删（曾指向平台首页）；拿到真实主页后在 profileMode.socialIcons 加回
     [[languages.zh.menu.main]]
       identifier = "posts"
       name = '文章'
@@ -203,16 +202,6 @@ isPlainText = true
     [[languages.ja.params.profileMode.buttons]]
       name = "アーカイブ"
       url = "/ja/archives/"
-    [[languages.ja.params.socialIcons]]
-      name = "youtube"
-      url = "https://youtube.com/"
-    [[languages.ja.params.socialIcons]]
-      name = "twitter"
-      url = "https://twitter.com/"
-    [[languages.ja.params.socialIcons]]
-      name = "github"
-      url = "https://github.com/"
-
     [[languages.ja.menu.main]]
       identifier = "posts"
       name = '記事'
@@ -271,16 +260,6 @@ isPlainText = true
     [[languages.en.params.profileMode.buttons]]
       name = "Archives"
       url = "/en/archives/"
-    [[languages.en.params.socialIcons]]
-      name = "youtube"
-      url = "https://youtube.com/"
-    [[languages.en.params.socialIcons]]
-      name = "twitter"
-      url = "https://twitter.com/"
-    [[languages.en.params.socialIcons]]
-      name = "github"
-      url = "https://github.com/"
-
     [[languages.en.menu.main]]
       identifier = "posts"
       name = 'Posts'

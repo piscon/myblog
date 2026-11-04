@@ -30,7 +30,7 @@
 
 ## 自定义功能回归
 
-- `bash scripts/feature-check.sh`：20 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/相关文章/站点 JS/搜索入口/语言全名/aliases/llms）
+- `bash scripts/feature-check.sh`：25 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/相关文章/站点 JS/搜索入口/语言全名/aliases/llms/RSS 全文/feed 发现/x-default/RSS 列表入口/theme-color）
 - 新增任何依赖主题 DOM/类名/钩子的功能 → 必须同步加断言
 - weekly 主题 PR、build-check 两处会跑它（CMS「功能体检」按钮已于 2026-11-04 移除——action 按钮的孤儿记录会持续烧 GitHub 配额，详见 .zcode/reference/pagescms-capabilities.md §8；手动触发改走 GitHub 界面的 workflow_dispatch）
 
@@ -40,9 +40,10 @@
 - 视频不进 git（Netlify 配额/fair-use）；YouTube 用 `youtube_id`、B 站用 `bilibili_bvid` 字段（CMS 会校验 ID 格式）；自托管仅限小音频（`audio_file`）；外链音视频走 `audio_url`/`video_url`（模板支持但 CMS 不暴露，Git 路径维护）
 - 品牌资产在 `static/branding/`（CMS 不可见）；内容图 `static/images/`；音视频目录 `static/audio|video`
 - **og 分享图** = `static/branding/og-default.jpg`（1200×630，作为全站 og:image 兜底；文章有 cover 时被 cover 覆盖）。重生成：`NODE_PATH=/tmp/ogtool/node_modules node scripts/gen-og-image.js`（sharp 不进仓库，见脚本头注释）
-- **editPost 已启用**（仓库公开）：文章页 meta 行有「在 GitHub 上改进本文」链接（URL+文件路径拼成具体文件）
+- **editPost 已启用**（仓库公开）：文章页 meta 行有「在 GitHub 上改进本文」链接（URL+文件路径拼成具体文件）；URL 的分支段必须写 **master**（默认分支）——曾误写 `main` 致全站死链（2026-11-04 修复）
 - **菜单策略**：空的「资源」「发现」板块已从菜单摘除（section 文件保留，URL 仍可直达；填实后把 menu 项加回即可）
 - **AI 爬虫**：robots 全放行 + llms.txt 友好——站点立场就是开放 AI 读取；若日后要拦截（GPTBot/ClaudeBot 等）改 robots.txt 模板/CF 规则
+- **RSS/分发约定（2026-11-04）**：RSS 全文 = PaperMod 原生 `ShowFullTextinRSS`（rss.xml 的 content:encoded，纯配置零模板，勿再自建 rss.xml 覆盖）；文章页 feed 发现链接与 hreflang `x-default` 由 extend_head 补发（主题只在首页/列表页发 feed link——单页自身无 RSS 输出格式；x-default 恒指默认语言 zh 版，仅多语言页发出、单语言页不发，feature-check 正反双断言；默认语言判断用 `hugo.Sites.Default`——`site.Sites` 自 0.156 弃用）；安全头（nosniff/XFO DENY/Referrer-Policy/HSTS 1年）在 netlify.toml `/*` 规则，CSP 因主题与站点层大量 inline style/script 暂不上；profileMode 社交图标占位死链（平台首页）已删，拿到真实主页后经 `profileMode.socialIcons` 加回
 - **多语言约定**：`displayFullLangName = true`（头部切换器与文章页翻译列表显示 简体中文/日本語/English 全名，而非 Ja/En 缩写）；头部切换器经 site.js 注入**全量常驻**——当前语言按权重位插入并高亮标记（不可点），三语言顺序恒定（简体中文→日本語→English），JS 禁用回退主题默认「只列其他语言」；**小屏（≤768px，与主题 zmedia 断点一致）自动切短码 ZH/JA/EN**（双标签 span 由 site.js 包裹、CSS 按断点显隐——三个全名+logo+主题按钮在手机上会换行）；切换器容器标 `translate="no"`/`notranslate`（防 Chrome 翻译篡改语言名；页面级翻译提示是 Chrome 设备语言≠页面语言的正常行为，用户侧「一律不翻译此网站」可永久关闭，站点不强禁——访客可能需要翻译 zh 长文）；切换器语义 = 跳对方语言首页（文章页同页切换走 translation_list，hreflang 已对齐）；翻译标签主题自带（语言:/言語/Translations，旧式 `- id:` YAML 格式，grep 顶层键会漏查）；站点 i18n 覆盖试验过——新格式 yaml **未能稳定覆盖**主题旧格式键，故不采用，缺文案时优先查主题 `- id:` 格式
 - **语言级元数据必须覆盖**（2026-11-04 修复 en/ja 中文泄漏）：`languages.ja/en` 各自显式设置 `title`（ja=二重奏，日文原生词；en=Deux，域名品牌）与 `[languages.xx.params]` 的 `description`/`keywords`——全局 `[params]` 的中文 title/description/keywords 曾原样泄漏到 en/ja 页面与 RSS。meta author 与页脚 © 的「二重奏」是**笔名/品牌，有意保留不翻译**
 - **文章页元素顺序（黄金标准对齐，2026-11-04）**：面包屑（已关 ShowBreadCrumbs）→ 标题 → SEO 摘要 → meta 行（日期·阅读时间·作者·语言列表·编辑链接；ShowWordCount 已关——阅读时间已表达长度）→ 封面 → 目录 → 正文 → 媒体（media_position）→ 最后更新于 → 标签 → 分享 → 上一篇/下一篇 → 相关文章 → 评论（giscus 待凭据）。实现 = `.post-single` 全局 flex 列 + order（footer 4/related 5/giscus 6，0 组按 DOM 序），**margin 补偿**精确还原主题块布局间距（flex 不塌缩 margin：content 10/30、media 0/24、lastmod 0/20、footer-top 0；改任何一侧 margin 前先重算这三个边界）；置顶媒体经 extend_head 注入 media order:1/content order:2 覆盖静态值（feature-check 断言依赖该注入串）
