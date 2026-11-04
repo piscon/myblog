@@ -26,11 +26,58 @@
   gap: 0.6rem;
 }
 
+/* Article end-matter ordering (gold standard): content → media → last
+   updated → tags → share → prev/next → related → comments.
+   .post-single is a flex column; default-order children (header/toc/
+   content) keep DOM order, the rest are placed by order below. Margin
+   compensations keep spacing identical to the theme's block layout
+   (flex never collapses margins: --content-gap=20, content margins 30). */
+.post-single {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-single > .post-content {
+  margin: 10px 0 30px;
+}
+
+.post-single > .post-media {
+  order: 2;
+  margin: 0 0 24px;
+}
+
+.post-single > .post-lastmod {
+  order: 3;
+}
+
+.post-single > .post-footer {
+  order: 4;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+}
+
+.post-single > .post-footer > .share-buttons {
+  order: 1;
+}
+
+.post-single > .post-footer > .paginav {
+  order: 2;
+}
+
+.post-single > .post-related {
+  order: 5;
+}
+
+.post-single > .giscus-wrapper {
+  order: 6;
+}
+
 /* Last-updated line (rendered by extend_post_content) */
 .post-lastmod {
   color: var(--secondary);
   font-size: 0.85rem;
-  margin-top: 1.5rem;
+  margin: 0 0 20px;
 }
 
 /* Related posts (rendered by extend_post_content) */
