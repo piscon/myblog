@@ -26,6 +26,34 @@
   gap: 0.6rem;
 }
 
+/* CJK-Latin typography: deliberate per-language stacks — Latin renders
+   from the system UI fonts first, CJK from the platform's quality sans.
+   The theme stack is Latin-only, so ja pages previously fell back to a
+   CHINESE font (Microsoft YaHei) rendering kanji with Chinese glyph
+   variants; html[lang] scoping fixes that. text-autospace adds the
+   CJK-Latin gap automatically where the engine supports it (CSS Text 4,
+   no-op elsewhere). No web fonts: mainland reachability + multi-MB CJK. */
+body {
+  text-autospace: normal;
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei",
+    "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
+}
+
+html[lang^="ja"] body {
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic",
+    "Noto Sans CJK JP", "Source Han Sans JP", "Meiryo", sans-serif;
+}
+
+html[lang^="en"] body {
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+}
+
 /* Article end-matter ordering (gold standard): content → media → last
    updated → tags → share → prev/next → related → comments.
    .post-single is a flex column; default-order children (header/toc/
