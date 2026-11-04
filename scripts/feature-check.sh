@@ -52,6 +52,8 @@ check "og:video meta"          "grep -q 'property=\"og:video\"' '$PAGE'"
 check "品牌 favicon 引用"       "grep -q '/branding/favicon.ico' '$PAGE'"
 check "og:image 品牌图"         "grep -q 'branding/logo.jpg' '$PAGE'"
 check "自定义 404 页存在"        "test -f '$OUT/zh/404.html'"
+check "归档页 zh 本地化(年/月)"  "grep -q 'archive-year-header' '$OUT/zh/archives/index.html' && grep -q '2026年' '$OUT/zh/archives/index.html' && grep -q '11月' '$OUT/zh/archives/index.html'"
+check "归档页 en 本地化(月名)"   "grep -q 'archive-year-header' '$OUT/en/archives/index.html' && grep -q 'November' '$OUT/en/archives/index.html'"
 check "YouTube nocookie iframe"  "grep -q 'youtube-nocookie.com/embed/dQw4w9WgXcQ' '$PAGE'"
 check "B站 iframe 播放器"         "grep -q 'player.bilibili.com/player.html?bvid=BV1xx411c7mD' '$PAGE'"
 

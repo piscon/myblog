@@ -14,8 +14,3 @@
   object-position: center;
   border-radius: var(--radius);
 }
-
-/* Optional: slightly tighter on list pages */
-.post-entry .entry-cover {
-  aspect-ratio: 1.91 / 1;
-}

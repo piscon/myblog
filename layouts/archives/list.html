@@ -1,5 +1,14 @@
 {{- define "main" }}
 
+{{- /* Single language-aware override of the theme's archives layout, used by
+       the archives sections (content/<lang>/archives/_index.md). Sections do
+       not pick up the theme's layouts/archives.html, so this file mirrors its
+       markup; the only local deltas are the localized strings (年 suffix,
+       numeric month names for zh/ja vs English month names, draft tooltip)
+       derived from the current language. When reviewing weekly PaperMod PRs
+       that touch themes/PaperMod/layouts/archives.html, re-diff it against
+       this file. */ -}}
+
 <header class="page-header">
   <h1>
     {{ .Title }}
@@ -33,13 +42,23 @@
 {{- $pages = site.RegularPages }}
 {{- end }}
 
+{{- $lang := .Site.Language.Lang }}
+{{- $monthNames := slice "January" "February" "March" "April" "May" "June"
+  "July" "August" "September" "October" "November" "December" }}
+{{- $draftTitle := "Draft" }}
+{{- if eq $lang "zh" }}
+{{- $draftTitle = "草稿" }}
+{{- else if eq $lang "ja" }}
+{{- $draftTitle = "下書き" }}
+{{- end }}
+
 {{- range $pages.GroupByPublishDate "2006" }}
 {{- if ne .Key "0001" }}
 <div class="archive-year">
   {{- $year := replace .Key "0001" "" }}
   <h2 class="archive-year-header" id="{{ $year }}">
     <a class="archive-header-link" href="#{{ $year }}">
-      {{- $year -}}年
+      {{- $year -}}{{ if ne $lang "en" }}年{{ end }}
     </a>
     <sup class="archive-count">&nbsp;{{ len .Pages }}</sup>
   </h2>
@@ -47,7 +66,11 @@
   <div class="archive-month">
     <h3 class="archive-month-header" id="{{ $year }}-{{ .Key }}">
       <a class="archive-header-link" href="#{{ $year }}-{{ .Key }}">
+        {{- if eq $lang "en" }}
+        {{- index $monthNames (sub (int .Key) 1) -}}
+        {{- else }}
         {{- printf "%d月" (int .Key) -}}
+        {{- end }}
       </a>
       <sup class="archive-count">&nbsp;{{ len .Pages }}</sup>
     </h3>
@@ -58,7 +81,7 @@
         <h3 class="archive-entry-title entry-hint-parent">
           {{- .Title | markdownify }}
           {{- if .Draft }}
-          <span class="entry-hint" title="草稿">
+          <span class="entry-hint" title="{{ $draftTitle }}">
             <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 -960 960 960" fill="currentColor">
               <path
                 d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
