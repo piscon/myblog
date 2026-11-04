@@ -180,6 +180,11 @@ isPlainText = true
     label = "日本語"
     contentDir = "content/ja"
     weight = 2
+    title = "二重奏"
+
+    [languages.ja.params]
+    description = "精神と思考の二重奏、自由と独立の交響曲"
+    keywords = ["二重奏", "deux", "ブログ", "AI", "Hugo"]
 
     [languages.ja.params.profileMode]
       enabled = true
@@ -243,6 +248,11 @@ isPlainText = true
     label = "English"
     contentDir = "content/en"
     weight = 3
+    title = "Deux"
+
+    [languages.en.params]
+    description = "A duet of spirit and thought, a symphony of freedom and independence"
+    keywords = ["Deux", "blog", "AI", "Hugo"]
 
     [languages.en.params.profileMode]
       enabled = true
