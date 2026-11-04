@@ -25,7 +25,7 @@ home = ["HTML", "RSS", "JSON"]
   description = "精神与思想的二重奏，自由与独立的交响曲"
   author = "二重奏"
   keywords = ["二重奏", "deux", "博客", "AI", "Hugo", "技术"]
-  images = ["/images/logo.jpg"]
+  images = ["/branding/logo.jpg"]
   defaultTheme = "auto"
   ShowReadingTime = true
   ShowWordCount = true
@@ -42,11 +42,11 @@ home = ["HTML", "RSS", "JSON"]
     hiddenInSingle = false
 
   [params.assets]
-    favicon = "/images/favicon.ico"
-    favicon16x16 = "/images/favicon.ico"
-    favicon32x32 = "/images/favicon.ico"
-    apple_touch_icon = "/images/favicon.ico"
-    safari_pinned_tab = "/images/favicon.svg"
+    favicon = "/branding/favicon.ico"
+    favicon16x16 = "/branding/favicon.ico"
+    favicon32x32 = "/branding/favicon.ico"
+    apple_touch_icon = "/branding/favicon.ico"
+    safari_pinned_tab = "/branding/favicon.svg"
 
   [params.schema]
     publisherType = "Person"
@@ -62,7 +62,7 @@ home = ["HTML", "RSS", "JSON"]
       enabled = true
       title = "精神与思想的二重奏"
       subtitle = "自由与独立的交响曲"
-      imageUrl = "images/logo.gif"
+      imageUrl = "branding/logo.gif"
       imageWidth = 120
       imageHeight = 120
 
@@ -132,7 +132,7 @@ home = ["HTML", "RSS", "JSON"]
       enabled = true
       title = "精神と思考の二重奏"
       subtitle = "自由と独立の交響曲"
-      imageUrl = "images/logo.gif"
+      imageUrl = "branding/logo.gif"
       imageWidth = 120
       imageHeight = 120
 
@@ -202,7 +202,7 @@ home = ["HTML", "RSS", "JSON"]
       enabled = true
       title = "A duet of spirit and thought"
       subtitle = "a symphony of freedom and independence"
-      imageUrl = "images/logo.gif"
+      imageUrl = "branding/logo.gif"
       imageWidth = 120
       imageHeight = 120
 

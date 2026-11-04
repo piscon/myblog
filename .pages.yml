@@ -4,11 +4,21 @@ media:
     input: static/images
     output: /images
     extensions: [jpg, jpeg, png, webp, gif, svg]
+  - name: audio
+    label: 音频
+    input: static/audio
+    output: /audio
+    categories: [audio]
+  - name: video
+    label: 视频
+    input: static/video
+    output: /video
+    categories: [video]
   - name: files
     label: 附件
     input: static/files
     output: /files
-    categories: [document, audio, video]
+    categories: [document]
 
 content:
   - name: zh-posts
@@ -56,13 +66,13 @@ content:
         label: 音频（文末播放器）
         type: file
         options:
-          media: files
+          media: audio
           categories: [audio]
       - name: video_file
         label: 视频（文末播放器）
         type: file
         options:
-          media: files
+          media: video
           categories: [video]
       - name: body
         label: 正文
@@ -126,13 +136,13 @@ content:
         label: 音声（末尾プレーヤー）
         type: file
         options:
-          media: files
+          media: audio
           categories: [audio]
       - name: video_file
         label: 動画（末尾プレーヤー）
         type: file
         options:
-          media: files
+          media: video
           categories: [video]
       - name: body
         label: 本文
@@ -196,13 +206,13 @@ content:
         label: Audio (footer player)
         type: file
         options:
-          media: files
+          media: audio
           categories: [audio]
       - name: video_file
         label: Video (footer player)
         type: file
         options:
-          media: files
+          media: video
           categories: [video]
       - name: body
         label: Body
