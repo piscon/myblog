@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Five self-gating features — each activates only when its DOM exists:
+   Six self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -11,6 +11,9 @@
       (from <html lang>) at its weight position, marked non-clickable.
       Falls back to the theme's behavior without JS. Language names mirror
       hugo.toml labels.
+   6. Floating side TOC — wide screens (≥1280px) pin the toc beside the
+      content column and force the details open; below the breakpoint the
+      inline collapsed details is restored (see ui.css media block).
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
    #menu / #searchInput / .lang-menu; regression-guarded by feature-check
    assertions. */
@@ -182,5 +185,29 @@
       });
       langMenu.insertBefore(li, before);
     }
+  }
+
+  /* 6. Floating side TOC on wide screens */
+  var tocDetails = document.querySelector('details.toc');
+  if (tocDetails) {
+    var wideToc = window.matchMedia('(min-width: 1280px)');
+    var tocForced = false;
+    var syncToc = function () {
+      if (wideToc.matches) {
+        if (!tocDetails.open) {
+          tocDetails.open = true;
+          tocForced = true;
+        }
+      } else if (tocForced) {
+        tocDetails.open = false;
+        tocForced = false;
+      }
+    };
+    if (wideToc.addEventListener) {
+      wideToc.addEventListener('change', syncToc);
+    } else if (wideToc.addListener) {
+      wideToc.addListener(syncToc);
+    }
+    syncToc();
   }
 })();
