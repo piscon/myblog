@@ -117,6 +117,7 @@
 - workflow 侧必须声明 `on.workflow_dispatch.inputs.payload`（`required: true, type: string`）。payload JSON 形状（文档示例）：`source`、`action{name,label}`、`repository{owner,repo,ref,workflowRef,sha}`、`triggeredAt`、`triggerType`（如 `rerun`）、`rerunOfActionRunId`、`triggeredBy{userId,name,email,githubUsername,image}`、`context{type,name,path,data}`、`inputs{...}`。文档建议 workflow 内用 `jq`/node/`actions/github-script` 解析。
 - 权限/取消：`Run again` 仅 GitHub 用户；`Cancel run` 仅在 workflow run 实际存在后可用；collaborator 只能取消自己发起的 run；`cancelable: false` 全局禁用取消。
 - GitHub 侧要求仓库启用 Actions。
+- **运行状态追踪机制（源码核实，2026-11-04）**：点击后 CMS 在自己数据库建 run 记录并 dispatch，随后最多 6 次×1.5 秒轮询 GitHub 找匹配 run（按创建时间窗 + 未被其他记录认领）；前端 toast 每 4 秒打状态端点、状态存 sessionStorage（随标签页销毁、刷新恢复、12 小时超时）。**故障模式**：dispatch 被限流拒绝时记录永远匹配不到 run →「Waiting for GitHub to start…」卡死，且 4 秒轮询 × 6 次重试会持续烧 GitHub 配额形成恶性循环。处置：关标签页（不是刷新），以 GitHub run summary 为准。
 
 ## 9. 认证 / 权限模型
 

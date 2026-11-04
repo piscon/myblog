@@ -45,5 +45,5 @@
 
 - YouTube iframe 大陆不可达；B 站 iframe 480p 封顶
 - Pages CMS actions 只回传成功/失败，详情看 GitHub run summary（feature-check 失败时自动附 DOM 快照）
-- CMS actions 卡在「Waiting for GitHub to start…」或「Couldn't refresh action status. Retrying…」＝状态轮询被限流打断的 UI 残留，不代表真实结果——以 GitHub run summary 为准，刷新页面即恢复（2026-11-04 实例：CMS 卡 Waiting，实际 run 已 success）
+- CMS actions 卡在「Waiting for GitHub to start…」＝该次点击的 dispatch 大概率被限流拒绝，CMS 数据库里的 run 记录永远匹配不到 GitHub run；前端每 4 秒轮询状态端点、每次后端最多重试 6 次 listWorkflowRuns——**开着页面会持续烧 GitHub 配额，形成恶性循环**。正确处置：**直接关掉 CMS 标签页**（轮询状态存 sessionStorage，随标签页销毁；刷新无效、反而恢复轮询），结果以 GitHub run summary 为准；前端 12 小时后也会自动放弃追踪（2026-11-04 实例，源码 action-toast-context.tsx + api/[runId]/route.ts 核实）
 - `hugo.toml` 的 `baseURL` 必须与 Netlify 主域一致（现为 apex，无 www）
