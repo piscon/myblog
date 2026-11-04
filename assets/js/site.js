@@ -1,13 +1,19 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Four self-gating features — each activates only when its DOM exists:
+   Five self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
    4. Ctrl/Cmd+K — focus the search input on the search page, otherwise
       jump to the current language's search page (menu link is the
       language-correct source of truth)
+   5. Language switcher — PaperMod only renders the OTHER languages, so
+      the list members swap on every switch; prepend the current language
+      (from <html lang>) at its weight position, marked non-clickable.
+      Falls back to the theme's behavior without JS. Language names mirror
+      hugo.toml labels.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
-   #menu / #searchInput; regression-guarded by feature-check assertions. */
+   #menu / #searchInput / .lang-menu; regression-guarded by feature-check
+   assertions. */
 (function () {
   'use strict';
 
@@ -121,4 +127,32 @@
       if (link) location.href = link.href;
     }
   });
+
+  /* 5. Language switcher: stable full list (all languages, current marked) */
+  var langMenu = document.querySelector('.lang-menu');
+  if (langMenu) {
+    var docLang = (document.documentElement.getAttribute('lang') || '').slice(0, 2);
+    var langMeta = {
+      zh: { name: '简体中文', home: '/zh/', order: 0 },
+      ja: { name: '日本語', home: '/ja/', order: 1 },
+      en: { name: 'English', home: '/en/', order: 2 }
+    };
+    var meta = langMeta[docLang];
+    var listed = meta && langMenu.querySelector('a[href$="' + meta.home + '"]');
+    if (meta && !listed) {
+      var li = document.createElement('li');
+      li.className = 'current-lang';
+      var label = document.createElement('span');
+      label.textContent = meta.name;
+      label.setAttribute('aria-current', 'true');
+      li.appendChild(label);
+      var before = null;
+      langMenu.querySelectorAll('a').forEach(function (a) {
+        if (before) return;
+        var m = (a.getAttribute('href') || '').match(/\/(zh|ja|en)\/?$/);
+        if (m && langMeta[m[1]].order > meta.order) before = a.parentElement;
+      });
+      langMenu.insertBefore(li, before);
+    }
+  }
 })();

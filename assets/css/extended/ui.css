@@ -114,3 +114,15 @@
   width: 1em;
   height: 1em;
 }
+
+/* Language switcher: current language marked (injected by site.js);
+   the whole list stays constant across languages */
+.lang-menu li.current-lang span {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary);
+  padding: 0 0.4rem;
+  cursor: default;
+}

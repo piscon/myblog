@@ -43,7 +43,7 @@
 - **editPost 已启用**（仓库公开）：文章页 meta 行有「在 GitHub 上改进本文」链接（URL+文件路径拼成具体文件）
 - **菜单策略**：空的「资源」「发现」板块已从菜单摘除（section 文件保留，URL 仍可直达；填实后把 menu 项加回即可）
 - **AI 爬虫**：robots 全放行 + llms.txt 友好——站点立场就是开放 AI 读取；若日后要拦截（GPTBot/ClaudeBot 等）改 robots.txt 模板/CF 规则
-- **多语言约定**：`displayFullLangName = true`（头部切换器与文章页翻译列表显示 简体中文/日本語/English 全名，而非 Ja/En 缩写）；翻译标签主题三语言自带（语言:/言語/Translations，旧式 `- id:` YAML 格式，grep 顶层键会漏查）；头部切换器语义 = 跳对方语言首页（文章页同页切换走 translation_list，hreflang 已对齐）；站点 i18n 覆盖试验过——新格式 yaml **未能覆盖**主题旧格式键（zh 失败/ja 成功，行为不一致），故不采用，缺文案时优先查主题 `- id:` 格式
+- **多语言约定**：`displayFullLangName = true`（头部切换器与文章页翻译列表显示 简体中文/日本語/English 全名，而非 Ja/En 缩写）；头部切换器经 site.js 注入**全量常驻**——当前语言按权重位插入并高亮标记（不可点），三语言顺序恒定（简体中文→日本語→English），JS 禁用回退主题默认「只列其他语言」；切换器语义 = 跳对方语言首页（文章页同页切换走 translation_list，hreflang 已对齐）；翻译标签主题自带（语言:/言語/Translations，旧式 `- id:` YAML 格式，grep 顶层键会漏查）；站点 i18n 覆盖试验过——新格式 yaml **未能稳定覆盖**主题旧格式键，故不采用，缺文案时优先查主题 `- id:` 格式
 - 结构性文件（`posts/_index.md` 等板块索引）已用 `.pages.yml` 的 `exclude` 挡在 CMS 外，只走 Git 路径——给它们开草稿会整块下线，CMS 列表里的条目都是真实文章
 - CMS 发表文章的文件名是自动时间戳（`{year}{month}{day}-{hour}{minute}.md`，中文标题无法自动生成 slug）；URL 语义化 = 事后在 CMS 里改文件名（会换 URL），**改完把旧路径填进「旧链接跳转」（aliases）字段**——注意填 `/posts/<旧名>/`（不含语言前缀，Hugo 多语言模式自动加前缀），旧 URL 即生成 meta-refresh 跳转页；CMS actions 按钮已整体移除，防孤儿记录烧配额
 - CMS 已暴露主题原生参数字段：`weight`（置顶）/`showtoc`/`searchHidden`/`robotsNoIndex`/`aliases`——纯字段、零模板工作，主题直接消费
