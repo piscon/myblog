@@ -164,7 +164,7 @@
 
 /* Language switcher: current language marked (injected by site.js);
    the whole list stays constant across languages */
-.lang-menu li.current-lang span {
+.lang-menu li.current-lang {
   display: inline-flex;
   align-items: center;
   font-size: 1rem;
@@ -172,4 +172,20 @@
   color: var(--primary);
   padding: 0 0.4rem;
   cursor: default;
+}
+
+/* Dual labels: full names on wide screens, short ZH/JA/EN codes on mobile
+   (three full names + logo + theme toggle would wrap on small screens) */
+.lang-menu .lang-short {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .lang-menu .lang-full {
+    display: none;
+  }
+
+  .lang-menu .lang-short {
+    display: inline;
+  }
 }

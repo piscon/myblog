@@ -128,23 +128,51 @@
     }
   });
 
-  /* 5. Language switcher: stable full list (all languages, current marked) */
+  /* 5. Language switcher: stable full list (all languages, current marked).
+     Every item gets a dual label — full name (≥768px) / short code
+     (<768px, keeps the crowded mobile header on one line). The switcher is
+     marked translate=no so Chrome Translate never mangles language names
+     or re-prompts off them. */
   var langMenu = document.querySelector('.lang-menu');
   if (langMenu) {
+    langMenu.setAttribute('translate', 'no');
+    langMenu.classList.add('notranslate');
     var docLang = (document.documentElement.getAttribute('lang') || '').slice(0, 2);
     var langMeta = {
-      zh: { name: '简体中文', home: '/zh/', order: 0 },
-      ja: { name: '日本語', home: '/ja/', order: 1 },
-      en: { name: 'English', home: '/en/', order: 2 }
+      zh: { name: '简体中文', short: 'ZH', home: '/zh/', order: 0 },
+      ja: { name: '日本語', short: 'JA', home: '/ja/', order: 1 },
+      en: { name: 'English', short: 'EN', home: '/en/', order: 2 }
     };
+    var dualLabel = function (text, short) {
+      var full = document.createElement('span');
+      full.className = 'lang-full';
+      full.textContent = text;
+      var s = document.createElement('span');
+      s.className = 'lang-short';
+      s.textContent = short;
+      s.setAttribute('translate', 'no');
+      return [full, s];
+    };
+    langMenu.querySelectorAll('a').forEach(function (a) {
+      var m = (a.getAttribute('href') || '').match(/\/(zh|ja|en)\/?$/);
+      if (!m) return;
+      var meta = langMeta[m[1]];
+      var text = a.textContent;
+      a.textContent = '';
+      dualLabel(text, meta.short).forEach(function (sp) {
+        a.appendChild(sp);
+      });
+    });
     var meta = langMeta[docLang];
     var listed = meta && langMenu.querySelector('a[href$="' + meta.home + '"]');
     if (meta && !listed) {
       var li = document.createElement('li');
       li.className = 'current-lang';
       var label = document.createElement('span');
-      label.textContent = meta.name;
       label.setAttribute('aria-current', 'true');
+      dualLabel(meta.name, meta.short).forEach(function (sp) {
+        label.appendChild(sp);
+      });
       li.appendChild(label);
       var before = null;
       langMenu.querySelectorAll('a').forEach(function (a) {
