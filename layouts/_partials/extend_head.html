@@ -12,3 +12,9 @@
 {{- if eq (.Param "media_position") "top" -}}
 <style>.post-single{display:flex;flex-direction:column}.post-single>.page-header{order:0}.post-single>.post-media{order:1;margin:1.5rem 0}.post-single>.post-content{order:2}.post-single>.post-lastmod{order:3}.post-single>.post-related{order:3}.post-single>.post-footer{order:4}</style>
 {{- end -}}
+
+{{- /* Site JS: reading progress / lightbox / TOC scrollspy — each feature
+       self-gates on theme DOM (see assets/js/site.js). Fingerprinted and
+       deferred like the theme's own assets. */ -}}
+{{- $siteJs := resources.Get "js/site.js" | resources.Minify | resources.Fingerprint }}
+<script defer src="{{ $siteJs.RelPermalink }}" integrity="{{ $siteJs.Data.Integrity }}" crossorigin="anonymous"></script>

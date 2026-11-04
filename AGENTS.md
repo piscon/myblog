@@ -19,7 +19,7 @@
 新功能按此顺序选实现层级：
 
 1. **首选**：front matter 字段 + 站点层 Hugo 模板逻辑（如 `youtube_id`/`bilibili_bvid` 模式：CMS 出 ID，渲染全在站点层）
-2. CSS/JS：站点层扩展机制——`assets/css/extended/*.css` + 钩子 partial（`layouts/_partials/extend_head.html` 等；主题自带空 stub、站点同名文件覆盖，天然兼容升级）
+2. CSS/JS：站点层扩展机制——`assets/css/extended/*.css` + `assets/js/site.js`（经 extend_head 指纹加载，功能自门控于主题 DOM）+ 钩子 partial（`layouts/_partials/extend_head.html` 等；主题自带空 stub、站点同名文件覆盖，天然兼容升级）
 3. 必须改模板时：拷贝到站点 `layouts/` 覆盖；代价是 weekly PR 碰同名文件需人工 review diff，且 feature-check 必须覆盖该耦合点
 4. **永远不改 submodule 本体**
 
@@ -29,7 +29,7 @@
 
 ## 自定义功能回归
 
-- `bash scripts/feature-check.sh`：17 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/相关文章/aliases/llms）
+- `bash scripts/feature-check.sh`：18 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/相关文章/站点 JS/aliases/llms）
 - 新增任何依赖主题 DOM/类名/钩子的功能 → 必须同步加断言
 - weekly 主题 PR、build-check 两处会跑它（CMS「功能体检」按钮已于 2026-11-04 移除——action 按钮的孤儿记录会持续烧 GitHub 配额，详见 .zcode/reference/pagescms-capabilities.md §8；手动触发改走 GitHub 界面的 workflow_dispatch）
 
@@ -38,6 +38,10 @@
 - 文章正文不写 Hugo shortcode（Pages CMS Tiptap 会破坏语法）；高级排版走 Git 路径
 - 视频不进 git（Netlify 配额/fair-use）；YouTube 用 `youtube_id`、B 站用 `bilibili_bvid` 字段（CMS 会校验 ID 格式）；自托管仅限小音频（`audio_file`）；外链音视频走 `audio_url`/`video_url`（模板支持但 CMS 不暴露，Git 路径维护）
 - 品牌资产在 `static/branding/`（CMS 不可见）；内容图 `static/images/`；音视频目录 `static/audio|video`
+- **og 分享图** = `static/branding/og-default.jpg`（1200×630，作为全站 og:image 兜底；文章有 cover 时被 cover 覆盖）。重生成：`NODE_PATH=/tmp/ogtool/node_modules node scripts/gen-og-image.js`（sharp 不进仓库，见脚本头注释）
+- **editPost 已启用**（仓库公开）：文章页 meta 行有「在 GitHub 上改进本文」链接（URL+文件路径拼成具体文件）
+- **菜单策略**：空的「资源」「发现」板块已从菜单摘除（section 文件保留，URL 仍可直达；填实后把 menu 项加回即可）
+- **AI 爬虫**：robots 全放行 + llms.txt 友好——站点立场就是开放 AI 读取；若日后要拦截（GPTBot/ClaudeBot 等）改 robots.txt 模板/CF 规则
 - 结构性文件（`posts/_index.md` 等板块索引）已用 `.pages.yml` 的 `exclude` 挡在 CMS 外，只走 Git 路径——给它们开草稿会整块下线，CMS 列表里的条目都是真实文章
 - CMS 发表文章的文件名是自动时间戳（`{year}{month}{day}-{hour}{minute}.md`，中文标题无法自动生成 slug）；URL 语义化 = 事后在 CMS 里改文件名（会换 URL），**改完把旧路径填进「旧链接跳转」（aliases）字段**——注意填 `/posts/<旧名>/`（不含语言前缀，Hugo 多语言模式自动加前缀），旧 URL 即生成 meta-refresh 跳转页；CMS actions 按钮已整体移除，防孤儿记录烧配额
 - CMS 已暴露主题原生参数字段：`weight`（置顶）/`showtoc`/`searchHidden`/`robotsNoIndex`/`aliases`——纯字段、零模板工作，主题直接消费

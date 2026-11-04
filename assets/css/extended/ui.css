@@ -59,3 +59,45 @@
   font-size: 0.8rem;
   margin-left: 0.5rem;
 }
+
+/* Reading progress bar (site.js, article pages only) */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Lightbox (site.js) */
+.post-content img {
+  cursor: zoom-in;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.lightbox img {
+  max-width: 92vw;
+  max-height: 92vh;
+  border-radius: var(--radius);
+}
+
+/* TOC scrollspy active state (site.js) */
+.toc li.active > a {
+  color: var(--primary);
+  font-weight: 600;
+}

@@ -49,7 +49,7 @@ isPlainText = true
   description = "精神与思想的二重奏，自由与独立的交响曲"
   author = "二重奏"
   keywords = ["二重奏", "deux", "博客", "AI", "Hugo", "技术"]
-  images = ["/branding/logo.jpg"]
+  images = ["/branding/og-default.jpg"]
   defaultTheme = "auto"
   ShowReadingTime = true
   ShowWordCount = true
@@ -83,6 +83,11 @@ isPlainText = true
     repoId = ""
     category = ""
     categoryId = ""
+
+  # 「在 GitHub 编辑」链接（公开仓库）；URL + 文件路径拼成具体文件链接
+  [params.editPost]
+    URL = "https://github.com/piscon/myblog/blob/main"
+    appendFilePath = true
 
 [languages]
   [languages.zh]
@@ -139,21 +144,14 @@ isPlainText = true
       pageRef = '/archives'
       weight = 40
     [[languages.zh.menu.main]]
-      identifier = "library"
-      name = '资源'
-      pageRef = '/library'
-      weight = 50
-    [[languages.zh.menu.main]]
-      identifier = "explore"
-      name = '发现'
-      pageRef = '/explore'
-      weight = 60
-    [[languages.zh.menu.main]]
       identifier = "search"
       name = '搜索'
       pageRef = '/search'
       weight = 70
       pre = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
+
+    [languages.zh.params.editPost]
+      Text = '在 GitHub 上改进本文'
 
   [languages.ja]
     locale = "ja-JP"
@@ -209,21 +207,14 @@ isPlainText = true
       pageRef = '/archives'
       weight = 40
     [[languages.ja.menu.main]]
-      identifier = "library"
-      name = 'リソース'
-      pageRef = '/library'
-      weight = 50
-    [[languages.ja.menu.main]]
-      identifier = "explore"
-      name = '発見'
-      pageRef = '/explore'
-      weight = 60
-    [[languages.ja.menu.main]]
       identifier = "search"
       name = '検索'
       pageRef = '/search'
       weight = 70
       pre = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
+
+    [languages.ja.params.editPost]
+      Text = 'GitHub で改善提案'
 
   [languages.en]
     locale = "en-US"
@@ -279,18 +270,11 @@ isPlainText = true
       pageRef = '/archives'
       weight = 40
     [[languages.en.menu.main]]
-      identifier = "library"
-      name = 'Resources'
-      pageRef = '/library'
-      weight = 50
-    [[languages.en.menu.main]]
-      identifier = "explore"
-      name = 'Discover'
-      pageRef = '/explore'
-      weight = 60
-    [[languages.en.menu.main]]
       identifier = "search"
       name = 'Search'
       pageRef = '/search'
       weight = 70
       pre = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
+
+    [languages.en.params.editPost]
+      Text = 'Edit on GitHub'
