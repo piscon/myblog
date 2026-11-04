@@ -47,5 +47,5 @@
 - YouTube iframe 大陆不可达；B 站 iframe 480p 封顶
 - Pages CMS actions 只回传成功/失败，详情看 GitHub run summary（feature-check 失败时自动附 DOM 快照）
 - CMS actions 卡在「Waiting for GitHub to start…」＝该次点击的 dispatch 大概率被限流拒绝，CMS 数据库里的 run 记录永远匹配不到 GitHub run；前端每 4 秒轮询状态端点、每次后端最多重试 6 次 listWorkflowRuns——**开着页面会持续烧 GitHub 配额，形成恶性循环**。正确处置：**直接关掉 CMS 标签页**（轮询状态存 sessionStorage，随标签页销毁；刷新无效、反而恢复轮询），结果以 GitHub run summary 为准；前端 12 小时后也会自动放弃追踪（2026-11-04 实例，源码 action-toast-context.tsx + api/[runId]/route.ts 核实）
-- Admin→Actions 管理页会因孤儿 run 记录**永久卡在骨架屏**：后端对库内最近 ≤100 条记录逐条同步（孤儿每条重跑 6 次 listWorkflowRuns、永不收敛），前端再每 4 秒重拉，持续烧配额——与 `.pages.yml` 无关（2026-11-04 删配置实验证实），UI 无清理入口。处置：**勿开此页**（actions 按钮已移除，它是纯负资产；详见 .zcode/reference/pagescms-capabilities.md §8）
+- Admin→Actions 管理页永久骨架屏：库里遗留一条指向已删除 workflow（`pages-cms-lastmod.yml`，lastmod 按钮时代产物）的孤儿 run 记录，后端同步时 `listWorkflowRuns` 404 无 try/catch → 整个接口确定性 404，前端吞错骨架屏永转，每 4 秒重试持续烧配额——与 `.pages.yml` 无关（2026-11-04 抓包+git 历史定案），UI 无清理入口。处置：**勿开此页**；待上游修复（详见 .zcode/reference/pagescms-capabilities.md §8）
 - `hugo.toml` 的 `baseURL` 必须与 Netlify 主域一致（现为 apex，无 www）
