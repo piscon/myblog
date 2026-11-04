@@ -29,7 +29,7 @@
 
 ## 自定义功能回归
 
-- `bash scripts/feature-check.sh`：16 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/aliases/llms）
+- `bash scripts/feature-check.sh`：17 项断言覆盖所有主题耦合点（播放器/置顶 CSS/og/品牌/404 分流/归档本地化/最后更新/相关文章/aliases/llms）
 - 新增任何依赖主题 DOM/类名/钩子的功能 → 必须同步加断言
 - weekly 主题 PR、build-check 两处会跑它（CMS「功能体检」按钮已于 2026-11-04 移除——action 按钮的孤儿记录会持续烧 GitHub 配额，详见 .zcode/reference/pagescms-capabilities.md §8；手动触发改走 GitHub 界面的 workflow_dispatch）
 

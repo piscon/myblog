@@ -190,7 +190,7 @@
 **现有站点层扩展点清单**（全部位于项目根，主题升级不丢）
 
 - `layouts/_partials/extend_head.html` —— og:audio/og:video meta（`audio_file`/`video_file` 参数）+ `media_position = "top"` 置顶排序 CSS。
-- `layouts/_partials/extend_post_content.html` —— 音视频播放器与 YouTube(`youtube_id`)/B站(`bilibili_bvid`) 嵌入，统一 `.post-media` 包裹（对应 stub 覆盖机制，见第 2 节）；末尾按 `Lastmod > Date+1天` 输出「最后更新于」行（CLDR 本地化日期，CSS 在 ui.css，参与置顶 flex 排序）。
+- `layouts/_partials/extend_post_content.html` —— 音视频播放器与 YouTube(`youtube_id`)/B站(`bilibili_bvid`) 嵌入，统一 `.post-media` 包裹（对应 stub 覆盖机制，见第 2 节）；末尾按 `Lastmod > Date+1天` 输出「最后更新于」行（CLDR 本地化日期，CSS 在 ui.css，参与置顶 flex 排序）；再输出「相关文章」块（Hugo 内建 Related Content，`[related]` 配置 tags/categories 加权，限 mainSections，最多 3 条）。
 - `layouts/_partials/comments.html` —— giscus 评论（2026-11-04 接线；凭据留空不渲染，见 AGENTS.md）。
 - `layouts/404.html` —— 独立整页 404，按语言渲染三语文案（Netlify `[[redirects]]`：`/ja/*`→`/ja/404.html`、`/en/*`→`/en/404.html`，其余兜底 `/zh/404.html`）。
 - `layouts/archives/list.html` —— archives 模板（2026-11-04 起单份语言感知文件替代原三语言变体，本地化串由 `.Site.Language.Lang` 分支派生），由 `content/<lang>/archives/_index.md` 的 `layout = "archives/list"` 定点引用。

@@ -48,3 +48,29 @@
 {{- if .Lastmod.After (.Date.AddDate 0 0 1) }}
 <div class="post-lastmod">{{ $lastmodLabel }} {{ .Lastmod | time.Format ":date_long" }}</div>
 {{- end }}
+
+{{- /* Related posts: Hugo built-in Related Content over tags/categories
+       (see [related] in hugo.toml), restricted to mainSections so structural
+       pages (search etc.) never surface. Localized heading; styles in
+       ui.css; participates in the media-top flex ordering via extend_head. */ -}}
+{{- $related := where site.RegularPages "Type" "in" site.Params.mainSections }}
+{{- $related = $related.Related . | first 3 }}
+{{- $relHeading := "Related Posts" }}
+{{- if eq .Site.Language.Lang "zh" }}
+{{- $relHeading = "相关文章" }}
+{{- else if eq .Site.Language.Lang "ja" }}
+{{- $relHeading = "関連記事" }}
+{{- end }}
+{{- with $related }}
+<div class="post-related">
+  <h2 class="post-related-title">{{ $relHeading }}</h2>
+  <ul class="post-related-list">
+    {{- range . }}
+    <li>
+      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      <span class="post-related-date">{{ .Date | time.Format ":date_long" }}</span>
+    </li>
+    {{- end }}
+  </ul>
+</div>
+{{- end }}

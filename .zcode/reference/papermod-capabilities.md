@@ -139,7 +139,7 @@
 
 ## e. 与本仓库的对接现状
 
-**钩子**：`layouts/_partials/extend_head.html`＝①按 `audio_file`/`video_file` 补发 og:audio/og:video meta；②`media_position: "top"` 时注入 flex order CSS 把 `.post-media` 提到正文上方（2026-11-04 起该 CSS 同时编排 `.post-lastmod`）。`layouts/_partials/extend_post_content.html`＝六个媒体字段（audio_file/audio_url/video_file/video_url/youtube_id/bilibili_bvid）渲染 HTML5 播放器或 nocookie/B 站 iframe，统一 `.post-media` 包裹；末尾输出「最后更新于/Last updated/最終更新」行（`.Lastmod` 晚于日期一天以上才显示）。`layouts/_partials/comments.html`＝giscus 评论接线（2026-11-04；凭据在 `hugo.toml [params.giscus]`，留空不渲染）。`extend_footer` 未用。
+**钩子**：`layouts/_partials/extend_head.html`＝①按 `audio_file`/`video_file` 补发 og:audio/og:video meta；②`media_position: "top"` 时注入 flex order CSS 把 `.post-media` 提到正文上方（2026-11-04 起该 CSS 同时编排 `.post-lastmod`）。`layouts/_partials/extend_post_content.html`＝六个媒体字段（audio_file/audio_url/video_file/video_url/youtube_id/bilibili_bvid）渲染 HTML5 播放器或 nocookie/B 站 iframe，统一 `.post-media` 包裹；末尾输出「最后更新于/Last updated/最終更新」行（`.Lastmod` 晚于日期一天以上才显示）与「相关文章」块（Hugo Related Content，tags/categories 加权，≤3 条）。`layouts/_partials/comments.html`＝giscus 评论接线（2026-11-04；凭据在 `hugo.toml [params.giscus]`，留空不渲染）。`extend_footer` 未用。
 
 **CSS（assets/css/extended/，4 个）**：`cover.css`、`post-media.css`（播放器样式+top 布局）、`search-icon.css`、`ui.css`（`404.css` 已于 2026-11-04 删除——`.not-found` 类只存在于自带内联样式的独立 404 页，进全局样式表纯属死重）。
 
