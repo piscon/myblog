@@ -72,11 +72,13 @@ jobs:
           # Commit back if there are changes
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          if git diff --quiet; then
+
+          # git add -A: bash globs don't recurse (**), and content files live
+          # at content/<lang>/posts/<name>.md — 3 levels deep
+          git add -A
+          if git diff --cached --quiet; then
             echo "No lastmod changes to commit."
           else
-            git add content/**/*.md
             git commit -m "chore: update lastmod from git [skip-lastmod]"
             git push
           fi
