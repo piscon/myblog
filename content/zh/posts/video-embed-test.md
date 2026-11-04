@@ -1,10 +1,15 @@
 +++
 lang = 'zh'
-title = '视频嵌入测试：YouTube 与 B 站播放器'
+title = '嵌入视频测试：YouTube 与 B 站播放器'
 date = '2026-11-04'
 draft = false
-categories = ['测试']
-tags = ['博客', '媒体']
+categories = [
+	'测试',
+]
+tags = [
+	'博客',
+	'媒体',
+]
 youtube_id = 'aqz-KE-bpKQ'
 bilibili_bvid = 'BV1i24P6rEmt'
 +++
@@ -25,3 +30,4 @@ bilibili_bvid = 'BV1i24P6rEmt'
 
 - YouTube iframe 在大陆网络环境下加载不出（属预期行为）
 - B 站 iframe 的清晰度由 B 站策略决定，博客侧无法突破
+
