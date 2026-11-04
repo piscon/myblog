@@ -26,6 +26,7 @@ content:
     type: collection
     path: content/zh/posts
     format: toml-frontmatter
+    exclude: [_index.md]
     fields:
       - name: lang
         label: 语言
@@ -111,14 +112,13 @@ content:
       default:
         sort: date
         order: desc
-      filter:
-        draft: false
 
   - name: ja-posts
     label: 日本語記事
     type: collection
     path: content/ja/posts
     format: toml-frontmatter
+    exclude: [_index.md]
     fields:
       - name: lang
         label: 言語
@@ -182,14 +182,14 @@ content:
         description: 動画IDのみ（dQw4w9WgXcQ）。完全URLは貼らない
         pattern:
           regex: '^([A-Za-z0-9_-]{11})?$'
-          message: YouTube ID 为 11 位字符（字母数字_-），请只贴 ID 不贴链接
+          message: YouTube ID は11文字（半角英数字と - _）です。URL ではなく ID のみ貼り付けてください
       - name: bilibili_bvid
         label: ビリビリ BV
         type: string
         description: BV番号のみ（BV1xx411c7mD）
         pattern:
           regex: '^(BV[0-9A-Za-z]{10})?$'
-          message: B 站 BV 号以 BV 开头共 12 位，请只贴 BV 号不贴链接
+          message: ビリビリ BV 番号は BV で始まる12文字です。URL ではなく BV 番号のみ貼り付けてください
       - name: body
         label: 本文
         type: rich-text
@@ -204,14 +204,13 @@ content:
       default:
         sort: date
         order: desc
-      filter:
-        draft: false
 
   - name: en-posts
     label: English Posts
     type: collection
     path: content/en/posts
     format: toml-frontmatter
+    exclude: [_index.md]
     fields:
       - name: lang
         label: Language
@@ -275,14 +274,14 @@ content:
         description: Paste the video ID only (e.g. dQw4w9WgXcQ), not the full URL; YouTube is unreachable for mainland-China readers
         pattern:
           regex: '^([A-Za-z0-9_-]{11})?$'
-          message: YouTube ID 为 11 位字符（字母数字_-），请只贴 ID 不贴链接
+          message: YouTube ID is 11 characters (alphanumeric, -, _). Paste the ID only, not the full URL
       - name: bilibili_bvid
         label: Bilibili BV ID
         type: string
         description: Paste the BV ID only (e.g. BV1xx411c7mD), not the full URL
         pattern:
           regex: '^(BV[0-9A-Za-z]{10})?$'
-          message: B 站 BV 号以 BV 开头共 12 位，请只贴 BV 号不贴链接
+          message: The Bilibili BV ID starts with BV and is 12 characters in total. Paste the BV ID only, not the full URL
       - name: body
         label: Body
         type: rich-text
@@ -297,8 +296,6 @@ content:
       default:
         sort: date
         order: desc
-      filter:
-        draft: false
 
 components:
   cover:

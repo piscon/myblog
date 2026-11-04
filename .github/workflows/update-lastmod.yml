@@ -29,18 +29,26 @@ jobs:
         run: |
           set -euo pipefail
           
-          # Get list of changed .md files in this push (content only)
-          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'content/**/*.md' || true)
-          
+          # Get list of changed .md files in this push (content only).
+          # Compare from github.event.before so multi-commit pushes are fully
+          # covered (HEAD~1 only sees the last commit); fall back to HEAD~1
+          # when before is unavailable (first push / force push).
+          BASE="${{ github.event.before }}"
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            BASE="HEAD~1"
+          fi
+          CHANGED=$(git diff --name-only "$BASE" HEAD -- 'content/**/*.md' || true)
+
           if [ -z "$CHANGED" ]; then
             echo "No content files changed."
             exit 0
           fi
-          
+
           echo "Changed files:"
           echo "$CHANGED"
-          
-          for file in $CHANGED; do
+
+          # while-read instead of a for loop: tolerates spaces in paths
+          while IFS= read -r file; do
             # Skip if file no longer exists
             [ -f "$file" ] || continue
             
@@ -67,7 +75,7 @@ jobs:
                 sed -i "1a lastmod = '$DATE_ONLY'" "$file"
               fi
             fi
-          done
+          done <<< "$CHANGED"
           
           # Commit back if there are changes
           git config user.name "github-actions[bot]"

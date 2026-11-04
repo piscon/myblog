@@ -6,7 +6,7 @@ defaultContentLanguageInSubdir = true
 timeZone = "Asia/Tokyo"
 
 hasCJKLanguage = true
-enableInlineShortcodes = true
+enableInlineShortcodes = false
 enableEmoji = true
 enableRobotsTXT = true
 enableGitInfo = true
