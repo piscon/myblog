@@ -20,7 +20,7 @@
 
 1. **首选**：front matter 字段 + 站点层 Hugo 模板逻辑（如 `youtube_id`/`bilibili_bvid` 模式：CMS 出 ID，渲染全在站点层）
 2. CSS/JS：站点层扩展机制——`assets/css/extended/*.css` + `assets/js/site.js`（经 extend_head 指纹加载，功能自门控于主题 DOM：进度条/灯箱/TOC 高亮/**Ctrl+K 搜索快捷键**）+ 钩子 partial（`layouts/_partials/extend_head.html` 等；主题自带空 stub、站点同名文件覆盖，天然兼容升级）
-- **搜索约定**：头部菜单与首页按钮统一为「图标+文字」；搜索权重在 `hugo.toml [params.fuseOpts]`（标题 2 > 摘要 1.5 > 正文 1 > 链接 0.5）；快捷键 Ctrl/Cmd+K（site.js）与主题 Alt+/ 并存；曾经把头部搜索做成 icon-only 的 `search-icon.css` 已删（2026-11-04，与首页文字按钮不一致）
+- **搜索约定**：头部菜单与首页按钮统一为「图标+文字」；图标经 ui.css 定为 `1em`（精确跟随菜单文字大小）+ inline-flex 垂直居中；搜索权重在 `hugo.toml [params.fuseOpts]`（标题 2 > 摘要 1.5 > 正文 1 > 链接 0.5）；快捷键 Ctrl/Cmd+K（site.js）与主题 Alt+/ 并存；曾经把头部搜索做成 icon-only 的 `search-icon.css` 已删（2026-11-04，与首页文字按钮不一致）
 3. 必须改模板时：拷贝到站点 `layouts/` 覆盖；代价是 weekly PR 碰同名文件需人工 review diff，且 feature-check 必须覆盖该耦合点
 4. **永远不改 submodule 本体**
 
