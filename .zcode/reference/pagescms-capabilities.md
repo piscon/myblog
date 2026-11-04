@@ -118,6 +118,7 @@
 - 权限/取消：`Run again` 仅 GitHub 用户；`Cancel run` 仅在 workflow run 实际存在后可用；collaborator 只能取消自己发起的 run；`cancelable: false` 全局禁用取消。
 - GitHub 侧要求仓库启用 Actions。
 - **运行状态追踪机制（源码核实，2026-11-04）**：点击后 CMS 在自己数据库建 run 记录并 dispatch，随后最多 6 次×1.5 秒轮询 GitHub 找匹配 run（按创建时间窗 + 未被其他记录认领）；前端 toast 每 4 秒打状态端点、状态存 sessionStorage（随标签页销毁、刷新/复制标签/Ctrl+Shift+T 都会恢复、12 小时超时）。**故障模式**：dispatch 被限流拒绝时记录永远匹配不到 run（无服务端 TTL 清理，孤儿记录永久留存）→「Waiting for GitHub to start…」卡死，且 4 秒轮询 × 6 次重试持续烧配额形成恶性循环；孤儿记录还会拖慢所有带 action 按钮的页面和 actions 页（每次访问固定 ~6 次 API 重查）。处置：关标签页（不是刷新）止血，结果以 GitHub run summary 为准，慢属预期直至上游修复。
+- **Admin→Actions 管理页永久骨架屏（2026-11-04 源码+删配置实验核实）**：该页 `GET /api/{owner}/{repo}/{branch}/actions?all=1` 读 CMS 自身数据库的 run 记录（最近 ≤100 条），逐条同步完成后才响应——孤儿记录每条重跑 6 次×1.5 秒 `listWorkflowRuns` 匹配循环、永不收敛，前端再每 4 秒重拉（`actions-page.tsx`）→ 骨架屏无限转 + 持续烧配额。**与 `.pages.yml` 无关**（删除仓库配置文件后行为不变；后台照常工作还顺带证实 CMS 服务端缓存配置）。官方 demo 显示 "No actions yet." 仅因其库为空。UI 无删除入口，Cancel 对孤儿记录也不可用（`canCancel` 需已有 workflowRunId）。处置：**勿开此页**；记录无法自行清除，待上游修复。
 
 ## 9. 认证 / 权限模型
 
