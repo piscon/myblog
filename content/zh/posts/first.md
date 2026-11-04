@@ -2,6 +2,7 @@
 lang = 'zh'
 title = '你好，世界'
 date = '2025-11-26'
+lastmod = '2026-11-04'
 draft = false
 categories = [
 	'日常',
