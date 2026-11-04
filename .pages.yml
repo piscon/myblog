@@ -98,6 +98,31 @@ content:
         pattern:
           regex: '^(BV[0-9A-Za-z]{10})?$'
           message: B 站 BV 号以 BV 开头共 12 位，请只贴 BV 号不贴链接
+      - name: weight
+        label: 置顶权重
+        type: number
+        description: 数字越小排序越靠前，用于置顶文章；留空按日期排序
+        options:
+          min: 0
+      - name: showtoc
+        label: 显示目录
+        type: boolean
+        default: true
+        description: 文章页是否显示目录（站点默认开）
+      - name: searchHidden
+        label: 从站内搜索隐藏
+        type: boolean
+        default: false
+      - name: robotsNoIndex
+        label: 禁止搜索引擎收录
+        type: boolean
+        default: false
+        description: 开启后输出 noindex meta，搜索引擎不收录本页
+      - name: aliases
+        label: 旧链接跳转
+        type: string
+        list: true
+        description: 改过文件名的文章填旧路径（不含语言前缀，如 /posts/20261104-1551/，系统自动按语言落地），旧链接自动跳转到本文
       - name: body
         label: 正文
         type: rich-text
@@ -192,6 +217,31 @@ content:
         pattern:
           regex: '^(BV[0-9A-Za-z]{10})?$'
           message: ビリビリ BV 番号は BV で始まる12文字です。URL ではなく BV 番号のみ貼り付けてください
+      - name: weight
+        label: 固定順位
+        type: number
+        description: 数値が小さいほど上位（目玉記事用）。空欄は日付順
+        options:
+          min: 0
+      - name: showtoc
+        label: 目次を表示
+        type: boolean
+        default: true
+        description: 記事ページに目次を表示するか（サイト既定はオン）
+      - name: searchHidden
+        label: サイト内検索から隠す
+        type: boolean
+        default: false
+      - name: robotsNoIndex
+        label: 検索エンジンのインデックス禁止
+        type: boolean
+        default: false
+        description: オンで noindex meta を出力し、検索エンジンに収録されません
+      - name: aliases
+        label: 旧リンク転送
+        type: string
+        list: true
+        description: ファイル名を変更した記事は旧パスを入力（言語プレフィックス不要、例 /posts/20261104-1551/、言語別に自動配置）。旧リンクは自動で本記事へ転送されます
       - name: body
         label: 本文
         type: rich-text
@@ -286,6 +336,31 @@ content:
         pattern:
           regex: '^(BV[0-9A-Za-z]{10})?$'
           message: The Bilibili BV ID starts with BV and is 12 characters in total. Paste the BV ID only, not the full URL
+      - name: weight
+        label: Pinned weight
+        type: number
+        description: Lower numbers rank higher (for pinning posts); leave empty to sort by date
+        options:
+          min: 0
+      - name: showtoc
+        label: Show TOC
+        type: boolean
+        default: true
+        description: Show table of contents on the post page (site default is on)
+      - name: searchHidden
+        label: Hide from site search
+        type: boolean
+        default: false
+      - name: robotsNoIndex
+        label: Noindex (search engines)
+        type: boolean
+        default: false
+        description: Outputs a noindex meta so search engines skip this page
+      - name: aliases
+        label: Legacy link redirects
+        type: string
+        list: true
+        description: If the filename changed, add the old path (no language prefix, e.g. /posts/20261104-1551/; placed under the language automatically); old links redirect here automatically
       - name: body
         label: Body
         type: rich-text

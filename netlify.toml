@@ -34,6 +34,23 @@
   [headers.values]
     Cache-Control = "public, max-age=2592000, stale-while-revalidate"
 
+# llms.txt 仅按语言生成（/zh|ja|en/llms.txt），根路径转发到中文版
+[[redirects]]
+  from = "/llms.txt"
+  to = "/zh/llms.txt"
+  status = 301
+
+# 404 按语言前缀分流（无真实文件命中时才触发）
+[[redirects]]
+  from = "/ja/*"
+  to = "/ja/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/en/*"
+  to = "/en/404.html"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/zh/404.html"

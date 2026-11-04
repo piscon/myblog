@@ -1,5 +1,5 @@
 +++
 title = "アーカイブ"
-layout = "archives/list.ja"
+layout = "archives/list"
 url = "/ja/archives/"
 +++

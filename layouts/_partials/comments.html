@@ -1,0 +1,44 @@
+{{- /* Giscus comments — site-layer takeover of the theme's empty stub.
+       The theme gates this partial on the `comments` param (single.html);
+       rendering additionally requires giscus credentials in hugo.toml
+       [params.giscus], so an unconfigured site renders nothing here.
+       Fill repo/repoId/category/categoryId (from giscus.app) to enable.
+       PaperMod's theme toggle is forwarded to the giscus iframe via
+       postMessage so embedded comments follow the site theme. */ -}}
+{{- $g := site.Params.giscus }}
+{{- with $g.repo }}
+{{- with $g.repoId }}
+{{- with $g.categoryId }}
+<div class="giscus-wrapper" style="margin-top: 2rem;">
+  <script src="https://giscus.app/client.js"
+    data-repo="{{ $g.repo }}"
+    data-repo-id="{{ $g.repoId }}"
+    data-category="{{ $g.category }}"
+    data-category-id="{{ $g.categoryId }}"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="preferred_color_scheme"
+    data-lang="{{ cond (eq $.Site.Language.Lang "zh") "zh-CN" $.Site.Language.Lang }}"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async></script>
+</div>
+<script>
+  (function () {
+    function syncGiscusTheme() {
+      var frame = document.querySelector('iframe.giscus-frame');
+      if (!frame) return;
+      frame.contentWindow.postMessage({
+        giscus: { setConfig: { theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light' } }
+      }, 'https://giscus.app');
+    }
+    new MutationObserver(syncGiscusTheme).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+  })();
+</script>
+{{- end }}{{ end }}{{ end }}

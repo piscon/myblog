@@ -65,7 +65,7 @@
 - 影响参数（特异性从高到低）：Kind → Layout（front matter）→ Output Format（名+后缀，如 `index.amp.html`）→ Language（文件名语言标签：`index.fr.amp.html` 胜 `index.amp.html`，`index.amp.html` 胜 `index.fr.html`）→ Type → Section。
 - **关键规则原文**：「Templates can live in either the project's or the themes' layout directories, and the most specific templates will be chosen. Hugo will interleave the lookups listed below, finding the most specific one either in the project or themes.」——站点 `layouts/` 与主题 `layouts/` 进入**同一条查找序列交错比对、取最具体匹配**。
 - 这就是站点层覆盖主题的机制：站点放一个「同标识、更匹配」的模板即赢，无需复制主题其余部分。
-- 配合语言标签可按语言覆盖（本站 `layouts/archives/list.zh.html|ja|en`，由 `content/zh/archives/_index.md` 的 `layout = "archives/list.zh"` 定点引用）。
+- 配合语言标签可按语言覆盖（曾用 `layouts/archives/list.zh.html|ja|en` 三语言变体；2026-11-04 合并为单份语言感知 `layouts/archives/list.html`，`_index.md` 改定点引用 `layout = "archives/list"`——覆盖数量收敛原则）。
 
 **partial**（https://gohugo.io/functions/partials/include/ 、 https://gohugo.io/functions/partials/includecached/ ）
 
@@ -184,21 +184,22 @@
 
 - `baseURL = 'https://deux.top/'`（apex，与 Netlify 主域一致）；`theme = 'PaperMod'`（submodule，v8.0-152-g1181196，layouts 已是 0.146+ 新体系）。
 - `defaultContentLanguage = "zh"` + `defaultContentLanguageInSubdir = true`；`timeZone = "Asia/Tokyo"`；`hasCJKLanguage`/`enableEmoji`/`enableRobotsTXT`/`enableGitInfo`/`enableInlineShortcodes` 均开。
-- `[outputs] home = ["HTML","RSS","JSON"]`；`[pagination] pagerSize = 8`；`[frontmatter] lastmod = ["lastmod", ":git", "date"]`；params 全是 PaperMod 开关（profileMode/socialIcons/cover/schema 等）。
+- `[outputs] home = ["HTML","RSS","JSON","llms"]`（2026-11-04 起 llms.txt 启用，自定义 `[outputFormats.llms]`）；`[pagination] pagerSize = 8`；`[frontmatter] lastmod = ["lastmod", ":git", "date"]`；params 全是 PaperMod 开关（profileMode/socialIcons/cover/schema 等）+ `mainSections = ["posts"]`（显式固定，不再靠推断）+ `comments = true`（实际渲染由 `[params.giscus]` 凭据门控）。
 - `[languages]` zh/ja/en 三语各自带 profileMode、buttons、socialIcons、menu（weight 顺序 zh > ja > en）。
 
 **现有站点层扩展点清单**（全部位于项目根，主题升级不丢）
 
 - `layouts/_partials/extend_head.html` —— og:audio/og:video meta（`audio_file`/`video_file` 参数）+ `media_position = "top"` 置顶排序 CSS。
-- `layouts/_partials/extend_post_content.html` —— 音视频播放器与 YouTube(`youtube_id`)/B站(`bilibili_bvid`) 嵌入，统一 `.post-media` 包裹（对应 stub 覆盖机制，见第 2 节）。
-- `layouts/404.html` —— 独立整页 404（Netlify `[[redirects]]` 将 404 指到 `/zh/404.html`）。
-- `layouts/archives/list.zh.html|ja|en` —— archives 模板三语言变体，由 `content/<lang>/archives/_index.md` 的 `layout = "archives/list.zh"` 等定点引用。
-- `assets/css/extended/` 共 5 个：`404.css`、`cover.css`、`post-media.css`、`search-icon.css`、`ui.css`（经 PaperMod 的 Match+Concat+Minify 进入最终指纹样式表）。
+- `layouts/_partials/extend_post_content.html` —— 音视频播放器与 YouTube(`youtube_id`)/B站(`bilibili_bvid`) 嵌入，统一 `.post-media` 包裹（对应 stub 覆盖机制，见第 2 节）；末尾按 `Lastmod > Date+1天` 输出「最后更新于」行（CLDR 本地化日期，CSS 在 ui.css，参与置顶 flex 排序）。
+- `layouts/_partials/comments.html` —— giscus 评论（2026-11-04 接线；凭据留空不渲染，见 AGENTS.md）。
+- `layouts/404.html` —— 独立整页 404，按语言渲染三语文案（Netlify `[[redirects]]`：`/ja/*`→`/ja/404.html`、`/en/*`→`/en/404.html`，其余兜底 `/zh/404.html`）。
+- `layouts/archives/list.html` —— archives 模板（2026-11-04 起单份语言感知文件替代原三语言变体，本地化串由 `.Site.Language.Lang` 分支派生），由 `content/<lang>/archives/_index.md` 的 `layout = "archives/list"` 定点引用。
+- `assets/css/extended/` 共 4 个：`cover.css`、`post-media.css`、`search-icon.css`、`ui.css`（经 PaperMod 的 Match+Concat+Minify 进入最终指纹样式表；`404.css` 已删——`.not-found` 类只存在于自带内联样式的独立 404 页，全局样式表载入纯属死重）。
 
 **回归保障**
 
-- `bash scripts/feature-check.sh`：10 项断言，构建携带全部自定义 front matter 参数的测试文并断言渲染 HTML（失败时在 CI summary 附 DOM 快照）。
-- weekly 主题 PR、build-check、CMS「功能体检」按钮三处都会跑；主题升级（`.github/workflows/update-papermod.yml`）后必跑。
+- `bash scripts/feature-check.sh`：12 项断言，构建携带全部自定义 front matter 参数的测试文并断言渲染 HTML（失败时在 CI summary 附 DOM 快照）。
+- weekly 主题 PR、build-check 两处都会跑（CMS「功能体检」按钮已于 2026-11-04 移除，防 action 孤儿记录烧配额）；主题升级（`.github/workflows/update-papermod.yml`）后必跑。
 - 新增任何依赖主题 DOM/类名/钩子的功能 → 必须同步加断言。
 
 **设计原则落地路径**

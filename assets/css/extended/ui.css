@@ -25,3 +25,10 @@
 .buttons {
   gap: 0.6rem;
 }
+
+/* Last-updated line (rendered by extend_post_content) */
+.post-lastmod {
+  color: var(--secondary);
+  font-size: 0.85rem;
+  margin-top: 1.5rem;
+}

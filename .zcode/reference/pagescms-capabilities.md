@@ -174,4 +174,4 @@
 - **`settings.content.merge: true` + `commit.identity: user`** 已启用：schema 外 frontmatter 键保留、提交署名为编辑者本人（官方能力，本仓库选择）。
 - **rich-text `body` + Hugo shortcode 冲突**：仓库实测 CMS 编辑器会破坏 shortcode 语法；官方文档未描述该行为（§11），故本仓库约定「正文高级排版走 Git 路径、CMS Tiptap/编辑器只做普通 Markdown」。
 - `filename: '{slug}.md'`、`format: toml-frontmatter`、`exclude: [_index.md]`（2026-11-04 加：板块索引原会被 CMS 当普通条目暴露，误开草稿会让整个 posts 列表页下线）、多语言三 collection（zh/ja/en）结构为仓库实测配置；`view.filter` 曾在用，2026-11-04 已移除（标准做法：`fields` 保留 `draft` 列标记草稿，不做列表过滤）。
-- **feature-check 体系**（`scripts/feature-check.sh` 10 项断言，weekly PR / build-check / CMS 体检按钮三处运行）是仓库侧对「CMS + 主题耦合点」的回归防线，CMS 文档无关，属仓库自建能力。
+- **feature-check 体系**（`scripts/feature-check.sh` 12 项断言，weekly PR / build-check 两处运行；CMS 体检按钮已于 2026-11-04 移除）是仓库侧对「CMS + 主题耦合点」的回归防线，CMS 文档无关，属仓库自建能力。

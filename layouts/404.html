@@ -1,3 +1,19 @@
+{{- /* Standalone 404 page (no theme coupling). Rendered per language by
+       Hugo; Netlify routes /ja/* and /en/* 404s to the localized copies and
+       everything else falls through to /zh/404.html (see netlify.toml). */ -}}
+{{- $lang := .Site.Language.Lang }}
+{{- $title := "Page not found" }}
+{{- $subtitle := "There is nothing here…" }}
+{{- $home := "Back to home" }}
+{{- if eq $lang "zh" }}
+{{- $title = "页面未找到" }}
+{{- $subtitle = "这里什么都没有……" }}
+{{- $home = "返回首页" }}
+{{- else if eq $lang "ja" }}
+{{- $title = "ページが見つかりません" }}
+{{- $subtitle = "ここには何もありません……" }}
+{{- $home = "ホームへ戻る" }}
+{{- end }}
 <!DOCTYPE html>
 <html lang="{{ .Site.Language.Lang | default "zh-CN"}}">
 <head>
@@ -74,9 +90,9 @@
 <body>
   <div class="not-found">
     <div class="not-found-code">404</div>
-    <div class="not-found-title">页面未找到</div>
-    <div class="not-found-subtitle">这里什么都没有……</div>
-    <a class="not-found-home" href="/">返回首页</a>
+    <div class="not-found-title">{{ $title }}</div>
+    <div class="not-found-subtitle">{{ $subtitle }}</div>
+    <a class="not-found-home" href="{{ .Site.Home.RelPermalink }}">{{ $home }}</a>
   </div>
 </body>
 </html>

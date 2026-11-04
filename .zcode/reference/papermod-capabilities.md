@@ -139,17 +139,17 @@
 
 ## e. 与本仓库的对接现状
 
-**钩子**：`layouts/_partials/extend_head.html`＝①按 `audio_file`/`video_file` 补发 og:audio/og:video meta；②`media_position: "top"` 时注入 flex order CSS 把 `.post-media` 提到正文上方。`layouts/_partials/extend_post_content.html`＝六个媒体字段（audio_file/audio_url/video_file/video_url/youtube_id/bilibili_bvid）渲染 HTML5 播放器或 nocookie/B 站 iframe，统一 `.post-media` 包裹。`extend_footer` 未用。
+**钩子**：`layouts/_partials/extend_head.html`＝①按 `audio_file`/`video_file` 补发 og:audio/og:video meta；②`media_position: "top"` 时注入 flex order CSS 把 `.post-media` 提到正文上方（2026-11-04 起该 CSS 同时编排 `.post-lastmod`）。`layouts/_partials/extend_post_content.html`＝六个媒体字段（audio_file/audio_url/video_file/video_url/youtube_id/bilibili_bvid）渲染 HTML5 播放器或 nocookie/B 站 iframe，统一 `.post-media` 包裹；末尾输出「最后更新于/Last updated/最終更新」行（`.Lastmod` 晚于日期一天以上才显示）。`layouts/_partials/comments.html`＝giscus 评论接线（2026-11-04；凭据在 `hugo.toml [params.giscus]`，留空不渲染）。`extend_footer` 未用。
 
-**CSS（assets/css/extended/，5 个）**：`404.css`、`cover.css`、`post-media.css`（播放器样式+top 布局）、`search-icon.css`、`ui.css`。
+**CSS（assets/css/extended/，4 个）**：`cover.css`、`post-media.css`（播放器样式+top 布局）、`search-icon.css`、`ui.css`（`404.css` 已于 2026-11-04 删除——`.not-found` 类只存在于自带内联样式的独立 404 页，进全局样式表纯属死重）。
 
-**模板覆盖**：`layouts/404.html`（全自定义页）；`layouts/archives/list.{zh,ja,en}.html`（归档页，define "main" 块级重写）。
+**模板覆盖**：`layouts/404.html`（全自定义页）；`layouts/archives/list.html`（归档页，define "main" 块级重写；2026-11-04 由三语言变体合并为单份语言感知文件）。
 
 **hugo.toml 已用参数**：env、description、author、keywords、images、defaultTheme=auto、ShowReadingTime、ShowWordCount、ShowPostNavLinks、ShowBreadCrumbs、ShowCodeCopyButtons、ShowShareButtons、showtoc、tocopen、disableScrollToTop、cover.hiddenInList/hiddenInSingle、assets.favicon 系列（指 `/branding/`）、schema.publisherType=Person；三语言各自的 profileMode（enabled+title/subtitle/imageUrl/buttons）、socialIcons（youtube/twitter/github）、menu.main（含搜索 SVG+accesskey）。顶层：home 输出含 JSON（搜索前提）、frontmatter lastmod `:git`。
 
 **品牌资产**：`static/branding/`（CMS 不可见）；内容图 `static/images/`；自托管小音频 `static/audio/`，视频目录 `static/video/` 但**视频文件不进 git**（Netlify 配额），线上依赖外链/Embed。
 
-**回归保障**：`scripts/feature-check.sh` 10 项断言（audio/video 播放器、置顶 order CSS、og:audio/og:video、品牌 favicon、og:image、404 页、YouTube nocookie iframe、B 站 iframe）——新增主题耦合功能必须同步加断言（weekly PR、build-check、CMS 体检按钮三处执行）。
+**回归保障**：`scripts/feature-check.sh` 12 项断言（audio/video 播放器、置顶 order CSS、og:audio/og:video、品牌 favicon、og:image、404 页、归档 zh/en 本地化、YouTube nocookie iframe、B 站 iframe）——新增主题耦合功能必须同步加断言（weekly PR、build-check 两处执行；CMS 体检按钮已于 2026-11-04 移除）。
 
 **已知边界**（AGENTS.md）：YouTube iframe 大陆不可达；B 站 iframe 480p 封顶。
 

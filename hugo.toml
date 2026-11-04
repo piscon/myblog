@@ -12,7 +12,12 @@ enableRobotsTXT = true
 enableGitInfo = true
 
 [outputs]
-home = ["HTML", "RSS", "JSON"]
+home = ["HTML", "RSS", "JSON", "llms"]
+
+[outputFormats.llms]
+baseName = "llms"
+mediaType = "text/plain"
+isPlainText = true
 
 [pagination]
   pagerSize = 8
@@ -22,6 +27,10 @@ home = ["HTML", "RSS", "JSON"]
 
 [params]
   env = "production"
+  # 归档/列表取文范围显式固定，不依赖 Hugo 的「最大 section」推断
+  mainSections = ["posts"]
+  # 评论开关；实际渲染由 [params.giscus] 是否填了凭据决定（见 comments.html）
+  comments = true
   description = "精神与思想的二重奏，自由与独立的交响曲"
   author = "二重奏"
   keywords = ["二重奏", "deux", "博客", "AI", "Hugo", "技术"]
@@ -50,6 +59,14 @@ home = ["HTML", "RSS", "JSON"]
 
   [params.schema]
     publisherType = "Person"
+
+  # 评论（giscus）：到 giscus.app 选好仓库/分类后，把四个值填入即启用；
+  # 留空则评论区不渲染。仓库需开启 Discussions 并安装 giscus App
+  [params.giscus]
+    repo = ""
+    repoId = ""
+    category = ""
+    categoryId = ""
 
 [languages]
   [languages.zh]

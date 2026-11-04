@@ -1,5 +1,5 @@
 +++
 title = "Archives"
-layout = "archives/list.en"
+layout = "archives/list"
 url = "/en/archives/"
 +++

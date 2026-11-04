@@ -26,6 +26,8 @@ video_file = '/video/feature-check.mp4'
 youtube_id = 'dQw4w9WgXcQ'
 bilibili_bvid = 'BV1xx411c7mD'
 media_position = 'top'
+lastmod = '2026-12-25'
+aliases = ['/posts/alias-test/']
 +++
 test body
 EOF
@@ -52,6 +54,10 @@ check "og:video meta"          "grep -q 'property=\"og:video\"' '$PAGE'"
 check "品牌 favicon 引用"       "grep -q '/branding/favicon.ico' '$PAGE'"
 check "og:image 品牌图"         "grep -q 'branding/logo.jpg' '$PAGE'"
 check "自定义 404 页存在"        "test -f '$OUT/zh/404.html'"
+check "404 en 文案分流"         "grep -q 'Page not found' '$OUT/en/404.html'"
+check "最后更新时间显示"        "grep -q '最后更新于' '$PAGE'"
+check "aliases 跳转页生成"      "test -f '$OUT/zh/posts/alias-test/index.html'"
+check "llms.txt 站点索引生成"    "test -f '$OUT/zh/llms.txt' && grep -q 'Feature health check' '$OUT/zh/llms.txt'"
 check "归档页 zh 本地化(年/月)"  "grep -q 'archive-year-header' '$OUT/zh/archives/index.html' && grep -q '2026年' '$OUT/zh/archives/index.html' && grep -q '11月' '$OUT/zh/archives/index.html'"
 check "归档页 en 本地化(月名)"   "grep -q 'archive-year-header' '$OUT/en/archives/index.html' && grep -q 'November' '$OUT/en/archives/index.html'"
 check "YouTube nocookie iframe"  "grep -q 'youtube-nocookie.com/embed/dQw4w9WgXcQ' '$PAGE'"
