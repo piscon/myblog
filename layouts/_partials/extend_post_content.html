@@ -1,0 +1,11 @@
+{{- /* Render footer audio/video players from page params (set via Pages CMS fields) */ -}}
+{{- with .Params.audio_file -}}
+<div class="post-media">
+  <audio src="{{ . }}" controls muted loading="lazy"></audio>
+</div>
+{{- end -}}
+{{- with .Params.video_file -}}
+<div class="post-media">
+  <video src="{{ . }}" controls playsinline loading="lazy"></video>
+</div>
+{{- end -}}

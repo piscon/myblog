@@ -8,7 +8,7 @@ media:
     label: 附件
     input: static/files
     output: /files
-    categories: [document]
+    categories: [document, audio, video]
 
 content:
   - name: zh-posts
@@ -30,6 +30,9 @@ content:
         label: 摘要（SEO）
         type: text
         description: 120-160字，用于搜索摘要和分享预览
+        pattern:
+          regex: '^(.{120,160})?$'
+          message: 摘要需 120-160 字，留空则不生成摘要
       - name: date
         label: 日期
         type: date
@@ -48,22 +51,25 @@ content:
         list: true
       - name: cover
         label: 封面
-        type: object
-        fields:
-          - name: image
-            label: 封面图
-            type: image
-            path: static/images
-          - name: caption
-            label: 图片说明
-            type: string
-          - name: alt
-            label: 图片替代文本
-            type: string
+        component: cover
+      - name: audio_file
+        label: 音频（文末播放器）
+        type: file
+        options:
+          media: files
+          categories: [audio]
+      - name: video_file
+        label: 视频（文末播放器）
+        type: file
+        options:
+          media: files
+          categories: [video]
       - name: body
         label: 正文
-        type: rich-text # 💡 这里已由 markdown 改为 rich-text
+        type: rich-text
         required: true
+        options:
+          media: images
     filename: '{slug}.md'
     view:
       fields: [title, description, date, draft, lang]
@@ -94,6 +100,9 @@ content:
         label: 概要（SEO）
         type: text
         description: 120-160文字、検索概要と共有プレビュー用
+        pattern:
+          regex: '^(.{120,160})?$'
+          message: 概要は120〜160文字で入力してください（空欄なら概要なし）
       - name: date
         label: 日付
         type: date
@@ -112,22 +121,25 @@ content:
         list: true
       - name: cover
         label: カバー
-        type: object
-        fields:
-          - name: image
-            label: カバー画像
-            type: image
-            path: static/images
-          - name: caption
-            label: キャプション
-            type: string
-          - name: alt
-            label: 代替テキスト
-            type: string
+        component: cover
+      - name: audio_file
+        label: 音声（末尾プレーヤー）
+        type: file
+        options:
+          media: files
+          categories: [audio]
+      - name: video_file
+        label: 動画（末尾プレーヤー）
+        type: file
+        options:
+          media: files
+          categories: [video]
       - name: body
         label: 本文
-        type: rich-text # 💡 这里已由 markdown 改为 rich-text
+        type: rich-text
         required: true
+        options:
+          media: images
     filename: '{slug}.md'
     view:
       fields: [title, description, date, draft, lang]
@@ -158,6 +170,9 @@ content:
         label: Description (SEO)
         type: text
         description: 120-160 characters for search snippets and share previews
+        pattern:
+          regex: '^(.{120,160})?$'
+          message: Description must be 120-160 characters, or left empty
       - name: date
         label: Date
         type: date
@@ -176,22 +191,25 @@ content:
         list: true
       - name: cover
         label: Cover
-        type: object
-        fields:
-          - name: image
-            label: Cover image
-            type: image
-            path: static/images
-          - name: caption
-            label: Caption
-            type: string
-          - name: alt
-            label: Alt text
-            type: string
+        component: cover
+      - name: audio_file
+        label: Audio (footer player)
+        type: file
+        options:
+          media: files
+          categories: [audio]
+      - name: video_file
+        label: Video (footer player)
+        type: file
+        options:
+          media: files
+          categories: [video]
       - name: body
         label: Body
-        type: rich-text # 💡 这里已由 markdown 改为 rich-text
+        type: rich-text
         required: true
+        options:
+          media: images
     filename: '{slug}.md'
     view:
       fields: [title, description, date, draft, lang]
@@ -222,8 +240,8 @@ components:
 settings:
   content:
     merge: true
-  i18n:
-    locale: auto
+  commit:
+    identity: user
 
 actions:
   - name: check-papermod-update

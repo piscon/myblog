@@ -1,0 +1,9 @@
+.post-media {
+  margin-top: 1.5rem;
+}
+
+.post-media audio,
+.post-media video {
+  width: 100%;
+  border-radius: var(--radius, 8px);
+}
