@@ -2,7 +2,7 @@
 lang = 'ja'
 title = '大規模モデル翻訳フローの構造保持性に関する研究：プレースホルダの原子化に基づく実証分析'
 date = '2026-11-05'
-draft = false
+draft = true
 source_hash = 'c47a9ea58fdbd6b1b40d5dd479f5fe86eab0ee86f48e7ea3867f50ba2b8d105e'
 source_fields_hash = '0d913653f167e342ac45592ac0b90689375dc0ab76ee7c62b29ddb1b474e8e93'
 description = '本論文では、静的ブログの三言語翻訳フローを対象として、大規模言語モデルが複雑なMarkdown構造を含む技術文書を翻訳する際の失敗パターンを研究し、プレースホルダの原子化を核とした防御アーキテクチャを提案する。オフラインテストと実際のテキストで構造保持性を検証する。'

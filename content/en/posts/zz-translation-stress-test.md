@@ -2,7 +2,7 @@
 lang = 'en'
 title = 'Structural Fidelity in Large Model Translation Pipelines: An Empirical Study Based on Placeholder Atomization'
 date = '2026-11-05'
-draft = false
+draft = true
 source_hash = 'c47a9ea58fdbd6b1b40d5dd479f5fe86eab0ee86f48e7ea3867f50ba2b8d105e'
 source_fields_hash = '0d913653f167e342ac45592ac0b90689375dc0ab76ee7c62b29ddb1b474e8e93'
 description = 'This paper studies the failure modes of large language models when translating technical documents with complex Markdown structures, using a three-language translation pipeline for static blogs, and proposes a protective architecture centered on placeholder atomization, verifying its structural fidelity through offline self-testing and real corpus validation.'
