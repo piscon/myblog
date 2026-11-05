@@ -2,7 +2,7 @@
 lang = 'en'
 title = 'Taking the Long Way Home: An Alley Found After Three Wrong Turns'
 date = '2026-11-05'
-draft = false
+draft = true
 source_hash = '88eebaa08371bf01630818556c5d492852257b8282b673ef287124b34df8ea0e'
 source_fields_hash = 'caddc438dc206ab297bba55120d5964bd55d66927940ea23dedef995ef2f9225'
 description = 'Instead of taking the subway, I chose to walk home through an old street, passing a closing bookstore and a hidden alley that my GPS refused to recognize. It is a reflection on autumn evenings, getting lost, and the small, seemingly useless details that stick in the memory.'
