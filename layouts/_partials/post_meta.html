@@ -1,34 +1,54 @@
+{{- /* Meta line items feed three contexts: article page (.post-meta),
+       list/term cards (.entry-footer) and archive rows (.archive-meta).
+       Each item gets a class + a monochrome feather-style icon so the
+       segments are tellable apart, and embeds its own LEADING separator,
+       so a context can display:none one item (ui.css hides the
+       site-constant author from cards/archives) without leaving a
+       dangling `·` behind. */ -}}
+{{- $svgOpen := `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` }}
+{{- $iconDate := printf "%s%s</svg>" $svgOpen `<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>` }}
+{{- $iconClock := printf "%s%s</svg>" $svgOpen `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>` }}
+{{- $iconWords := printf "%s%s</svg>" $svgOpen `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>` }}
+{{- $iconUser := printf "%s%s</svg>" $svgOpen `<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>` }}
+{{- $iconFolder := printf "%s%s</svg>" $svgOpen `<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>` }}
+
 {{- $meta := slice }}
+{{- $sep := "" }}
 
 {{- if not .Date.IsZero -}}
-    {{- $meta = $meta | append (printf "<span title='%s'>%s</span>" (.Date | time.Format "2006-01-02T15:04:05-07:00") (.Date | time.Format (default ":date_long" site.Params.DateFormat))) }}
+    {{- $meta = $meta | append (printf "%s<span class=\"meta-item meta-date\" title='%s'>%s&nbsp;%s</span>" $sep (.Date | time.Format "2006-01-02T15:04:05-07:00") $iconDate (.Date | time.Format (default ":date_long" site.Params.DateFormat))) }}
+    {{- $sep = `<span class="meta-sep" aria-hidden="true">&nbsp;·&nbsp;</span>` }}
 {{- end }}
 
 {{- if (.Param "ShowReadingTime") -}}
-    {{- $meta = $meta | append (printf "<span>%s</span>" (i18n "read_time" .ReadingTime | default (printf "%d min" .ReadingTime))) }}
+    {{- $meta = $meta | append (printf "%s<span class=\"meta-item meta-read\">%s&nbsp;%s</span>" $sep $iconClock (i18n "read_time" .ReadingTime | default (printf "%d min" .ReadingTime))) }}
+    {{- $sep = `<span class="meta-sep" aria-hidden="true">&nbsp;·&nbsp;</span>` }}
 {{- end }}
 
 {{- if (.Param "ShowWordCount") -}}
-    {{- $meta = $meta | append (printf "<span>%s</span>" (i18n "words" .WordCount | default (printf "%d words" .WordCount))) }}
+    {{- $meta = $meta | append (printf "%s<span class=\"meta-item meta-words\">%s&nbsp;%s</span>" $sep $iconWords (i18n "words" .WordCount | default (printf "%d words" .WordCount))) }}
+    {{- $sep = `<span class="meta-sep" aria-hidden="true">&nbsp;·&nbsp;</span>` }}
 {{- end }}
 
 {{- if not (.Param "hideAuthor") -}}
     {{- with (partial "author.html" .) }}
-        {{- $meta = $meta | append (printf "<span>%s</span>" .) }}
+        {{- $meta = $meta | append (printf "%s<span class=\"meta-item meta-author\">%s&nbsp;%s</span>" $sep $iconUser .) }}
+        {{- $sep = `<span class="meta-sep" aria-hidden="true">&nbsp;·&nbsp;</span>` }}
     {{- end }}
 {{- end }}
 
-{{- /* Categories appended to the meta line (menu no longer links to them) */ -}}
+{{- /* Categories appended to the meta line (menu no longer links to them);
+       kept as real <a> links — feature-check asserts the href */ -}}
 {{- with (.GetTerms "categories") -}}
     {{- $catLinks := slice -}}
     {{- range . -}}
         {{- $catLinks = $catLinks | append (printf "<a href=\"%s\">%s</a>" .Permalink .LinkTitle) -}}
     {{- end -}}
-    {{- $meta = $meta | append (delimit $catLinks ", ") -}}
+    {{- $meta = $meta | append (printf "%s<span class=\"meta-item meta-cats\">%s&nbsp;%s</span>" $sep $iconFolder (delimit $catLinks ", ")) -}}
 {{- end -}}
 
-{{/* Combine all meta information into a single string with separators and render it as HTML.*/}}
+{{/* Items already carry their leading separators; just concatenate. */}}
 
 {{- with $meta }}
-    {{- delimit . "&nbsp;·&nbsp;" | safeHTML -}}
+    {{- delimit . "" | safeHTML -}}
 {{- end -}}

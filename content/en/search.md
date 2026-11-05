@@ -4,4 +4,6 @@ layout = "search"
 description = "Search the site"
 summary = "Search"
 placeholder = "Type to search..."
+categoriesTitle = "Categories"
+tagsTitle = "Tags"
 +++

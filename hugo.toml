@@ -68,6 +68,9 @@ isPlainText = true
   comments = true
   description = "精神与思想的二重奏，自由与独立的交响曲"
   author = "二重奏"
+  # meta 行不显示作者（笔名全站恒定，页脚 © 已表达品牌）；head 的
+  # <meta name="author"> 走 author.html，不受此参数影响，SEO 保留
+  hideAuthor = true
   keywords = ["二重奏", "deux", "博客", "AI", "Hugo", "技术"]
   images = ["/branding/og-default.jpg"]
   defaultTheme = "auto"
@@ -115,9 +118,11 @@ isPlainText = true
 
   # 「在 GitHub 编辑」链接（公开仓库）；URL + 文件路径拼成具体文件链接
   # 分支必须与仓库默认分支一致（master）——此前写成 main 导致文章页链接 404
+  # 2026-11-06 停用（meta 行减密）；重开时删掉 disabled 一行即可
   [params.editPost]
     URL = "https://github.com/piscon/myblog/blob/master"
     appendFilePath = true
+    disabled = true
 
 [languages]
   [languages.zh]

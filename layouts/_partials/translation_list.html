@@ -1,0 +1,7 @@
+{{- /* Site override that intentionally renders NOTHING. The header
+       language switcher (site.js) switches to the same page via the head
+       hreflang links, so the per-page language list is redundant — one
+       language entry point site-wide. The theme still calls this partial
+       from single.html/search.html; a same-named empty stub here suppresses
+       it without overriding those templates. Do not clone theme logic back.
+       feature-check guards: 「语言切换同页」「语言列表已收敛」. */ -}}
