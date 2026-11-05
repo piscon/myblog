@@ -584,17 +584,31 @@ function splitBlocks(src) {
   // 最小单元是「行」；空行不是断块信号，而是参与贪心合并的填充（用 \n 拼接），
   // 这样相邻段落可并进同一块，调用数从 ~34 降到 ~10。
   const lines = src.split('\n');
-  const units = lines.map((line, i) => ({ text: line, sep: i < lines.length - 1 ? '\n' : '' }));
+  // 预标记每行是否处于围栏内：围栏开→闭之间的行永不单独成块，避免把 ``` 劈到块首
+  // （protectBody 会把「以 ``` 开头且无闭合」整块当未闭合围栏保护，导致后续正文不被翻译）。
+  let inFence = false;
+  const units = lines.map((line, i) => {
+    const isFence = /^\s*```/.test(line);
+    const enters = isFence && !inFence;   // 开围栏
+    const leaves = isFence && inFence;    // 闭围栏
+    const inside = inFence || isFence;
+    if (isFence) inFence = !inFence;
+    return { text: line, sep: i < lines.length - 1 ? '\n' : '', inside, enters, leaves };
+  });
   const blocks = [];
   let cur = null;
   const flush = () => { if (cur) blocks.push({ text: cur.text, sep: cur.sep }); cur = null; };
   for (const u of units) {
     const n = u.text.trim() ? protectBody(u.text).tokens.length : 0;
-    if (!cur) { cur = { text: u.text, sep: u.sep, n }; continue; }
-    if (cur.n + n > MAX_TOKENS_PER_BLOCK) { flush(); cur = { text: u.text, sep: u.sep, n }; continue; }
+    if (!cur) { cur = { text: u.text, sep: u.sep, n, fenceDepth: u.enters ? 1 : 0 }; continue; }
+    // 围栏内（含开/闭行本身）不按 token 上限切断，保证 ``` 成对且完整
+    const canSplit = cur.fenceDepth === 0 && !u.enters && !u.inside;
+    if (canSplit && cur.n + n > MAX_TOKENS_PER_BLOCK) { flush(); cur = { text: u.text, sep: u.sep, n, fenceDepth: u.enters ? 1 : 0 }; continue; }
     cur.text += '\n' + u.text;
     cur.sep = u.sep;
     cur.n += n;
+    if (u.enters) cur.fenceDepth++;
+    if (u.leaves) cur.fenceDepth = Math.max(0, cur.fenceDepth - 1);
   }
   flush();
   // 收尾：极小尾块（1-2 token）合并到前一块，避免单 «0» 块被模型重复输出
