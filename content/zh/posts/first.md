@@ -16,7 +16,7 @@ cover.image = '/images/grass.jpg'
 cover.caption = '网之外'
 cover.alt = '网之外'
 +++
-新的开始，新的出发！
+新的开端，新的出发！
 
 ### 这是我的第一篇博客文章，以此纪念！
 
