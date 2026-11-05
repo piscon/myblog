@@ -39,6 +39,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Translation pipeline self-test (offline)
+        run: node scripts/translate.mjs --self-test
+
       - name: Translate zh content to ja/en
         id: translate
         env:

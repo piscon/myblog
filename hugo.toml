@@ -105,13 +105,13 @@ isPlainText = true
   [params.schema]
     publisherType = "Person"
 
-  # 评论（giscus）：到 giscus.app 选好仓库/分类后，把四个值填入即启用；
-  # 留空则评论区不渲染。仓库需开启 Discussions 并安装 giscus App
+  # 评论（giscus）：凭据经 GraphQL 查询取得（2026-11-05 启用，等效 giscus.app 的查询）；
+  # 留空则评论区不渲染。仓库已开启 Discussions 并安装 giscus App
   [params.giscus]
-    repo = ""
-    repoId = ""
-    category = ""
-    categoryId = ""
+    repo = "piscon/myblog"
+    repoId = "R_kgDOM91SJw"
+    category = "Announcements"
+    categoryId = "DIC_kwDOM91SJ84DKauo"
 
   # 「在 GitHub 编辑」链接（公开仓库）；URL + 文件路径拼成具体文件链接
   # 分支必须与仓库默认分支一致（master）——此前写成 main 导致文章页链接 404

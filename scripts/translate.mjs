@@ -19,7 +19,9 @@
 //     403/400 等致命错误直接失败
 //   - 部分(文件,语言)失败不再拖垮全部：成功部分照常写入提交，失败计数写入 GITHUB_OUTPUT，
 //     由 workflow 的红牌步骤决定 run 是否标红（重跑时 hash 命中的部分不再计费）
-//   - 译文结构 QA 门：链接/标题/代码围栏计数与原文比对，缩水即重试，零 token 成本
+//   - Markdown 占位符保护：围栏/链接 URL/行内代码/骨架标记替换为 «n» 后模型只译散文，
+//     译后校验每个占位符恰好一次且位置合法（缺/重/越位即重试），再做结构计数保险丝；
+//     模型接触不到语法，链接打散/标记吞入在架构上不可能发生
 //
 // 增量机制（字段与正文拆分，互不连坐）：
 //   - front matter `source_hash` = 正文 hash（PROMPT_VERSION_BODY + MODEL + body）
@@ -41,7 +43,7 @@ const ZH_POSTS = join(ROOT, 'content/zh/posts');
 const LANGS = ['ja', 'en'];
 
 const MODEL = process.env.TRANSLATE_MODEL || '@cf/qwen/qwen3-30b-a3b-fp8';
-const PROMPT_VERSION_BODY = 'v3';   // 正文提示词（两段式 + /no_think）
+const PROMPT_VERSION_BODY = 'v4';   // 正文提示词（占位符保护 + 简化规则；改动使旧译文 hash 失配，全量重译一次）
 const PROMPT_VERSION_FIELDS = 'v4'; // 字段提示词（/no_think + json_schema）
 const MAX_TOKENS_FIELDS = 2000;
 const MAX_TOKENS_BODY = 6000;
@@ -52,6 +54,7 @@ const GATEWAY = process.env.AI_GATEWAY || ''; // AI Gateway 名称；空 = 直�
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const FORCE = process.argv.includes('--force');
+const SELF_TEST = process.argv.includes('--self-test');
 
 const MACHINE_KEY = 'source_hash';
 const FIELDS_HASH_KEY = 'source_fields_hash';
@@ -59,7 +62,7 @@ const DROP_KEYS = ['lang', 'lastmod', 'aliases', 'auto_translate', MACHINE_KEY, 
 const TRANSLATED_KEYS = ['title', 'description', 'categories', 'tags'];
 
 const DISCLAIMER = {
-  ja: (link) => `> 本記事はAIによる自動翻訳です。表現が不自然な場合は[中文の原文](${link})をご参照ください。\n\n`,
+  ja: (link) => `> 本記事はAIによる自動翻訳です。表現が不自然な場合は[中国語の原文](${link})をご参照ください。\n\n`,
   en: (link) => `> This article was machine-translated by AI and may contain inaccuracies. See the [Chinese original](${link}) for the authoritative version.\n\n`,
 };
 
@@ -120,20 +123,17 @@ function upsertDescriptionLine(raw, desc) {
   return lines.join('\n');
 }
 
-// 正文走纯文本调用（Markdown 链接/结构在 JSON 里会被模型打散，纯文本则保真）
+// 正文调用：Markdown 语法在 protectBody 里已被替换为占位符，模型只看到自然语言 + 编号 token。
+// 规则因此极简——可靠性不依赖模型「听话」，而依赖「模型根本接触不到语法」。
 const LANG_BODY_PROMPT = {
-  ja: `你是个人技术博客的专业翻译。把用户的 Markdown 正文翻译成自然的日语（です・ます体）。/no_think
-- 只输出翻译后的 Markdown，不要任何解释、不要代码围栏
-- 所有中文文字必须翻译，绝不能原样复制中文
-- 保持 Markdown 结构不变：标题层级、列表（有序/无序）、引用块、斜体/粗体标记原样保留
-- 行内链接必须保持 [文字](URL) 语法，只译链接文字，URL 原样
-- 图片语法、行内代码、代码块、URL 原样保留；代码块内容除注释外不翻译`,
-  en: `You are a professional translator for a personal tech blog. Translate the user's Markdown body into natural English. /no_think
-- Output ONLY the translated Markdown — no explanations, no code fences
-- ALL Chinese text must be translated — never copy the Chinese verbatim
-- Keep the Markdown structure intact: heading levels, ordered/unordered lists, blockquotes, italic/bold markers preserved
-- Inline links must keep [text](URL) syntax — translate only the link text, keep URLs verbatim
-- Image syntax, inline code, code blocks and URLs verbatim; do not translate code block contents except comments`,
+  ja: `你是个人技术博客的专业翻译。把用户文本中的中文译成自然的日语（です・ます体）。/no_think
+- 保持 «0» 这类编号标记原样、位置不变、每个恰好出现一次
+- 只输出译文，不要解释、不要代码围栏、不要新增或删除标记
+- 中文必须全部译出；「中文」译作「中国語」`,
+  en: `You are a professional translator for a personal tech blog. Translate the Chinese in the user text into natural English. /no_think
+- Keep tokens like «0» verbatim, in place, each appearing exactly once
+- Output ONLY the translation — no explanations, no code fences, no added or removed tokens
+- All Chinese must be translated`,
 };
 
 // ---------- 错误分类 ----------
@@ -384,69 +384,220 @@ async function translateFields(lang, slim) {
   });
 }
 
-// 结构 QA 门：链接/标题/代码围栏计数与原文比对，缩水 = 内容级失败，在 withRetry 内重试
+// ---------- Markdown 占位符保护（可靠性核心，2026-11-05 落地）----------
+//
+// 做法：按块解析 Markdown，把所有「机器语法」替换为 «n» 占位符，模型只看到
+// 自然语言 + 编号；译后机械还原并验证。模型接触不到 [](), 列表标记、URL、
+// 代码围栏，因此「链接打散 / 标记吞入链接文字」这类事故物理上不可能发生
+// （社区共识：引擎永远看不到不该动的东西，就不需要恳求它别动）。
+//
+// 保护粒度（对照本仓库实际语料定）：
+//   - 围栏代码块：整块一个 token，不进模型
+//   - 骨架行（标题/列表/引用/表格分隔行）：整行分块，行首标记、行尾标记
+//     （斜体/粗体收尾、表格尾 |）各一个 token，可译文字居中
+//   - 行内：链接与图片（仅 URL 部分保护，文字可译）、行内代码、裸粗体/斜体标记
+//   每类语法用一对 token 表达，还原时校验配对与位置（吞入/移动/改写都会被门拦下）。
+const TOK = (id) => `«${id}»`;
+const TOK_RE = /«(\d+)»/g;
+
+// 把一行文本按「行内原子」切分：URL/图片目标、行内代码、链接文字边界、粗斜体开关。
+// 返回 [{ t: 'text'|'tok', v }]，tok 的 v 是要保护的字面串。
+function inlineAtoms(line) {
+  const atoms = [];
+  // 管道符一律保护（表格列分隔 / 分隔行）；围栏内字符不会走到这里
+  const re = /(!?\[[^\]]*\]\()([^)\s]+)(\))|(`[^`\n]+`)|(\*\*|~~)|(\*|_|\||-+)/g;
+  let last = 0;
+  for (const m of line.matchAll(re)) {
+    if (m.index > last) atoms.push({ t: 'text', v: line.slice(last, m.index) });
+    if (m[1] !== undefined) {
+      // 链接/图片：仅保护 [文字]( 与 )(URL 部分)；文字留在可译区
+      atoms.push({ t: 'tok', v: m[1] });
+      atoms.push({ t: 'tok', v: m[2] });
+      atoms.push({ t: 'tok', v: m[3] });
+    } else {
+      atoms.push({ t: 'tok', v: m[0] });
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < line.length) atoms.push({ t: 'text', v: line.slice(last) });
+  return atoms;
+}
+
+// 骨架行解析：返回 { lead, core, tail }，首尾为受保护的标记，core 可译。
+function skeletonLine(line) {
+  const lead = line.match(/^(\s*(?:#{1,6}\s+|\d+\.\s+|[-*+]\s+|>\s*|\|?))?/)[1] ?? '';
+  let rest = line.slice(lead.length);
+  let tail = '';
+  // 行尾收尾标记（成对强调的闭符号、表格尾竖线）；逐层剥离
+  const tailRe = /(\s*(?:\*\*|~~|\*|_|\|))$/;
+  let tm;
+  while ((tm = rest.match(tailRe))) { tail = tm[1] + tail; rest = rest.slice(0, -tm[1].length); }
+  return { lead, core: rest, tail };
+}
+
+function protectBody(src) {
+  const tokens = [];
+  // kind 决定还原时的位置约束：lead/tail 是骨架标记（必须贴行首/行尾），
+  // inline/fence 是行内原子（只要求存在且不跨行，不要求贴边）。
+  const push = (v, kind) => { tokens.push({ v, kind }); return TOK(tokens.length - 1); };
+  const lines = src.split('\n');
+  let out = '';
+  let fence = null; // 当前围栏块累积内容
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+    const eol = li < lines.length - 1 ? '\n' : '';
+    if (fence !== null) {
+      fence.push(line);
+      if (/^```[ \t]*$/.test(line.trim())) {
+        out += push(fence.join('\n'), 'fence') + eol;
+        fence = null;
+      }
+      continue;
+    }
+    if (/^\s*```/.test(line)) { fence = [line]; continue; } // 开围栏（含 info string）
+    if (/^\s*$/.test(line)) { out += eol; continue; }
+
+    const sk = skeletonLine(line);
+    if (sk.lead) out += push(sk.lead, 'lead');
+    for (const a of inlineAtoms(sk.core)) out += a.t === 'tok' ? push(a.v, 'inline') : a.v;
+    if (sk.tail) out += push(sk.tail, 'tail');
+    out += eol;
+  }
+  if (fence !== null) out += push(fence.join('\n'), 'fence'); // 未闭合围栏：整块保护，不静默丢弃
+  return { text: out, tokens };
+}
+
+// 还原：每个 token 恰好出现一次（Translatorio 式「占位符完整性」），且位置合法。
+// 任何异常抛 Retry → 重试 → 仍失败则该篇不落盘（旧译文原地保留）。
+function restoreBody(protectedText, translated, tokens) {
+  const seen = new Map();
+  for (const m of translated.matchAll(TOK_RE)) {
+    const id = Number(m[1]);
+    if (id >= tokens.length) throw new Retry(`占位符越界 «${id}»`);
+    seen.set(id, (seen.get(id) ?? 0) + 1);
+  }
+  const missing = tokens.map((_, i) => i).filter((i) => !seen.has(i));
+  const dup = [...seen].filter(([, n]) => n > 1).map(([i]) => i);
+  if (missing.length || dup.length) {
+    throw new Retry(`占位符不完整（缺失 ${missing.length}${missing.length ? ':' + missing.slice(0, 5).join(',') : ''}，重复 ${dup.length}${dup.length ? ':' + dup.slice(0, 5).join(',') : ''}）`);
+  }
+  // 位置约束：骨架 lead 必须贴行首、tail 必须贴行尾（吞入/位移/合并到别的行都会被抓）。
+  const lines = translated.split('\n');
+  for (const line of lines) {
+    for (const m of line.matchAll(TOK_RE)) {
+      const id = Number(m[1]);
+      const { v, kind } = tokens[id];
+      const at = line.indexOf(TOK(id));
+      if (kind === 'lead' && at !== 0) throw new Retry(`骨架标记 «${id}»(${JSON.stringify(v)}) 脱离行首`);
+      if (kind === 'tail' && at + TOK(id).length !== line.length) throw new Retry(`收尾标记 «${id}»(${JSON.stringify(v)}) 脱离行尾`);
+    }
+  }
+  return translated.replace(TOK_RE, (_, id) => tokens[Number(id)].v);
+}
+
+// 结构 QA 门：占位符还原后对最终 Markdown 做计数比对（保险丝，零 token 成本）。
+// 链接/列表/标题/围栏计数守恒 + 链接文字卫生检查
 function structuralIssues(src, dst) {
   const issues = [];
   const count = (s, re) => (s.match(re) || []).length;
   const links = (s) => count(s, /\]\(/g);
   const heads = (s) => count(s, /^#{1,6} /gm);
   const fences = (s) => count(s, /^```/gm);
+  const lists = (s) => count(s, /^ {0,3}(?:\d+\. |[-*+] )/gm);
+  const badLinks = (s) => [...s.matchAll(/\[([^\]]*)\]\([^)]+\)/g)]
+    .filter((m) => /^\d+\. |[*]/.test(m[1])).length;
   if (links(dst) < links(src)) issues.push(`行内链接 ${links(src)}→${links(dst)}`);
   if (heads(src) !== heads(dst)) issues.push(`标题 ${heads(src)}→${heads(dst)}`);
   if (fences(src) !== fences(dst)) issues.push(`代码围栏 ${fences(src)}→${fences(dst)}`);
+  if (lists(src) !== lists(dst)) issues.push(`列表项 ${lists(src)}→${lists(dst)}`);
+  if (badLinks(dst) > badLinks(src)) issues.push(`链接文字吞入列表/斜体标记 ${badLinks(src)}→${badLinks(dst)}`);
   return issues;
 }
 
-// 链接自愈：模型偶发把 [text](url) 打散成 text（url）——按原文链接的 URL 清单机械还原。
-// 只处理代码围栏/行内代码之外的部分；自愈成功可以省掉一次重译。
-function healLinks(srcBody, dstBody) {
-  const srcLinks = [...srcBody.matchAll(/\[([^\]]*)\]\(([^)\s]+)\)/g)].map((m) => m[2]);
-  if (!srcLinks.length) return dstBody;
-  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const healSegment = (seg) => {
-    let out = seg;
-    for (const url of srcLinks) {
-      // 已是合法链接的跳过；全角/半角括号两种打散形态都还原
-      const already = new RegExp(`\\[[^[\\]]*\\]\\(${esc(url)}\\)`);
-      if (already.test(out)) continue;
-      const flat = new RegExp(`([^[\\n（(]{1,80})[（(]${esc(url)}[）)]`, 'g');
-      out = out.replace(flat, (_, text) => `[${text.trim()}](${url})`);
-    }
-    return out;
-  };
-  // 按代码围栏切分，围栏外按行内代码切分，只动普通文本
-  return dstBody
-    .split(/(```[\s\S]*?```)/g)
-    .map((part) =>
-      part.startsWith('```')
-        ? part
-        : part.split(/(`[^`\n]*`)/g).map((sub) => (sub.startsWith('`') ? sub : healSegment(sub))).join(''),
-    )
-    .join('');
-}
-
-const LINK_REMINDER =
-  '\n\n（重要：上一版输出把行内链接打散了。每处链接必须保持 Markdown 语法 [文字](URL)，链接文字可翻译，括号与方括号结构不能动，URL 原样保留。）';
+const TOKEN_REMINDER =
+  '\n\n（重要：上一版输出弄丢了编号标记。«0» 这类标记必须原样保留、位置不变、每个恰好出现一次；不要翻译、改写、增删或合并它们。）';
 
 async function translateBody(lang, srcBody) {
+  const { text: protectedText, tokens } = protectBody(srcBody);
   return withRetry(`正文 ${lang}`, async (attempt) => {
     const { text, usage } = await runModel({
       max_tokens: MAX_TOKENS_BODY + (attempt - 1) * 3000, // 截断重试时自动加预算
       messages: [
         { role: 'system', content: LANG_BODY_PROMPT[lang] },
-        { role: 'user', content: attempt >= 2 ? srcBody + LINK_REMINDER : srcBody },
+        { role: 'user', content: attempt >= 2 ? protectedText + TOKEN_REMINDER : protectedText },
       ],
     });
     let t = stripThinking(text);
     if (!t) throw new Retry('正文空响应');
-    let issues = structuralIssues(srcBody, t);
-    if (issues.length) {
-      t = healLinks(srcBody, t); // 先自愈（免费），再复查
-      issues = structuralIssues(srcBody, t);
-    }
+    t = restoreBody(protectedText, t, tokens); // 完整性门：缺/重复/越位即重试，绝不落盘
+    // 保险丝：还原后的最终 Markdown 与原文做结构计数比对（正常路径下恒过）
+    const issues = structuralIssues(srcBody, t);
     if (issues.length) throw new Retry(`结构 QA 门未过（${issues.join('，')}）`);
     return { body: t, neurons: usage?.neurons };
   });
+}
+
+// ---------- 离线自测（--self-test，零 API 调用）----------
+// 1) 全语料往返：protect → 模拟「只翻译文字、token 原样保留」→ restore 必须与原文逐字一致
+// 2) 合成损伤：删除/重复/移动占位符必须被完整性门拦下
+function selfTest() {
+  let fails = 0;
+  const check = (ok, label) => { if (!ok) { fails++; console.error(`✗ ${label}`); } };
+
+  const files = listZhPosts();
+  for (const name of files) {
+    const parsed = parsePost(readFileSync(join(ZH_POSTS, name), 'utf8'));
+    if (!parsed) continue;
+    const src = parsed.body.trim();
+    const { text, tokens } = protectBody(src);
+    // ① 恒等往返：token 原样保留 → restore 后必须逐字等于原文
+    const identical = restoreBody(text, text, tokens);
+    check(identical === src, `${name}：恒等往返不一致`);
+    // ② 模拟译文：把非 token 文字换成等长假译文，token 全部原样保留 →
+    //    还原后结构计数必须与原文守恒（保险丝在正常路径下恒过）
+    const fake = text.replace(/[^\n«»0-9]+/g, (s) => '訳'.repeat(Math.max(1, Math.ceil(s.length / 2))).slice(0, s.length));
+    const rebuilt = restoreBody(text, fake, tokens);
+    check(!rebuilt.match(TOK_RE), `${name}：还原后残留占位符`);
+    const issues = structuralIssues(src, rebuilt);
+    check(issues.length === 0, `${name}：模拟译文触发结构门 ${issues.join('，')}`);
+    console.log(`✓ ${name}：${tokens.length} 个占位符，恒等往返/模拟译文/结构门全通`);
+  }
+
+  // 合成损伤样本：逐一验证完整性门
+  const sample = '1. *感谢 [Hugo](https://gohugo.io) 提供代码支持*';
+  const p = protectBody(sample);
+  const good = p.text.replace(/[^«»\d\n]+/g, 'x');
+  const firstTok = p.text.match(TOK_RE)[0];
+  const drop = good.replace(firstTok, '');
+  const dup = good.replace(firstTok, (t) => t + t);
+  const moved = good.replace(firstTok, '') + firstTok; // lead 标记被挪到行尾 → 应被位置门拦下
+  check(restoreBody(p.text, good, p.tokens) !== '', '合成样本：正常路径应可还原');
+  for (const [label, bad] of [['缺失', drop], ['重复', dup], ['位移', moved]]) {
+    let threw = false;
+    try { restoreBody(p.text, bad, p.tokens); } catch { threw = true; }
+    check(threw, `合成样本：${label} 占位符应被拦下`);
+  }
+
+  // 旧事故等价形态（2026-11-05）：lead 标记被吞进链接文字 / 收尾标记挪进句中 /
+  // token 越界——在新架构下必须是「位移/完整性门」拦截，正常路径必须放行
+  const accidentSrc = '1. *感谢 [Hugo](https://gohugo.io) 提供代码支持*';
+  const ap = protectBody(accidentSrc);
+  const leadMoved = ap.text.replace(/(«\d+»)(«\d+»)(感谢)/, '$2$3$1'); // lead 从行首挪进文字
+  const tailTok = ap.text.match(/(«\d+»)$/)[1];
+  const tailMoved = ap.text.replace(tailTok, '').replace(/代码支持/, tailTok + '代码支持');
+  const outOfRange = ap.text + TOK(999);
+  for (const [label, bad] of [['lead 位移', leadMoved], ['收尾标记位移', tailMoved], ['越界 token', outOfRange]]) {
+    let threw = false;
+    try { restoreBody(ap.text, bad, ap.tokens); } catch { threw = true; }
+    check(threw, `旧事故等价：${label} 应被拦下`);
+  }
+  const normal = ap.text.replace(/[^\n«»\d]+/g, 'x');
+  let normalOk = true;
+  try { restoreBody(ap.text, normal, ap.tokens); } catch { normalOk = false; }
+  check(normalOk, '旧事故等价：正常译文路径应放行');
+
+  console.log(fails ? `\n自测失败 ${fails} 项` : '\n自测全部通过');
+  if (fails) process.exit(1);
 }
 
 // ---------- 增量 hash ----------
@@ -695,4 +846,5 @@ async function main() {
   if (failures > 0 && successes === 0) process.exit(1);
 }
 
-await main();
+if (SELF_TEST) selfTest();
+else await main();
