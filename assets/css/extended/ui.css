@@ -32,32 +32,43 @@
   gap: 0.6rem;
 }
 
-/* CJK-Latin typography: deliberate per-language stacks — Latin renders
-   from the system UI fonts first, CJK from the platform's quality sans.
-   The theme stack is Latin-only, so ja pages previously fell back to a
-   CHINESE font (Microsoft YaHei) rendering kanji with Chinese glyph
-   variants; html[lang] scoping fixes that. text-autospace adds the
-   CJK-Latin gap automatically where the engine supports it (CSS Text 4,
-   no-op elsewhere). No web fonts: mainland reachability + multi-MB CJK. */
+/* CJK-Latin typography: deliberate per-language stacks — Latin/digits
+   render from the self-hosted Inter Variable (fonts.css, latin slices,
+   ~48KB one-time), CJK from the platform's quality sans. "Punct SC/JP"
+   (fonts.css, zero-byte local() layer) hands CJK punctuation (—— ""
+   …… codepoints that Latin system fonts also carry) to the installed
+   CJK font for full-width connected dashes. The theme stack is
+   Latin-only, so ja pages previously fell back to a CHINESE font
+   (Microsoft YaHei) rendering kanji with Chinese glyph variants;
+   html[lang] scoping fixes that. CJK deliberately stays on system
+   fonts — sliced CJK web fonts (~11MB repo, 200-400KB/visit) were
+   researched and declined 2026-11-06 (AGENTS.md 字体栈约定).
+   text-autospace adds the CJK-Latin gap automatically where the
+   engine supports it (CSS Text 4, no-op elsewhere). */
 body {
   text-autospace: normal;
   font-family:
-    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Punct SC", "Inter Variable",
+    system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial,
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei",
     "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
 }
 
 html[lang^="ja"] body {
   font-family:
-    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Punct JP", "Inter Variable",
+    system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial,
     "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic",
     "Noto Sans CJK JP", "Source Han Sans JP", "Meiryo", sans-serif;
 }
 
 html[lang^="en"] body {
   font-family:
-    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif;
+    "Inter Variable",
+    system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Article end-matter ordering (gold standard): content → media →
@@ -80,7 +91,6 @@ html[lang^="en"] body {
   order: 2;
   margin: 0 0 24px;
 }
-
 
 .post-single > .post-footer {
   order: 4;
@@ -224,6 +234,17 @@ html[lang^="en"] body {
 .toc li.active > a {
   color: var(--primary);
   font-weight: 600;
+}
+
+/* Anchor-jump breathing room: browsers scroll [id] targets flush to the
+   viewport top edge, so a TOC click lands the heading with zero space
+   above it (header is not sticky — pure comfort, no offset to budget).
+   One u of scroll-margin restores a flow-like gap; also covers footnote
+   round-trips (backref sup in text, footnote li at page bottom). */
+:is(h1, h2, h3, h4, h5, h6)[id],
+li[id^="fn:"],
+sup[id^="fnref:"] {
+  scroll-margin-top: var(--gap);
 }
 
 /* Floating side TOC on wide screens: docs-standard sidebar on the LEFT of
@@ -529,6 +550,15 @@ html[lang^="en"] body {
   width: 1em;
   height: 1em;
   vertical-align: -0.125em;
+}
+
+/* Tabular figures for dates/counts in all meta rows — digits align
+   across entries when scanning lists (works on system fonts too,
+   graceful no-op where unsupported) */
+.post-meta,
+.entry-footer,
+.archive-meta {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Freshness ("meta-updated") belongs to the article header only — the

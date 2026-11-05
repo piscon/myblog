@@ -150,6 +150,14 @@ check "汉堡菜单(手机)"           "grep -q '.js .header-nav>#menu{display:n
 # 主题文案存活探针；容器类 paginav 守主题 DOM；移动端标题 2 行 -webkit-line-clamp
 # 防 50% 列宽长标题撑高行（token 守 bundle，minifier 剔 > 两侧空白但保留后代空格与选择器）
 check "文章导航(文案+移动端限行)" "test -f i18n/zh-CN.toml && test -f i18n/ja.toml && test -f i18n/en.toml && grep -q '上一篇' i18n/zh-CN.toml && grep -q '« 上一篇' '$PAGE' && grep -q '下一篇 »' '$PAGE' && grep -q '分钟' '$PAGE' && grep -q 'class=\"paginav\"' '$PAGE' && grep -q '前の記事' '$OUT/ja/posts/first/index.html' && grep -q '目次' '$OUT/ja/posts/first/index.html' && grep -q 'Previous' '$OUT/en/posts/first/index.html' && grep -q 'Table of Contents' '$OUT/en/posts/first/index.html' && grep -q 'paginav a>span:not(.title)' '$OUT'/assets/css/stylesheet.*.css && grep -q 'webkit-line-clamp' '$OUT'/assets/css/stylesheet.*.css"
+# 字体栈（2026-11-06）：自托管 Inter Variable 拉丁切片（static/fonts/v1/，4 片
+# latin/latin-ext × 正体/斜体，~48KB/访客，unicode-range 按需）统一三语拉丁/数字；
+# 零字节标点层 Punct SC/JP（fonts.css local() 系统字体）把 —— "" …… 交还 CJK 字体
+# 全宽渲染（latin-first 栈会被 SF/Segoe 抢渲染成西文窄破折号，12/15 篇 zh 文用 ——）。
+# CJK 刻意留系统栈（切片 CJK 网页字体 ~11MB repo / 200-400KB 每访客，调研后放弃）。
+# 耦合点：minifier 会把 font-family 值去引号+小写（"Punct SC"→punct sc），
+# 但 src local() 的实参保引号保大小写——token 各按各自形态取
+check "字体栈(Inter拉丁+标点层)" "grep -q 'punct sc,inter variable' '$OUT'/assets/css/stylesheet.*.css && grep -q 'punct jp,inter variable' '$OUT'/assets/css/stylesheet.*.css && grep -q 'segoe ui variable,segoe ui' '$OUT'/assets/css/stylesheet.*.css && grep -q '/fonts/v1/inter/files/inter-latin-wght-normal.woff2' '$OUT'/assets/css/stylesheet.*.css && grep -q 'local(.PingFang SC.)' '$OUT'/assets/css/stylesheet.*.css && grep -q 'local(.Hiragino Kaku Gothic ProN.)' '$OUT'/assets/css/stylesheet.*.css && grep -q 'font-variant-numeric:tabular-nums' '$OUT'/assets/css/stylesheet.*.css && ls '$OUT'/fonts/v1/inter/files/*.woff2 >/dev/null && grep -q '/fonts' netlify.toml"
 
 FAILED=0
 {

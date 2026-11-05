@@ -41,6 +41,13 @@
   [headers.values]
     Cache-Control = "public, max-age=2592000, stale-while-revalidate"
 
+# 自托管字体切片（static/fonts/v1/）：文件名无内容哈希，版本化目录即
+# 缓存键——升级字体时把 v1 改名 v2 并同步 fonts.css 里的 URL（AGENTS.md 字体栈约定）
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # 品牌资产（favicon/logo）：几乎不变，长缓存
 [[headers]]
   for = "/branding/*"
