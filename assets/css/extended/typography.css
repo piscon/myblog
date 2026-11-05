@@ -38,12 +38,16 @@
 /* ---- Title block ---------------------------------------------------- */
 
 /* Fluid title: 2.058em on desktop (φ^1.5), relaxes to ~1.7em on phones so
-   long zh titles wrap into balanced 2 lines instead of a 40px wall.
-   balance = even line lengths in wrapped titles (progressive, Chromium 114+). */
+   long zh titles wrap into 2 lines instead of a 40px wall.
+   text-wrap: pretty, NOT balance — balance evens the lines and with CJK
+   that splits words at visibly wrong points (旧书 broke across lines,
+   压到/什么 likewise) while leaving line 1 at 60% column width; greedy
+   full lines + orphan avoidance is the clreq-conformant behavior. pretty
+   is progressive (Chromium 117+), older engines fall back to normal. */
 .post-title {
   font-size: clamp(1.55em, 1.35em + 1.8vw, 2.058em);
   line-height: 1.3;
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 
 /* SEO summary under the title: one quiet step down, not a second headline.
@@ -116,8 +120,9 @@ html[lang^="ja"] .post-content {
 /* ---- Heading ladder --------------------------------------------------- */
 
 /* Sizes per ladder above; 1.3 leading because zh headings routinely wrap
-   (theme's global 1.2 is tuned for single-line Latin). balance keeps
-   two-line headings even. */
+   (theme's global 1.2 is tuned for single-line Latin). pretty (not
+   balance — see .post-title) keeps greedy full lines and avoids orphan
+   last lines in wrapped zh headings. */
 .post-content h1,
 .post-content h2,
 .post-content h3,
@@ -125,7 +130,7 @@ html[lang^="ja"] .post-content {
 .post-content h5,
 .post-content h6 {
   line-height: 1.3;
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 
 .post-content h1 {
