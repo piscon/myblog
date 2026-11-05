@@ -81,6 +81,45 @@ const LANG_FIELDS_PROMPT = {
   ja: `把 JSON 中 title/description/categories/tags/cover_alt/cover_caption 的中文翻译成自然的日语（です・ます体）。规则：title 简洁；description 1-2 句完整句（源为 null 时根据 body 概括写出）；categories/tags 用日语惯用词，专有名词（AI、Hugo 等）保留原文；cover_alt/cover_caption 源为 null 输出 null。只输出一个合法 JSON 对象，键与输入一致。/no_think`,
   en: `Translate the Chinese in the JSON fields title/description/categories/tags/cover_alt/cover_caption into natural English. Rules: title concise; description 1-2 full sentences (if null, summarize from body); categories/tags use common English equivalents, keep proper nouns (AI, Hugo) as-is; cover_alt/cover_caption output null if null. Output ONLY one valid JSON object with the same keys. /no_think`,
 };
+// zh 摘要缺失时自动补写（写回 zh front matter；用户可在 CMS 改写，改后 fHash 失配自动重译三语字段）
+const DESC_PROMPT = `用 70-160 个汉字为这篇中文博客文章写一段 SEO 摘要。要求：单行纯文本；不要引号、Markdown、换行或任何解释；第一句概括文章核心（搜索结果只展示前约 80 字）；客观自然，不夸张推销。/no_think`;
+
+async function genDescription(body) {
+  return withRetry('摘要 zh', async () => {
+    const { text, usage } = await runModel({
+      max_tokens: 300,
+      messages: [
+        { role: 'system', content: DESC_PROMPT },
+        { role: 'user', content: body.slice(0, 4000) },
+      ],
+    });
+    let t = stripThinking(text).split('\n').filter((x) => x.trim())[0]?.trim() ?? '';
+    t = t.replace(/^["'「『]+|["'」』]+$/g, '').trim();
+    if (!t) throw new Retry('摘要空响应');
+    if (t.length < 40 || t.length > 200) throw new Retry(`摘要长度 ${t.length} 超出 40-200 容差`);
+    return { desc: t, neurons: usage?.neurons };
+  });
+}
+
+// 在 front matter 范围内补写/替换 description 行（空行替换、date 后插入，均不越界进正文）
+function upsertDescriptionLine(raw, desc) {
+  const lines = raw.split('\n');
+  let fmEnd = -1;
+  for (let i = 1; i < lines.length; i++) {
+    if (/^\+\+\+[ \t]*\r?$/.test(lines[i])) { fmEnd = i; break; }
+  }
+  if (fmEnd === -1) return raw;
+  const newLine = `description = ${tomlString(desc)}`;
+  let dateIdx = -1;
+  for (let i = 0; i < fmEnd; i++) {
+    if (/^description[ \t]*=/.test(lines[i])) { lines[i] = newLine; return lines.join('\n'); }
+    if (dateIdx === -1 && /^date[ \t]*=/.test(lines[i])) dateIdx = i;
+  }
+  if (dateIdx !== -1) lines.splice(dateIdx + 1, 0, newLine);
+  else lines.splice(1, 0, newLine);
+  return lines.join('\n');
+}
+
 // 正文走纯文本调用（Markdown 链接/结构在 JSON 里会被模型打散，纯文本则保真）
 const LANG_BODY_PROMPT = {
   ja: `你是个人技术博客的专业翻译。把用户的 Markdown 正文翻译成自然的日语（です・ます体）。/no_think
@@ -493,12 +532,31 @@ async function main() {
       continue;
     }
 
+    // zh SEO 摘要缺失 → AI 补写并写回 zh front matter（失败回退为缺失，由各语言自行生成）
+    let zhDescription = String(src.fm.description ?? '').trim();
+    if (!zhDescription) {
+      if (DRY_RUN) {
+        console.log(`? zh/${name} 将补写 SEO 摘要`);
+      } else {
+        try {
+          const r = await genDescription(body);
+          zhDescription = r.desc;
+          neuronsTotal += r.neurons ?? 0;
+          apiCalls += 1;
+          writeFileSync(join(ZH_POSTS, name), upsertDescriptionLine(raw, zhDescription));
+          console.log(`+ zh 摘要已补写（${zhDescription.length} 字）→ ${name}`);
+        } catch (err) {
+          console.error(`⚠ ${name} zh 摘要补写失败（不影响译文生成）：${shortErr(err)}`);
+        }
+      }
+    }
+
     const base = basename(name, '.md');
     const zhLink = `/zh/posts/${base}/`;
     const bHash = bodyHashOf(body);
     const fParts = {
       title: String(src.fm.title ?? ''),
-      description: String(src.fm.description ?? ''),
+      description: zhDescription,
       categories: strArray(src.fm.categories),
       tags: strArray(src.fm.tags),
       cover_alt: src.fm['cover.alt'] ?? '',
