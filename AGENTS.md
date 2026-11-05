@@ -37,7 +37,8 @@
 ## 内容与媒体约定
 
 - 文章正文不写 Hugo shortcode（Pages CMS Tiptap 会破坏语法）；高级排版走 Git 路径
-- 视频不进 git（Netlify 配额/fair-use）；YouTube 用 `youtube_id`、B 站用 `bilibili_bvid` 字段（CMS 会校验 ID 格式）；自托管仅限小音频（`audio_file`）；外链音视频走 `audio_url`/`video_url`（模板支持但 CMS 不暴露，Git 路径维护）
+- 视频不进 git（Netlify 配额/fair-use）；YouTube 用 `youtube_id`、B 站用 `bilibili_bvid` 字段（CMS 会校验 ID 格式）；自托管仅限小音频（`audio_file`）；外链音视频走 `audio_url`/`video_url`（模板支持但 CMS 不暴露，Git 路径维护）；**`video_file` 与 `video` 媒体源也已移出 CMS**（2026-11-05，防误传大视频烧 Netlify 配额；`merge: true` 保住已有键，Git 路径字段仍可用）
+- `.pages.yml` 三集合 schema 经 **YAML 锚点共享**（zh 块 `&post-fields`，ja/en 引用，2026-11-05）——加字段只改 zh 块一处；代价是字段 label 统一中文。**勿在 CMS Settings UI 重存该文件**（重新序列化会展开锚点）；锚点属官方文档未确认用法，CMS 端异常时优先怀疑它（回退=展开重写）
 - 品牌资产在 `static/branding/`（CMS 不可见）；内容图 `static/images/`；音视频目录 `static/audio|video`
 - **og 分享图** = `static/branding/og-default.jpg`（1200×630，作为全站 og:image 兜底；文章有 cover 时被 cover 覆盖）。重生成：`NODE_PATH=/tmp/ogtool/node_modules node scripts/gen-og-image.js`（sharp 不进仓库，见脚本头注释）
 - **editPost 已启用**（仓库公开）：文章页 meta 行有「在 GitHub 上改进本文」链接（URL+文件路径拼成具体文件）；URL 的分支段必须写 **master**（默认分支）——曾误写 `main` 致全站死链（2026-11-04 修复）
@@ -50,8 +51,9 @@
 - **响应式约定**：断点与主题对齐（768px = zmedia；1280px = 浮动目录自定）；**≥1280px 目录悬浮**于正文右侧空白（site.js 强制 `details.toc` open + CSS `details.toc[open]` fixed 定位、隐藏 summary——`:has`/open 门控保证 JS 禁用时回退内联折叠条；.toc 独立滚动防长目录溢出）；表格 `overflow-x:auto` 防撑破窄屏；移动端语言短码 ZH/JA/EN（见多语言约定）；正文列保持 720px 窄测（65-75ch 可读性标准，大屏留白是特性）；不加汉堡菜单（5 项折行可接受）、不加 CJK 两端对齐（中英混排拉伸难看）
 - **字体栈约定（2026-11-04）**：主题原栈纯拉丁、无 CJK 字体——ja 页面兜底命中中文字体，汉字被排成中式字形。ui.css 按语言显式栈：zh=系统 UI 拉丁 + PingFang SC/微软雅黑 UI/Noto Sans CJK SC；**ja=系统 UI 拉丁 + Hiragino/Yu Gothic/Noto Sans CJK JP**（字形变体正确）；en=纯拉丁栈；`text-autospace: normal` 自动中西文间距（渐进增强）。**有意不引网页字体**：大陆可达性 + CJK 字体多 MB；若未来要全平台像素级一致，自托管切片 Noto Sans SC/JP（重量级工程，暂不做）
 - 结构性文件（`posts/_index.md` 等板块索引）已用 `.pages.yml` 的 `exclude` 挡在 CMS 外，只走 Git 路径——给它们开草稿会整块下线，CMS 列表里的条目都是真实文章
-- CMS 发表文章的文件名是自动时间戳（`{year}{month}{day}-{hour}{minute}.md`，中文标题无法自动生成 slug）；URL 语义化 = 事后在 CMS 里改文件名（会换 URL），**改完把旧路径填进「旧链接跳转」（aliases）字段**——注意填 `/posts/<旧名>/`（不含语言前缀，Hugo 多语言模式自动加前缀），旧 URL 即生成 meta-refresh 跳转页；CMS actions 按钮已整体移除，防孤儿记录烧配额
+- CMS 发表文章的文件名默认时间戳（`{year}{month}{day}-{hour}{minute}.md`，中文标题无法自动生成 slug），`field: create`（2026-11-05）＝**新建时文件名输入框可见、可当场改成语义化 slug**（需实测确认预填模板值）；事后改名的老流程不变（会换 URL），**改完把旧路径填进「旧链接跳转」（aliases）字段**——注意填 `/posts/<旧名>/`（不含语言前缀，Hugo 多语言模式自动加前缀），旧 URL 即生成 meta-refresh 跳转页；CMS actions 按钮已整体移除，防孤儿记录烧配额
 - CMS 已暴露主题原生参数字段：`weight`（置顶）/`showtoc`/`searchHidden`/`robotsNoIndex`/`aliases`——纯字段、零模板工作，主题直接消费
+- **AI 翻译流水线（2026-11-05）**：push `content/zh/**` → `translate-content` workflow 跑 `scripts/translate.mjs`（Workers AI 免费计划，模型 `@cf/qwen/qwen3-30b-a3b-fp8`，本地无 token 时自动回退 `cf` CLI OAuth）生成 `content/{ja,en}/posts/<同名>.md` 并回写 git（`[skip-translate] [skip-lastmod]`，机翻文件不带 lastmod）；commit 前 `hugo --gc --minify` 校验产物防坏 TOML 打挂 Netlify 部署。两段式调用：字段走小 JSON、正文走纯文本（**Markdown 塞 JSON 会被模型打散链接语法**，实测 qwen3 与 llama 都如此）。增量 = 译文 front matter `source_hash`（sha256，含 PROMPT_VERSION+MODEL，一致即跳过；换模型自动全量重译，改提示词要递增版本号）。**人工保护**：无 `source_hash` 的译文（手写，或经 CMS 编辑后标记被剥离）永不覆盖/删除；人工校对过的机翻只要 zh 源不动就不会被重译。zh 源删除→删机翻目标；zh 转 draft→目标 draft 同步。单篇退出：zh 加 `auto_translate = false`。Secrets：`CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN`（Workers AI Run 权限）。每次 zh 内容变更会有两次 Netlify 部署（原文 push + 译文 push），正常现象
 - 评论 = giscus：`comments.html` 站点覆盖 + `hugo.toml [params.giscus]`。**待配置**：到 giscus.app 生成 repo/repoId/category/categoryId 填入即启用（repo 需开 Discussions + 安装 giscus App）；凭据留空时评论区不渲染
 - 主题升级流程见 `.github/workflows/update-papermod.yml` 内联检查；升级后必跑 feature-check
 

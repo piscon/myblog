@@ -1,24 +1,35 @@
+# Pages CMS 配置
+#
+# 三集合的 fields/filename/view 经 YAML 锚点共享（zh 块定义 &post_*，ja/en 引用）：
+# 增改字段只动 zh 块一处、三语言同步生效；代价是字段 label/description 统一为中文
+# （2026-11-05 定案，站点主编辑语言为中文）。
+# ⚠️ 勿在 CMS Settings UI 里重存本文件——重新序列化会展开锚点、文件膨胀回三份。
+#
+# media.rename: safe 会 slugify 上传文件名（默认保留原名）；CJK 文件名的 slugify
+# 行为未验证，若实测中文名被剥光（只剩扩展名/互相重名），把 rename 改回 false。
+#
+# 视频不进 git（Netlify 配额约定）：video 媒体源与 video_file 字段已移出 CMS；
+# 模板仍消费 video_file/video_url（Git 路径维护），merge: true 保住已有文章的键。
+
 media:
   - name: images
     label: 图片
     input: static/images
     output: /images
     extensions: [jpg, jpeg, png, webp, gif, svg]
+    rename: safe
   - name: audio
     label: 音频
     input: static/audio
     output: /audio
     categories: [audio]
-  - name: video
-    label: 视频
-    input: static/video
-    output: /video
-    categories: [video]
+    rename: safe
   - name: files
     label: 附件
     input: static/files
     output: /files
     categories: [document]
+    rename: safe
 
 content:
   - name: zh-posts
@@ -27,20 +38,15 @@ content:
     path: content/zh/posts
     format: toml-frontmatter
     exclude: [_index.md]
-    fields:
-      - name: lang
-        label: 语言
-        type: string
-        default: zh
-        required: true
+    fields: &post-fields
       - name: title
         label: 标题
         type: string
         required: true
       - name: description
         label: 摘要（SEO）
-        type: text
-        description: 120-160字，用于搜索摘要和分享预览
+        type: string
+        description: 120-160字，用于搜索摘要和分享预览；单行
         pattern:
           regex: '^(.{120,160})?$'
           message: 摘要需 120-160 字，留空则不生成摘要
@@ -51,7 +57,6 @@ content:
       - name: draft
         label: 草稿
         type: boolean
-        default: false
       - name: categories
         label: 分类
         type: string
@@ -69,12 +74,6 @@ content:
         options:
           media: audio
           categories: [audio]
-      - name: video_file
-        label: 视频（文末播放器）
-        type: file
-        options:
-          media: video
-          categories: [video]
       - name: media_position
         label: 播放器位置
         type: select
@@ -107,16 +106,13 @@ content:
       - name: showtoc
         label: 显示目录
         type: boolean
-        default: true
-        description: 文章页是否显示目录（站点默认开）
+        description: 文章页是否显示目录（站点默认开，不勾即用全局默认）
       - name: searchHidden
         label: 从站内搜索隐藏
         type: boolean
-        default: false
       - name: robotsNoIndex
         label: 禁止搜索引擎收录
         type: boolean
-        default: false
         description: 开启后输出 noindex meta，搜索引擎不收录本页
       - name: aliases
         label: 旧链接跳转
@@ -129,11 +125,11 @@ content:
         required: true
         options:
           media: images
-    filename:
+    filename: &post-filename
       template: '{year}{month}{day}-{hour}{minute}.md'
-      field: false
-    view:
-      fields: [title, description, date, draft, lang]
+      field: create
+    view: &post-view
+      fields: [title, description, date, draft]
       primary: title
       sort: [date, title]
       default:
@@ -146,118 +142,9 @@ content:
     path: content/ja/posts
     format: toml-frontmatter
     exclude: [_index.md]
-    fields:
-      - name: lang
-        label: 言語
-        type: string
-        default: ja
-        required: true
-      - name: title
-        label: タイトル
-        type: string
-        required: true
-      - name: description
-        label: 概要（SEO）
-        type: text
-        description: 120-160文字、検索概要と共有プレビュー用
-        pattern:
-          regex: '^(.{120,160})?$'
-          message: 概要は120〜160文字で入力してください（空欄なら概要なし）
-      - name: date
-        label: 日付
-        type: date
-        required: true
-      - name: draft
-        label: 下書き
-        type: boolean
-        default: false
-      - name: categories
-        label: カテゴリ
-        type: string
-        list: true
-      - name: tags
-        label: タグ
-        type: string
-        list: true
-      - name: cover
-        label: カバー
-        component: cover
-      - name: audio_file
-        label: 音声（末尾プレーヤー）
-        type: file
-        options:
-          media: audio
-          categories: [audio]
-      - name: video_file
-        label: 動画（末尾プレーヤー）
-        type: file
-        options:
-          media: video
-          categories: [video]
-      - name: media_position
-        label: プレーヤー位置
-        type: select
-        options:
-          values:
-            - name: bottom
-              label: 末尾（デフォルト）
-            - name: top
-              label: 冒頭（タイトル下）
-      - name: youtube_id
-        label: YouTube 動画ID
-        type: string
-        description: 動画IDのみ（dQw4w9WgXcQ）。完全URLは貼らない
-        pattern:
-          regex: '^([A-Za-z0-9_-]{11})?$'
-          message: YouTube ID は11文字（半角英数字と - _）です。URL ではなく ID のみ貼り付けてください
-      - name: bilibili_bvid
-        label: ビリビリ BV
-        type: string
-        description: BV番号のみ（BV1xx411c7mD）
-        pattern:
-          regex: '^(BV[0-9A-Za-z]{10})?$'
-          message: ビリビリ BV 番号は BV で始まる12文字です。URL ではなく BV 番号のみ貼り付けてください
-      - name: weight
-        label: 固定順位
-        type: number
-        description: 数値が小さいほど上位（目玉記事用）。空欄は日付順
-        options:
-          min: 0
-      - name: showtoc
-        label: 目次を表示
-        type: boolean
-        default: true
-        description: 記事ページに目次を表示するか（サイト既定はオン）
-      - name: searchHidden
-        label: サイト内検索から隠す
-        type: boolean
-        default: false
-      - name: robotsNoIndex
-        label: 検索エンジンのインデックス禁止
-        type: boolean
-        default: false
-        description: オンで noindex meta を出力し、検索エンジンに収録されません
-      - name: aliases
-        label: 旧リンク転送
-        type: string
-        list: true
-        description: ファイル名を変更した記事は旧パスを入力（言語プレフィックス不要、例 /posts/20261104-1551/、言語別に自動配置）。旧リンクは自動で本記事へ転送されます
-      - name: body
-        label: 本文
-        type: rich-text
-        required: true
-        options:
-          media: images
-    filename:
-      template: '{year}{month}{day}-{hour}{minute}.md'
-      field: false
-    view:
-      fields: [title, description, date, draft, lang]
-      primary: title
-      sort: [date, title]
-      default:
-        sort: date
-        order: desc
+    fields: *post-fields
+    filename: *post-filename
+    view: *post-view
 
   - name: en-posts
     label: English Posts
@@ -265,118 +152,9 @@ content:
     path: content/en/posts
     format: toml-frontmatter
     exclude: [_index.md]
-    fields:
-      - name: lang
-        label: Language
-        type: string
-        default: en
-        required: true
-      - name: title
-        label: Title
-        type: string
-        required: true
-      - name: description
-        label: Description (SEO)
-        type: text
-        description: 120-160 characters for search snippets and share previews
-        pattern:
-          regex: '^(.{120,160})?$'
-          message: Description must be 120-160 characters, or left empty
-      - name: date
-        label: Date
-        type: date
-        required: true
-      - name: draft
-        label: Draft
-        type: boolean
-        default: false
-      - name: categories
-        label: Categories
-        type: string
-        list: true
-      - name: tags
-        label: Tags
-        type: string
-        list: true
-      - name: cover
-        label: Cover
-        component: cover
-      - name: audio_file
-        label: Audio (footer player)
-        type: file
-        options:
-          media: audio
-          categories: [audio]
-      - name: video_file
-        label: Video (footer player)
-        type: file
-        options:
-          media: video
-          categories: [video]
-      - name: media_position
-        label: Player position
-        type: select
-        options:
-          values:
-            - name: bottom
-              label: Bottom (default)
-            - name: top
-              label: Top (below title)
-      - name: youtube_id
-        label: YouTube video ID
-        type: string
-        description: Paste the video ID only (e.g. dQw4w9WgXcQ), not the full URL; YouTube is unreachable for mainland-China readers
-        pattern:
-          regex: '^([A-Za-z0-9_-]{11})?$'
-          message: YouTube ID is 11 characters (alphanumeric, -, _). Paste the ID only, not the full URL
-      - name: bilibili_bvid
-        label: Bilibili BV ID
-        type: string
-        description: Paste the BV ID only (e.g. BV1xx411c7mD), not the full URL
-        pattern:
-          regex: '^(BV[0-9A-Za-z]{10})?$'
-          message: The Bilibili BV ID starts with BV and is 12 characters in total. Paste the BV ID only, not the full URL
-      - name: weight
-        label: Pinned weight
-        type: number
-        description: Lower numbers rank higher (for pinning posts); leave empty to sort by date
-        options:
-          min: 0
-      - name: showtoc
-        label: Show TOC
-        type: boolean
-        default: true
-        description: Show table of contents on the post page (site default is on)
-      - name: searchHidden
-        label: Hide from site search
-        type: boolean
-        default: false
-      - name: robotsNoIndex
-        label: Noindex (search engines)
-        type: boolean
-        default: false
-        description: Outputs a noindex meta so search engines skip this page
-      - name: aliases
-        label: Legacy link redirects
-        type: string
-        list: true
-        description: If the filename changed, add the old path (no language prefix, e.g. /posts/20261104-1551/; placed under the language automatically); old links redirect here automatically
-      - name: body
-        label: Body
-        type: rich-text
-        required: true
-        options:
-          media: images
-    filename:
-      template: '{year}{month}{day}-{hour}{minute}.md'
-      field: false
-    view:
-      fields: [title, description, date, draft, lang]
-      primary: title
-      sort: [date, title]
-      default:
-        sort: date
-        order: desc
+    fields: *post-fields
+    filename: *post-filename
+    view: *post-view
 
 components:
   cover:
@@ -399,4 +177,8 @@ settings:
     merge: true
   commit:
     identity: user
-
+    templates:
+      create: 'CMS create {filename}'
+      update: 'CMS update {filename}'
+      delete: 'CMS delete {filename}'
+      rename: 'CMS rename {oldFilename} -> {newFilename}'

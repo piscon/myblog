@@ -175,3 +175,13 @@
 - **rich-text `body` + Hugo shortcode 冲突**：仓库实测 CMS 编辑器会破坏 shortcode 语法；官方文档未描述该行为（§11），故本仓库约定「正文高级排版走 Git 路径、CMS Tiptap/编辑器只做普通 Markdown」。
 - `filename: '{slug}.md'`、`format: toml-frontmatter`、`exclude: [_index.md]`（2026-11-04 加：板块索引原会被 CMS 当普通条目暴露，误开草稿会让整个 posts 列表页下线）、多语言三 collection（zh/ja/en）结构为仓库实测配置；`view.filter` 曾在用，2026-11-04 已移除（标准做法：`fields` 保留 `draft` 列标记草稿，不做列表过滤）。
 - **feature-check 体系**（`scripts/feature-check.sh` 12 项断言，weekly PR / build-check 两处运行；CMS 体检按钮已于 2026-11-04 移除）是仓库侧对「CMS + 主题耦合点」的回归防线，CMS 文档无关，属仓库自建能力。
+
+**2026-11-05 配置增补**（`.pages.yml` 重构，本节以上条目按当日快照保留）：
+- 三集合 `fields`/`filename`/`view` 经 **YAML 锚点共享**（zh 块定义 `&post-fields` 等，ja/en 用 `*` 引用）——404 行 → 约 190 行，增改字段一处生效；label 统一中文。锚点属「官方文档未确认」用法（§13），本地 yaml 解析验证过三集合结构全等；**勿经 CMS Settings UI 重存**（会展开锚点）。
+- 删 `lang` 冗余字段与 view.lang 列：站点按目录分语言，`.Params.lang` 全仓零消费（grep 核实）；`merge: true` 保已有文件键。
+- 删 `video` 媒体源与 `video_file` 字段：视频不进 git 约定（§14 上一条），防误传烧 Netlify 配额；模板消费不受影响（Git 路径）。
+- `filename.field: create`：新建时文件名输入框可见（预填时间戳，可当场语义化；预填行为待 UI 实测）。
+- media 三源加 `rename: safe`：slugify 上传文件名（默认保留原名）；CJK 名被剥光/重名时回退 `false`（待实测）。
+- SEO `description` 改 `type: string`（单行；text 多行框会诱导换行、换行致 `.` 不匹配 `\n` 卡 pattern 校验）。
+- `draft`/`searchHidden`/`robotsNoIndex`/`showtoc` 去 `default`：不勾不写键、文件降噪；showtoc 缺键走 hugo.toml 全局 `showtoc = true`，行为不变。
+- `settings.commit.templates` 定制（`CMS create {filename}` 等，rename 用 `oldFilename -> newFilename`）。
