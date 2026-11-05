@@ -12,7 +12,7 @@ tags = ['Blog', 'Getting Started']
 [cover]
   image = '/images/grass.jpg'
   alt = 'Beyond the Web'
-  caption = "Beyond the Web',"
+  caption = 'Beyond the Web'
 +++
 > This article was machine-translated by AI and may contain inaccuracies. See the [Chinese original](/zh/posts/first/) for the authoritative version.
 

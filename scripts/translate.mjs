@@ -446,7 +446,23 @@ async function translateFields(lang, slim) {
     }
     try {
       const { text, usage } = await runModel(body);
-      return { data: extractJSON(text, `字段 ${lang}`), neurons: usage?.neurons };
+      const data = extractJSON(text, `字段 ${lang}`);
+      // 字段值卫生门（2026-11-05 gemma 事故）：json_schema 只保证「合法 JSON 对象」，
+      // 不保证字符串内容干净——v8 首跑的 cover_caption 曾输出 `ネットワークの外',`
+      // （尾部多出引号逗号，来自模型把 JSON 定界符混进值里）。检查「引号/逗号收尾」
+      // 与控制字符，异常即重试；正常译文不以这些字符结尾。
+      const dirty = (s) => /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
+      for (const [k, v] of Object.entries(data)) {
+        if (v != null && typeof v === 'string' && dirty(v)) {
+          throw new Retry(`字段 ${k} 值含尾部引号/控制字符：${JSON.stringify(v)}`);
+        }
+        if (Array.isArray(v)) for (const x of v) {
+          if (typeof x === 'string' && dirty(x)) {
+            throw new Retry(`字段 ${k} 数组项含尾部引号/控制字符：${JSON.stringify(x)}`);
+          }
+        }
+      }
+      return { data, neurons: usage?.neurons };
     } catch (err) {
       if (body.response_format && isJsonModeError(err)) {
         fieldsJsonModeBroken.add(lang); // 下一轮重试自动走纯解析
@@ -899,6 +915,11 @@ function selfTest() {
   check(unsafeBlocks === 0, `合成中长文有 ${unsafeBlocks} 个多行块无法安全二分`);
   console.log(`✓ 速率预算：2 篇 ${longDoc.length} 字中长文 → ${callsPerDocPerLang} 调用/篇/语言，` +
     `共 ${totalCalls} 次；节流后峰值 ${peakPerMin} req/min（上游 300），总耗时约 ${Math.round(totalCalls * REQUEST_INTERVAL_MS / 1000)}s`);
+
+  // 字段值卫生门：模型把 JSON 定界符混进字符串值（v8 实测 `ネットワークの外',`）
+  const dirty = (s) => /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
+  check(dirty("ネットワークの外',"), '字段卫生门：尾部引号逗号应被拦下');
+  check(!dirty('ネットワークの外'), '字段卫生门：正常字段值应放行');
 
   console.log(fails ? `\n自测失败 ${fails} 项` : '\n自测全部通过');
   if (fails) process.exit(1);

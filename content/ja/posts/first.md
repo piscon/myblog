@@ -12,7 +12,7 @@ tags = ['ブログ', 'スタート']
 [cover]
   image = '/images/grass.jpg'
   alt = 'ネットワークの外'
-  caption = "ネットワークの外',"
+  caption = 'ネットワークの外'
 +++
 > 本記事はAIによる自動翻訳です。表現が不自然な場合は[中国語の原文](/zh/posts/first/)をご参照ください。
 
