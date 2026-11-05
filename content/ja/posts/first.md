@@ -3,10 +3,10 @@ lang = 'ja'
 title = 'こんにちは、世界'
 date = '2025-11-26'
 draft = false
-source_hash = '4bae5986e7a06e7b60ef8ad76f1d99c9ab1f4a309d10e183041263c78938b503'
-description = '新しい始まりと出発を祝して、初めてのブログ記事を書きました。'
-categories = ['日常']
-tags = ['ブログ', 'スタート']
+source_hash = '8ab99164a6b973a48c23ca765b9f9d090a52ebc64993216a2fe74c92beb0812e'
+description = '新しい始まり、新しい出発です。'
+categories = ['日々']
+tags = ['ブログ', '開始']
 
 [cover]
   image = '/images/grass.jpg'
@@ -17,8 +17,8 @@ tags = ['ブログ', 'スタート']
 
 新しい始まり、新しい出発！
 
-### これは私の最初のブログ記事です。記念として！
+### これは私の最初のブログ記事です、記念として！
 
-1. *[Hugo](https://gohugo.io) にコードのサポートを感謝します*
-2. *[PaperMod](https://github.com/adityatelange/hugo-PaperMod) にテーマのサポートを感謝します*
-3. *[Pages CMS](https://pagescms.org) に素早い編集のサポートを感謝します*
+1. *Hugo（https://gohugo.io）にコードのサポートを感謝します*
+2. *PaperMod（https://github.com/adityatelange/hugo-PaperMod）にテーマのサポートを感謝します*
+3. *Pages CMS（https://pagescms.org）に素早い編集のサポートを感謝します*

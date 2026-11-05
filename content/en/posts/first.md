@@ -3,22 +3,22 @@ lang = 'en'
 title = 'Hello, World'
 date = '2025-11-26'
 draft = false
-source_hash = '4bae5986e7a06e7b60ef8ad76f1d99c9ab1f4a309d10e183041263c78938b503'
-description = 'A new beginning and a new journey!'
+source_hash = '8ab99164a6b973a48c23ca765b9f9d090a52ebc64993216a2fe74c92beb0812e'
+description = 'A new beginning and a new start! This is my first blog post, commemorating this moment.'
 categories = ['Daily']
 tags = ['Blog', 'Start']
 
 [cover]
   image = '/images/grass.jpg'
-  alt = 'Beyond the Web'
-  caption = 'Beyond the Web'
+  alt = 'Outside the Web'
+  caption = 'Outside the Web'
 +++
 > This article was machine-translated by AI and may contain inaccuracies. See the [Chinese original](/zh/posts/first/) for the authoritative version.
 
-A New Beginning, A New Start!
+New beginning, new start!
 
-### This is My First Blog Post, to Celebrate!
+### This is my first blog post, to commemorate!
 
-1. *Thank you [Hugo](https://gohugo.io) for code support*
-2. *Thank you [PaperMod](https://github.com/adityatelange/hugo-PaperMod) for theme support*
-3. *Thank you [Pages CMS](https://pagescms.org) for quick editing support*
+1. *Thanks to [Hugo](https://gohugo.io) for code support*
+2. *Thanks to [PaperMod](https://github.com/adityatelange/hugo-PaperMod) for theme support*
+3. *Thanks to [Pages CMS](https://pagescms.org) for quick editing support*
