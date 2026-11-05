@@ -2,6 +2,7 @@
 lang = 'zh'
 title = '用 Cloudflare Workers AI 给博客搭自动翻译流水线'
 date = '2026-11-05'
+lastmod = '2026-11-05'
 draft = false
 description = '写一篇中文，日文英文版全自动：本文记录如何用 GitHub Actions 和 Cloudflare Workers AI 免费额度搭一条增量翻译流水线——包括「Markdown 塞进 JSON 会被打散链接」这个坑、source_hash 增量机制、人工译文保护规则，以及这篇文章自己的日/英文版就是流水线自动生成的。'
 categories = ['技术']
@@ -55,6 +56,7 @@ JSON 模式产出：   Hugo（https://gohugo.io）          ← 链接死了，�
 lang = 'ja'
 title = '（翻译后的标题）'
 date = '2025-11-26'
+lastmod = '2026-11-05'
 draft = false
 source_hash = '4bae5986e7a0…'  # 中文源内容的 sha256，混入提示词版本号和模型名
 ```
