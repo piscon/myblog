@@ -451,13 +451,16 @@ async function translateFields(lang, slim) {
       // 不保证字符串内容干净——v8 首跑的 cover_caption 曾输出 `ネットワークの外',`，
       // 长文首跑更把后续 `","body":"## …` 整段 JSON 碎片吞进 caption 值里。
       // 三重检查：①键集合必须恰好是 schema 的 6 键（无多余键）；②字符串值不得含
-      // JSON 结构碎片 `","` / `":"` / `\n##`（模型串位的典型形态）；③尾部引号/控制字符。
+      // JSON 结构碎片 `","` / `":"` / `\n##` / 转义换行（模型串位的典型形态）；
+      // ③尾部 `',` 这类明确定界符残留与控制字符。
+      // 注意：不能泛查「引号收尾」——正常译文 description 完全可以以引号+空格
+      // 结尾（2026-11-05 7 篇实测 en/zz-s03 因此被误伤 3 次重试全失败）。
       const REQUIRED_KEYS = Object.keys(FIELDS_SCHEMA.properties);
       const extra = Object.keys(data).filter((k) => !REQUIRED_KEYS.includes(k));
       if (extra.length) throw new Retry(`字段响应多出非 schema 键：${extra.join(',')}`);
       const dirty = (s) =>
         /["']\s*,\s*"|"\s*:\s*"|\n#{1,6}\s|\\n/.test(s) ||
-        /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
+        /['"]\s*,\s*$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
       for (const [k, v] of Object.entries(data)) {
         if (v != null && typeof v === 'string' && dirty(v)) {
           throw new Retry(`字段 ${k} 值含 JSON 碎片/控制字符：${JSON.stringify(v.slice(0, 60))}`);
@@ -923,10 +926,11 @@ function selfTest() {
     `共 ${totalCalls} 次；节流后峰值 ${peakPerMin} req/min（上游 300），总耗时约 ${Math.round(totalCalls * REQUEST_INTERVAL_MS / 1000)}s`);
 
   // 字段值卫生门：模型把 JSON 定界符混进字符串值（v8 实测 `ネットワークの外',`）
-  const dirty = (s) => /["']\s*,\s*"|"\s*:\s*"|\n#{1,6}\s|\\n/.test(s) || /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
-  check(dirty("ネットワークの外',"), '字段卫生门：尾部引号逗号应被拦下');
+  const dirty = (s) => /["']\s*,\s*"|"\s*:\s*"|\n#{1,6}\s|\\n/.test(s) || /['"]\s*,\s*$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
+  check(dirty("ネットワークの外',"), '字段卫生门：尾部定界符残留应被拦下');
   check(dirty('日が沈み始めたばかりの通り","body":"## 一、地下鉄…'), '字段卫生门：JSON 碎片吞入应被拦下');
   check(!dirty('天刚暗下来的那条街'), '字段卫生门：正常字段值应放行');
+  check(!dirty('the same unfinished piano piece " '), '字段卫生门：引号+空格收尾的正常译文不得误伤');
 
   console.log(fails ? `\n自测失败 ${fails} 项` : '\n自测全部通过');
   if (fails) process.exit(1);
