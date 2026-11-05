@@ -438,6 +438,11 @@ function isMachineGenerated(parsed) {
   return parsed && typeof parsed.fm[MACHINE_KEY] === 'string' && parsed.fm[MACHINE_KEY].length > 0;
 }
 
+// CMS 里 boolean 可能被序列化成字符串，true/'true' 都认
+const isTrue = (v) => v === true || v === 'true';
+// 译文锁定 = 视同人工稿件（CMS 的 translation_lock 开关），永不覆盖/删除/同步
+const isLocked = (parsed) => parsed && isTrue(parsed.fm.translation_lock);
+
 function setDraftFlag(file, raw, flag) {
   const re = /^draft\s*=\s*(true|false)/m;
   if (re.test(raw)) return raw.replace(re, `draft = ${flag}`);
@@ -473,8 +478,9 @@ async function main() {
       console.log(`- 跳过 ${name}（无法解析 front matter）`);
       continue;
     }
-    if (src.fm.auto_translate === false) {
-      console.log(`- 跳过 ${name}（auto_translate = false）`);
+    if (src.fm.auto_translate === false || src.fm.auto_translate === 'false'
+      || isTrue(src.fm.no_translate)) {
+      console.log(`- 跳过 ${name}（已退出自动翻译）`);
       continue;
     }
     if (src.fm.draft === true) {
@@ -506,6 +512,10 @@ async function main() {
 
       if (existing && !isMachineGenerated(existing)) {
         console.log(`- 跳过 ${lang}/${name}（人工手写译文，不触碰）`);
+        continue;
+      }
+      if (existing && isLocked(existing)) {
+        console.log(`- 跳过 ${lang}/${name}（译文已锁定，视同人工稿件）`);
         continue;
       }
 
@@ -602,7 +612,7 @@ async function main() {
     for (const f of readdirSync(dir).filter((x) => x.endsWith('.md') && x !== '_index.md')) {
       const tPath = join(dir, f);
       const parsed = parsePost(readFileSync(tPath, 'utf8'));
-      if (!isMachineGenerated(parsed)) continue; // 人工手写文件永不删除
+      if (!isMachineGenerated(parsed) || isLocked(parsed)) continue; // 人工手写/已锁定文件永不删除
       const zhRaw = join(ZH_POSTS, f);
       if (!existsSync(zhRaw)) {
         console.log(`- 删除孤儿机翻 ${lang}/${f}（zh 源已不存在）`);

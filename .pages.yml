@@ -114,6 +114,14 @@ content:
         label: 禁止搜索引擎收录
         type: boolean
         description: 开启后输出 noindex meta，搜索引擎不收录本页
+      - name: no_translate
+        label: 不翻译（退出 AI 日/英文自动生成）
+        type: boolean
+        description: 仅中文条目勾选：本篇不再生成/更新日文英文版（已有译文保留不动）
+      - name: translation_lock
+        label: 锁定译文（校对后转人工稿）
+        type: boolean
+        description: 仅 ja/en 译文条目勾选：此译文视同人工稿件，AI 永不覆盖/删除，中文原文更新也不再同步
       - name: aliases
         label: 旧链接跳转
         type: string
