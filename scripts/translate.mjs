@@ -64,8 +64,8 @@ const ZH_POSTS = join(ROOT, 'content/zh/posts');
 const LANGS = ['ja', 'en'];
 
 const MODEL = process.env.TRANSLATE_MODEL || '@cf/qwen/qwen3-30b-a3b-fp8';
-const PROMPT_VERSION_BODY = 'v6';   // 正文提示词（占位符保护 + 贪心分段；改动使旧译文 hash 失配，全量重译一次）
-const PROMPT_VERSION_FIELDS = 'v4'; // 字段提示词（/no_think + json_schema）
+const PROMPT_VERSION_BODY = 'v7';   // 正文提示词（AST 保护 + 简化规则；改动使旧译文 hash 失配，全量重译一次）
+const PROMPT_VERSION_FIELDS = 'v5'; // 字段提示词（简化 + 术语规则挪入；改动使字段 hash 失配）
 const MAX_TOKENS_FIELDS = 2000;
 const MAX_TOKENS_BODY = 6000;
 const REST_TIMEOUT_MS = 180_000;
@@ -107,8 +107,8 @@ const FIELDS_SCHEMA = {
 };
 
 const LANG_FIELDS_PROMPT = {
-  ja: `把 JSON 中 title/description/categories/tags/cover_alt/cover_caption 的中文翻译成自然的日语（です・ます体）。规则：title 简洁；description 1-2 句完整句（源为 null 时根据 body 概括写出）；categories/tags 用日语惯用词，专有名词（AI、Hugo 等）保留原文；cover_alt/cover_caption 源为 null 输出 null。只输出一个合法 JSON 对象，键与输入一致。/no_think`,
-  en: `Translate the Chinese in the JSON fields title/description/categories/tags/cover_alt/cover_caption into natural English. Rules: title concise; description 1-2 full sentences (if null, summarize from body); categories/tags use common English equivalents, keep proper nouns (AI, Hugo) as-is; cover_alt/cover_caption output null if null. Output ONLY one valid JSON object with the same keys. /no_think`,
+  ja: `把 JSON 各字段的中文译成自然的日语（です・ます体）：title 简洁；description 1-2 句完整句（源为 null 则据 body 概括写出）；categories/tags 用日语惯用词、专有名词（AI、Hugo 等）保留原文；「中文」写作「中国語」；cover_alt/cover_caption 源为 null 输出 null。/no_think`,
+  en: `Translate the Chinese in each JSON field into natural English: title concise; description 1-2 full sentences (summarize from body if null); categories/tags use common English equivalents, keep proper nouns (AI, Hugo) as-is; "中文" as "Chinese"; cover_alt/cover_caption output null if null. /no_think`,
 };
 // zh 摘要缺失时自动补写（写回 zh front matter；用户可在 CMS 改写，改后 fHash 失配自动重译三语字段）
 const DESC_PROMPT = `用 70-160 个汉字为这篇中文博客文章写一段 SEO 摘要。要求：单行纯文本；不要引号、Markdown、换行或任何解释；第一句概括文章核心（搜索结果只展示前约 80 字）；客观自然，不夸张推销。/no_think`;
@@ -150,16 +150,16 @@ function upsertDescriptionLine(raw, desc) {
 }
 
 // 正文调用：Markdown 语法在 protectBody 里已被替换为占位符，模型只看到自然语言 + 编号 token。
-// 规则因此极简——可靠性不依赖模型「听话」，而依赖「模型根本接触不到语法」。
+// 规则每条都要有存在理由（2026-11-05 审计）：①编号契约有完整性门/位置门兜底但模型须知情；
+// ②「全部译出」与「只输出译文」无代码防线（漏译/解释都会被当译文落盘）——三条都删不得。
+// 术语规则（中文→中国語）已挪去字段 prompt：实测它该生效的地方（description）在字段调用里。
 const LANG_BODY_PROMPT = {
-  ja: `你是个人技术博客的专业翻译。把用户文本中的中文译成自然的日语（です・ます体）。/no_think
-- 保持 «0» 这类编号标记原样、位置不变、每个恰好出现一次
-- 只输出译文，不要解释、不要代码围栏、不要新增或删除标记
-- 中文必须全部译出；「中文」译作「中国語」`,
-  en: `You are a professional translator for a personal tech blog. Translate the Chinese in the user text into natural English. /no_think
-- Keep tokens like «0» verbatim, in place, each appearing exactly once
-- Output ONLY the translation — no explanations, no code fences, no added or removed tokens
-- All Chinese must be translated`,
+  ja: `把用户文本中的中文译成自然的日语（です・ます体）。/no_think
+- «0» 这类编号标记原样保留、位置不变、每个恰好出现一次，不增不减
+- 中文必须全部译出，只输出译文本身`,
+  en: `Translate the Chinese in the user text into natural English. /no_think
+- Keep tokens like «0» verbatim, in place, each appearing exactly once — no adding, removing or merging
+- Translate ALL Chinese; output only the translation itself`,
 };
 
 // ---------- 错误分类 ----------
