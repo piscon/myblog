@@ -2,7 +2,7 @@
 title = '把一张明信片寄丢之后'
 date = '2026-11-05'
 lastmod = '2026-11-05'
-draft = true
+draft = false
 description = '给朋友寄了张明信片，写了地址却没贴够邮票，退回来时边角已经磨毛。关于「没送到」这件事本身，以及后来干脆不补寄的那个决定。'
 categories = ['日常']
 tags = ['信件', '朋友']

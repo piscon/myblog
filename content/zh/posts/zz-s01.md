@@ -2,7 +2,7 @@
 title = '菜市场里的天气预报'
 date = '2026-11-05'
 lastmod = '2026-11-05'
-draft = true
+draft = false
 description = '楼下菜市场的摊主们比手机上的天气软件准。关于一把芹菜、一句「明天有雨」，和那些不用联网也能运转的小小预报系统。'
 categories = ['日常']
 tags = ['菜市场', '散步']

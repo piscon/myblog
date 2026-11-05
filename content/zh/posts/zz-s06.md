@@ -2,7 +2,7 @@
 title = '把构建时间从八秒压到两秒：一次没什么技术含量的优化'
 date = '2026-11-05'
 lastmod = '2026-11-05'
-draft = true
+draft = false
 description = 'Hugo 构建慢了半秒都要查清楚。这次的元凶不是模板也不是图片，是一条被反复调用的分类查询。记录定位过程、三个无效尝试，和最后那行删掉的代码。'
 categories = ['技术']
 tags = ['Hugo', '性能']

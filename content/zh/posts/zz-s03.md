@@ -2,7 +2,7 @@
 title = '傍晚六点的琴声'
 date = '2026-11-05'
 lastmod = '2026-11-05'
-draft = true
+draft = false
 description = '搬来之后每天傍晚六点，隔壁都会响起一段总在同一处停下的钢琴。关于没弹完的半首曲子、不好意思敲的门，和「不打扰」这种温柔的距离。'
 categories = ['日常']
 tags = ['邻居', '声音']

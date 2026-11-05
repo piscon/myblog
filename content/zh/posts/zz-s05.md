@@ -2,7 +2,7 @@
 title = '给静态博客加一个不打扰的阅读进度条'
 date = '2026-11-05'
 lastmod = '2026-11-05'
-draft = true
+draft = false
 description = '用不到四十行 CSS 和一小段 JS 给文章页加进度条：不引第三方库、不改主题本体、JS 禁用时自动回退。记录取舍过程和两个踩过的小坑。'
 categories = ['技术']
 tags = ['Hugo', 'CSS', 'JavaScript']
