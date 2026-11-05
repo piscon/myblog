@@ -56,7 +56,6 @@ JSON 模式产出：   Hugo（https://gohugo.io）          ← 链接死了，�
 lang = 'ja'
 title = '（翻译后的标题）'
 date = '2025-11-26'
-lastmod = '2026-11-05'
 draft = false
 source_hash = '4bae5986e7a0…'  # 中文源内容的 sha256，混入提示词版本号和模型名
 ```

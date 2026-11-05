@@ -63,17 +63,23 @@ jobs:
             
             echo "Updating $file -> lastmod = $DATE_ONLY"
             
-            # Update or insert lastmod in TOML front matter
-            if grep -q '^lastmod' "$file"; then
+            # Update or insert lastmod in TOML front matter.
+            # Range 1,/^+++/ restricts edits to the front matter — article
+            # bodies can contain TOML example code blocks with their own
+            # `date =` lines (sed without the range once injected a lastmod
+            # line into such a block).
+            FM='1,/^+++[ \t]*$/'
+            if sed -n "${FM}p" "$file" | grep -q '^lastmod'; then
               # Replace existing
-              sed -i "s/^lastmod.*/lastmod = '$DATE_ONLY'/" "$file"
+              sed -i "${FM} s/^lastmod.*/lastmod = '$DATE_ONLY'/" "$file"
+            elif sed -n "${FM}p" "$file" | grep -q '^date'; then
+              # Insert after date line if present
+              sed -i "${FM} {
+                /^date/a lastmod = '$DATE_ONLY'
+              }" "$file"
             else
-              # Insert after date line if present, otherwise after first line of front matter
-              if grep -q '^date' "$file"; then
-                sed -i "/^date/a lastmod = '$DATE_ONLY'" "$file"
-              else
-                sed -i "1a lastmod = '$DATE_ONLY'" "$file"
-              fi
+              # Otherwise after first line of front matter (the opening +++)
+              sed -i "1a lastmod = '$DATE_ONLY'" "$file"
             fi
           done <<< "$CHANGED"
           
