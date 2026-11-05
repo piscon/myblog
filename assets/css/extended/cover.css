@@ -118,3 +118,25 @@
   overflow: hidden;
   font-size: 1.272em;
 }
+
+/* Phone pattern (≤768px, the theme's zmedia breakpoint): the 226px text
+   column cannot carry title + summary + meta — everything hit the 2-line
+   clamps and the screen filled with ellipses. News-app phone convention
+   applies instead: excerpt drops, title relaxes one ladder rung (20.3px =
+   φ^0.25) with a 3-line clamp so nothing truncates, meta follows directly.
+   Rows shrink to ~130px and density rises; term rows (block flow, theme
+   compact form) are untouched. */
+@media screen and (max-width: 768px) {
+  .post-entry:not(.tag-entry) > .entry-content {
+    display: none;
+  }
+
+  .post-entry:not(.tag-entry) > .entry-footer {
+    margin-top: 8px;
+  }
+
+  .post-entry .entry-header h2 {
+    font-size: 1.127em;
+    -webkit-line-clamp: 3;
+  }
+}
