@@ -2,6 +2,7 @@
 lang = 'en'
 title = 'Hello, World'
 date = '2025-11-26'
+lastmod = '2026-11-05'
 draft = false
 source_hash = 'b25ab0516d920add563d560fe51202e6b34be4954eb24f839f605c7e98f71683'
 source_fields_hash = '6f3044391be9639c5ef424d0923fe4e7161894c43b76d66537d1e7384da867a1'
