@@ -63,5 +63,8 @@ jobs:
             echo "No translations to commit."
           else
             git commit -m "chore: AI translations (ja/en) [skip-translate] [skip-lastmod]"
+            # update-lastmod 与本 workflow 都由 content 变更触发、都回写 git；
+            # 推前 rebase 避免慢的一方被快的一方挡成 non-fast-forward
+            git pull --rebase origin master
             git push
           fi
