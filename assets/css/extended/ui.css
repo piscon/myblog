@@ -239,12 +239,13 @@ html[lang^="en"] body {
 /* Anchor-jump breathing room: browsers scroll [id] targets flush to the
    viewport top edge, so a TOC click lands the heading with zero space
    above it (header is not sticky — pure comfort, no offset to budget).
-   One u of scroll-margin restores a flow-like gap; also covers footnote
-   round-trips (backref sup in text, footnote li at page bottom). */
+   Two u (40px) of scroll-margin reads as comfortable headroom; also
+   covers footnote round-trips (backref sup in text, footnote li at
+   page bottom). */
 :is(h1, h2, h3, h4, h5, h6)[id],
 li[id^="fn:"],
 sup[id^="fnref:"] {
-  scroll-margin-top: var(--gap);
+  scroll-margin-top: calc(var(--gap) * 2);
 }
 
 /* Floating side TOC on wide screens: docs-standard sidebar on the LEFT of
