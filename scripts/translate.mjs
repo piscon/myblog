@@ -670,18 +670,18 @@ async function translateOneBlock(lang, block, depth = 0) {
     const lines = block.split('\n');
     // 深度 ≥1：不再二分（表格片段越切越怪，模型对裸管道符行更不稳定），
     // 改为逐行重试——单表格行/单列表项是模型最稳定的粒度。
-    // 单行最终失败时原样保留该行（一行未译远好于整篇失败；下次 zh 变更会重试）。
+    // 空行直接通过（protectBody 返回 0 token，送模型会诱发凭空 «0» 输出）。
+    // 单行最终失败时原样保留该行：一行未译（=恒等）远好于整篇失败，下次 zh 变更会重试。
     if (depth >= 1) {
       const parts = [];
       let neurons = 0;
       for (const line of lines) {
+        if (!line.trim()) { parts.push(line); continue; }
         try {
           const r = await translateOneBlock(lang, line, depth + 1);
           parts.push(r.body);
           neurons += r.neurons ?? 0;
-        } catch (lineErr) {
-          const p = protectBody(line);
-          if (p.tokens.length === 0) throw lineErr; // 纯文本行失败仍是失败
+        } catch {
           console.warn(`  ↳ ${lang} 单行重译仍失败，原样保留该行（${JSON.stringify(line.slice(0, 40))}…）`);
           parts.push(line);
         }
