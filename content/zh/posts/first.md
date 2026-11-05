@@ -3,7 +3,7 @@ lang = 'zh'
 title = '你好，世界'
 date = '2025-11-26'
 description = '博客的第一篇文章：记录这个三语静态博客的诞生——Hugo + PaperMod 搭建、Netlify 部署、Pages CMS 在线编辑，以及感谢 Hugo、PaperMod 与 Pages CMS 三个开源项目。'
-lastmod = '2026-11-04'
+lastmod = '2026-11-05'
 draft = false
 categories = [
 	'日常',
