@@ -14,3 +14,107 @@
   object-position: center;
   border-radius: var(--radius);
 }
+
+/* --- List view: uniform flush-square thumbnail rows --------------------------
+   /posts/ cards: ONE card skeleton for every list entry — a grid row of
+   min-height var(--thumb) with the text block centered as a whole — and the
+   cover (when present) is a full-bleed square overlay hugging the card's
+   left edge, with the text inset to the second column. Entries WITHOUT a
+   cover (cf-auto-translate) render the same 200px row, text-only, so the
+   list stays height-uniform instead of mixing two component shapes.
+
+   .tag-entry is excluded EVERYWHERE: term pages keep the theme's compact
+   rows. Their figures exist in the DOM but display:none (theme rule), and
+   :has(.entry-cover) alone would still match them — reserving a dead 200px
+   column and 200px row height on /tags/ (observed). Single pages keep the
+   full-width 1.91:1 cover above; this section is scoped to .post-entry.
+
+   Geometry (theme-coupling guarded by feature-check #29):
+   - DOM order is cover → header → content → footer. The figure is pulled
+     OUT of the grid flow (position:absolute; the card is theme-relative)
+     onto the reserved first column, so it cannot inflate the row tracks and
+     the text stack centers as ONE block via align-content. (Per-item
+     align-self:center was tried and reverted: each item then centers inside
+     its own stretched track and the lines spread over the full card.)
+   - Strict 1:1: --thumb drives BOTH the column width and the card's
+     min-height, so at rest height == width exactly. If text ever exceeds
+     the square, the card grows and the figure follows (top/bottom anchored):
+     still flush, no longer exactly square. Mobile rows are normally taller
+     than the ~100-120px thumb, so phones get the flush rectangle.
+   - Why 176px: rung 14 of the site's own type ladder (18 × φ^¼¹⁴ = 176.4),
+     sized by an OPTICAL rule, not taste: the worst-case text stack (2-line
+     ladder title + 2-line summary + meta) is a FIXED 144.2px (explicit
+     line-heights + clamps), and its vertical breathing must match the
+     horizontal text inset (--gap = 20px) — title half-leading (~3.4px) +
+     breathing (16.1px) ≈ 19.5px to the glyphs ≈ the 20px side padding.
+     156px broke that rule (ja titles are routinely two lines → ~6px to the
+     glyphs: cramped); 200px overshot (airy, list reads slow). Row +
+     φ⁻¹·gap spacing = 188.8px → ~4.8 entries per 900px viewport.
+     Overflow (a wrapped meta line) degrades gracefully to flush cropping,
+     not a broken square. */
+.post-entry:not(.tag-entry) {
+  --thumb: clamp(96px, 28vw, 176px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--gap);
+  align-content: center;
+  padding: 0 var(--gap); /* horizontal only; centering owns the vertical */
+  min-height: var(--thumb);
+}
+
+/* Cover variant: reserve the thumbnail column, card padding moves onto the
+   figure (full bleed) and the text children */
+.post-entry:not(.tag-entry):has(.entry-cover) {
+  grid-template-columns: var(--thumb) minmax(0, 1fr);
+  padding: 0;
+}
+
+.post-entry:not(.tag-entry):has(.entry-cover) .entry-cover {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--thumb);
+  aspect-ratio: auto; /* base 1.91:1 would over-constrain the abspos box and
+                         drop bottom:0, collapsing the thumb to ~width/1.91 */
+  margin-bottom: 0;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.post-entry:not(.tag-entry):has(.entry-cover) .entry-cover img {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+
+/* Text children of the cover variant: inset to column 2 with the horizontal
+   padding the full-bleed figure removed */
+.post-entry:not(.tag-entry):has(.entry-cover) > .entry-header,
+.post-entry:not(.tag-entry):has(.entry-cover) > .entry-content,
+.post-entry:not(.tag-entry):has(.entry-cover) > .entry-footer {
+  grid-column: 2;
+  padding: 0 var(--gap);
+}
+
+/* One rhythm for EVERY list card, both variants (grid does not collapse
+   margins: the theme's 8px header margin-bottom + 8px content margin-top
+   would compound to 16px — zeroed and replaced by an explicit two-level
+   rhythm: 8px inside the title+summary group, φ⁻¹·gap (12.4px) between
+   summary and meta. In the no-cover block-flow fallback 0 + 8px still
+   collapses to 8px, so all three card kinds render the same gaps. */
+.post-entry > .entry-header {
+  margin-bottom: 0;
+}
+
+.post-entry > .entry-content {
+  margin: 8px 0 calc(var(--gap) * 0.618);
+}
+
+/* Uniform rows: long titles wrap to at most two lines in list cards.
+   Size sits ON the site's golden ladder (φ^0.5 × 18px = 22.9px) instead of
+   the theme's off-scale 24px, matching typography.css. */
+.post-entry .entry-header h2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 1.272em;
+}
