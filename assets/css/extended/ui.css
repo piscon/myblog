@@ -650,7 +650,9 @@ sup[id^="fnref:"] {
 }
 
 /* Language switcher: current language marked (injected by site.js);
-   the whole list stays constant across languages */
+   the whole list stays constant across languages. The gold check is the
+   selection mark — --accent's sanctioned "selection state" use; weight
+   alone (600 vs the links' 500) read as identical. */
 .lang-menu li.current-lang {
   display: inline-flex;
   align-items: center;
@@ -659,6 +661,13 @@ sup[id^="fnref:"] {
   color: var(--primary);
   padding: 0 0.4rem;
   cursor: default;
+}
+
+.lang-menu li.current-lang svg {
+  width: 0.9em;
+  height: 0.9em;
+  margin-left: 0.3rem;
+  color: var(--accent);
 }
 
 /* FOUC gate (all viewports, same pattern as the hamburger): until site.js
@@ -745,6 +754,16 @@ sup[id^="fnref:"] {
     /* the nav's line-height: var(--header-height) leaks in here and
        inflates each row (same as the hamburger panel rows) */
     line-height: 1.5;
+  }
+
+  /* current-language row: label left, gold check pinned to the right
+     edge — the OS language-picker pattern (theme's display:inherit
+     chain would leave the span as a plain block) */
+  .lang-menu.lang-open li.current-lang > span {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
 }
 

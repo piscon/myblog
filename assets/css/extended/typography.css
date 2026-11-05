@@ -80,7 +80,7 @@
   margin-bottom: 0.4em;
   font-size: 0.72em;
   font-weight: 600;
-  letter-spacing: 0.35em;
+  letter-spacing: var(--eyebrow-track, 0.35em);
 }
 
 html[lang^="ja"] .post-header .post-description::before {
@@ -90,7 +90,7 @@ html[lang^="ja"] .post-header .post-description::before {
 html[lang^="en"] .post-header .post-description::before {
   content: "Summary";
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  --eyebrow-track: 0.2em;
 }
 
 /* Collapsed summary row (site.js feature 10, html.js-gated — same
@@ -112,6 +112,13 @@ html.js .post-header {
   grid-template-columns: 1fr auto;
   column-gap: calc(var(--u) * 0.618); /* φ⁻¹·u — the card gutter */
   align-items: baseline;
+  /* the theme's `margin: 24px auto` is a flex-item trap: .post-single is
+     a flex column, and auto inline margins make the item shrink-to-fit
+     and center. Invisible while the description filled the width, the
+     collapse feature shrank the widest row to the label+meta line — the
+     whole header (title included) jumped ~54px inward on phones / ~95px
+     on desktop the moment .desc-body expanded back to full width */
+  margin-inline: 0;
 }
 
 html.js .post-header .post-title {
@@ -133,6 +140,12 @@ html.js .post-header .post-description::before {
   display: inline; /* share the line with the injected chevron */
   margin-bottom: 0;
   font-size: 13px;
+  /* the tracking and its negative right margin share one variable so the
+     chevron always sits tight against the last glyph — tracked text
+     leaves a phantom gap after it that read as the arrow floating free
+     of the 摘要 label (en tracks 0.2em via the lang rule above) */
+  letter-spacing: var(--eyebrow-track, 0.35em);
+  margin-right: calc(-1 * var(--eyebrow-track, 0.35em));
 }
 
 html.js .post-header .post-meta {

@@ -201,6 +201,14 @@
       var label = document.createElement('span');
       label.setAttribute('aria-current', 'true');
       label.textContent = meta.name;
+      /* gold check = the "you are here" mark on both surfaces (desktop
+         inline suffix / phone panel row right edge) — weight alone was
+         indistinguishable from the 500 links */
+      label.insertAdjacentHTML('beforeend',
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
+        ' width="14" height="14" fill="none" stroke="currentColor"' +
+        ' stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"' +
+        ' aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>');
       li.appendChild(label);
       var before = null;
       langMenu.querySelectorAll('a').forEach(function (a) {

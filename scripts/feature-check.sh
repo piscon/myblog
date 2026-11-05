@@ -164,7 +164,7 @@ check "汉堡菜单(手机)"           "grep -q '.js .header-nav>#menu{display:n
 # 取胜（同汉堡契约）；桌面 .lang-toggle 基础 display:none 保留内联全名。双面板互斥在 JS 层
 # （开启一方关闭另一方）。JS token 守 bundle（类名字面量不经 minifier），CSS token 守
 # 收纳/面板/按钮三端
-check "语言globe(手机)"          "grep -q 'lang-toggle' '$OUT'/js/site.*.js && grep -q 'lang-open' '$OUT'/js/site.*.js && grep -q '.js .lang-menu,.js .nav-sep{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-menu.lang-open{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-toggle{display:none' '$OUT'/assets/css/stylesheet.*.css"
+check "语言globe(手机)"          "grep -q 'lang-toggle' '$OUT'/js/site.*.js && grep -q 'lang-open' '$OUT'/js/site.*.js && grep -q 'aria-current' '$OUT'/js/site.*.js && grep -q '.js .lang-menu,.js .nav-sep{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-menu.lang-open{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-toggle{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-menu li.current-lang svg{width:.9em' '$OUT'/assets/css/stylesheet.*.css"
 # 文章导航（2026-11-06）：站点 i18n/{zh-CN,ja,en}.toml 平面键覆盖主题 prev_page/next_page
 # （「上一页/下一页」→「上一篇/下一篇」；ja/en 顺带文章化）。文件名规则系实证：zh 必须
 # locale 全名 zh-CN.toml（zh.toml 平局输给主题 zh.yaml）、ja/en 必须基名（ja-JP.toml 会把
