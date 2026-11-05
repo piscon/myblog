@@ -127,6 +127,17 @@
    Rows shrink to ~130px and density rises; term rows (block flow, theme
    compact form) are untouched. */
 @media screen and (max-width: 768px) {
+  .post-entry:not(.tag-entry) {
+    /* Lock the row to the thumb: uniform heights AND a strict square on
+       phones too. Worst text stack is ~107px (3-line title + one-line
+       meta), so the floor is 110px — 28vw alone dips to 96px at small
+       viewports and text would stretch the row. 110px also keeps the meta
+       line single-row at 375px (the most common phone width). */
+    --thumb: clamp(110px, 28vw, 176px);
+    height: var(--thumb);
+    overflow: hidden;
+  }
+
   .post-entry:not(.tag-entry) > .entry-content {
     display: none;
   }
@@ -135,8 +146,39 @@
     margin-top: 8px;
   }
 
+  /* Meta = date · categories. The author is site-constant (zero signal per
+     card) and the reading time is noise at this size; with both gone and
+     one font step down (12px) the line fits one row down to ~350px
+     viewports — no mid-word wraps. Separator spans are SIBLINGS of their
+     item (each item embeds its own leading sep), so hiding an item needs
+     the :has adjacency pair or a dangling `·` remains. Single-page meta is
+     scoped out (.post-entry only). */
+  .post-entry .meta-author,
+  .post-entry .meta-read,
+  .post-entry .meta-sep:has(+ .meta-author),
+  .post-entry .meta-sep:has(+ .meta-read) {
+    display: none;
+  }
+
+  .post-entry .entry-footer {
+    font-size: 12px;
+  }
+
+  /* Title at the ladder's body rung (φ^0 = 18px): two rungs under the
+     desktop list title — phone cards are ~110px tall and 20.3px read as a
+     shout. 3-line clamp at 18px ≈ 32 CJK chars, so almost nothing truncates. */
   .post-entry .entry-header h2 {
-    font-size: 1.127em;
+    font-size: 1em;
     -webkit-line-clamp: 3;
+  }
+}
+
+/* Sub-350px viewports (pre-2015 devices, <1% share): date · category still
+   exceeds the ~138px text column — date only, single line guaranteed. The
+   search hub remains the taxonomy entry point. */
+@media screen and (max-width: 349px) {
+  .post-entry .meta-cats,
+  .post-entry .meta-sep:has(+ .meta-cats) {
+    display: none;
   }
 }
