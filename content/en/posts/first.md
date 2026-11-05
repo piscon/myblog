@@ -3,23 +3,23 @@ lang = 'en'
 title = 'Hello, World'
 date = '2025-11-26'
 draft = false
-source_hash = '6fdd54b2f9d38a82ec3769b43c49663c2f7def647696def0f6d51534c4498a65'
-source_fields_hash = '9ebfc7947174addd2577c6bfa384fd63dec1a7340a06646ad512905228d8b63f'
-description = 'The first article of the blog: documenting the birth of this trilingual static blog - built with Hugo + PaperMod, deployed on Netlify, and edited online with Pages CMS, as well as thanking the three open-source projects Hugo, PaperMod, and Pages CMS.'
+source_hash = '4133c768eb81534fdd1a18bc9c00eafd5bd2898d3c34d8f96271d4725fff96e0'
+source_fields_hash = '6f3044391be9639c5ef424d0923fe4e7161894c43b76d66537d1e7384da867a1'
+description = 'The first post of this blog, documenting the creation of this trilingual static blog using Hugo, PaperMod, Netlify, and Pages CMS. Special thanks to the open-source projects that made this possible.'
 categories = ['Daily']
-tags = ['Blog', 'Start']
+tags = ['Blog', 'Getting Started']
 
 [cover]
   image = '/images/grass.jpg'
-  alt = 'Beyond the Net'
-  caption = 'Beyond the Net'
+  alt = 'Beyond the Web'
+  caption = "Beyond the Web',"
 +++
 > This article was machine-translated by AI and may contain inaccuracies. See the [Chinese original](/zh/posts/first/) for the authoritative version.
 
-A new beginning, a new start!
+A new beginning, a new journey!
 
-###  This is my first blog post, to commemorate!
+### This is my first blog post, to commemorate this moment!
 
-1. * Thanks to [Hugo](https://gohugo.io) for code support*
-2. * Thanks to [PaperMod](https://github.com/adityatelange/hugo-PaperMod) for theme support*
-3. * Thanks to [Pages CMS](https://pagescms.org) for quick editing support*
+1. *Thanks to [Hugo](https://gohugo.io) for the code support*
+2. *Thanks to [PaperMod](https://github.com/adityatelange/hugo-PaperMod) for the theme support*
+3. *Thanks to [Pages CMS](https://pagescms.org) for the quick editing support*

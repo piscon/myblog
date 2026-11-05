@@ -1,21 +1,21 @@
 +++
 lang = 'en'
-title = 'Automate Blog Translation with Cloudflare Workers AI'
+title = 'Building an Automated Blog Translation Pipeline with Cloudflare Workers AI'
 date = '2026-11-05'
 draft = false
-source_hash = 'f6cf7bdbfb9b8ae9c4f5210ffae97dca26a99cd8aeb26a4a11ba427d29e56adc'
-source_fields_hash = '75278e1f44211bad472181ee549f70ec6a40d96fda0468406ef11c9f939d1444'
-description = 'Write in Chinese and push it up, and Japanese and English versions are automatically generated and deployed within minutes. This article explains clearly how this pipeline works: why we need to split Markdown before feeding it to AI, how to make fixing a typo cost only one API call, and who is responsible when AI translation goes wrong.'
-categories = ['Technology']
+source_hash = 'de9ac8b34f390c6997848e694a961f44c99ddb6777184da3ba96e09c4a11e6ec'
+source_fields_hash = 'be5b7a14d7d7e75a0df12394bcfbbec0466d7670a85d27a211ac0463172f2cc4'
+description = 'Learn how to build a pipeline that automatically generates Japanese and English versions of your blog posts using Cloudflare Workers AI. This guide covers protecting Markdown syntax, optimizing costs, and ensuring translation quality.'
+categories = ['Tech']
 tags = ['AI', 'Cloudflare', 'Hugo']
 +++
 > This article was machine-translated by AI and may contain inaccuracies. See the [Chinese original](/zh/posts/cf-auto-translate/) for the authoritative version.
 
-This blog is multilingual (Simplified Chinese / Japanese / English). After I finish writing the Chinese version and push it, the Japanese and English versions are automatically generated and deployed within minutes — there is no manual translation involved in between. This article explains in plain language how it works, and the pitfalls encountered along the way.
+This blog is trilingual (Simplified Chinese / Japanese / English). Once I finish writing in Chinese and push it, the Japanese and English versions are automatically generated and deployed within minutes—with no manual translation involved in between. This article explains in plain language how it works and the pitfalls I encountered along the way.
 
-##  I. What does the whole system look like?
+## I. The Big Picture
 
-The entire pipeline runs on GitHub Actions, using all free resources:
+The entire pipeline runs on GitHub Actions, using only free resources:
 
 ```
 写完中文文章 push
@@ -26,75 +26,75 @@ The entire pipeline runs on GitHub Actions, using all free resources:
       → Netlify 自动部署，日/英文版上线
 ```
 
-Before starting, I set four rules, which later proved to be crucial:
+Before starting, I set four rules that proved to be lifesavers:
 
-- ** Translation enters git**. The Japanese and English versions are real files in the repository, which can be opened, edited, and rolled back at any time. AI is only the "first draft author," not the publishing channel.
-- ** The visitor side is completely static**. API keys exist only within GitHub Actions, there are zero keys on the web page, and no third-party scripts. Readers do not consume extra electricity because of me.
-- ** Each call has a bill**. All requests go through the AI Gateway, and each one records how many tokens were used, how much it cost, and how long it took.
-- ** Partial failures do not bring down the whole system**. If the Japanese translation succeeds but the English translation fails, then the Japanese version is published first, while the English version remains with the old version waiting for a retry.
+- **Translations go into git**. The Japanese and English versions are real files in the repository, which can be opened, edited, or rolled back at any time. AI is just the "first draft author," not the publishing channel.
+- **The visitor side is completely static**. API keys exist only within GitHub Actions; there are zero keys and zero third-party scripts on the webpage, so readers won't use an extra watt of electricity on my account.
+- **Every call is billed**. All requests pass through an AI Gateway, which logs every detail: how many tokens were used, how much it cost, and how long it took.
+- **Partial failures don't bring down the whole system**. If the Japanese translation succeeds but the English one fails, the Japanese version goes live first, while the English version keeps the old version and waits for a retry.
 
-##  II. Core Problem: AI will mess up Markdown
+## II. The Core Challenge: AI Can Ruin Markdown
 
-Translating plain text with AI already works well. However, blog posts are not plain text — they contain links, code blocks, tables, and list markers. In the early stages, I directly fed the entire Markdown to the model, and the translated results often "looked correct" but were actually broken. Real case example:
+Having AI translate plain text works quite well. But blog posts aren't just plain text—they are mixed with links, code blocks, tables, and list markers. In the early days, I would throw the entire Markdown file directly at the model, and the results often "looked correct" but were actually broken. Here is a real example:
 
 ```
 原文：1. *感谢 [Hugo](https://gohugo.io) 提供代码支持*
 翻后：[1. *Hugo](https://gohugo.io)に…（列表标记和星号被吞进了链接文字）
 ```
-The worst part is that such damage ** won't cause any error ** — the link remains the same, the page still renders normally, and it's almost impossible to spot without careful checking. Just writing "please keep the format" in the prompt doesn't work, as tested: the model can see the grammar, and it can't help but mess with the grammar.
+The worst part is that this kind of damage ** won't trigger an error **—the link remains the same, the page renders as usual, and you won't notice it unless you look closely. Simply writing "Please maintain the format" in the prompt is useless in practice: if the model can see the syntax, it can't help but mess with it.
 
-The final solution was straightforward: ** prevent the AI from seeing the grammar **.
+The final solution I used was very direct: **don't let the AI see the syntax**.
 
-Before translation, the program first "splits" the article: code blocks, link addresses, inline code, various markup symbols, all replaced with placeholder numbers like «0» «1». What the AI sees is only pure Chinese sentences plus a few numbers; it can't mess with the grammar. After translation, the program restores the placeholders as they were.
+Before translating, the program "disassembles" the article: code blocks, link addresses, inline code, and various markup symbols are all replaced with numbered placeholders like «0» and «1». All the AI sees are pure Chinese sentences plus a few numbers, so it has no way to break the syntax. After translation, the program swaps the placeholders back exactly as they were.
 
-The splitting uses a Markdown parser (remark) that locates based on the syntax tree, rather than using regular expressions for hard matching — the parser recognizes all standard syntax, and there's no need to patch when new syntax appears. After translation, there are several automatic checks:
+The disassembly uses a Markdown parser (remark) to locate elements via a syntax tree rather than using hard-coded regular expression matching—the parser understands all standard syntax, so no patches are needed when new syntax emerges. After translation, there are several automated checks:
 
-1. ** Check on the integrity of the numbers **: each placeholder must return exactly once; if any are missing, extra, or duplicated, it's considered a failure.
-2. ** Position check **: list markers must still be at the beginning of the line, closing symbols must still be at the end of the line.
-3. ** Structural comparison **: the number of links, headings, and tables in the translated text must match the original.
+1. **Placeholder Integrity**: Each placeholder must return exactly once; if any are missing, extra, or duplicated, it's considered a failure.
+2. **Position Check**: List markers must still be at the beginning of the line, and closing symbols must still be at the end of the line.
+3. **Structural Comparison**: The number of links, headings, and tables in the translation must match the original.
 
-If the check fails, it automatically retries; if still not working, it splits the section into smaller parts and translates again; if still not working, it leaves that line as is — better to have one line untranslated than the whole text being corrupted.
+If the checks fail, it automatically retries; if that still doesn't work, it splits the segment into smaller pieces and retries; if all else fails, it keeps the single line as-is—it's better to have one untranslated line than a broken entire article.
 
-##  3. Cost-saving mechanism: translate only what needs to be changed
+## III. Cost-saving mechanism: Translate only what has changed
 
-Each translation file has two "fingerprints" (hash): one corresponds to the main text, and the other corresponds to fields such as title and summary:
+Each translation file carries two "fingerprints" (hashes): one for the body text and one for fields like titles and summaries:
 
 ```toml
 source_hash = '…'        # 正文的指纹
 source_fields_hash = '…' # 字段的指纹
 ```
 
-Before translation, the fingerprints are compared:
--  changed ** main text ** → only re-translate the main text, title and abstract use the old ones
--  only changed ** abstract or tags ** → only re-translate the field, no cost for the main text
--  nothing changed → zero calls (this is how the scheduled reconciliation every Sunday morning works, doing a full scan, costing nothing when clean)
+Before translating, the fingerprints are compared:
+-  changed ** body text ** → Only re-translate the body; the title and abstract remain as they were.
+-  only changed ** abstract or tags ** → Only re-translate those fields; the body costs nothing.
+-  nothing changed → zero calls (the scheduled reconciliation every Sunday at midnight performs a full scan like this; if everything is clean, it costs nothing).
 
-Additionally, Cloudflare's AI Gateway has a built-in 7-day cache: the same request the second time, it directly returns the previous answer, without billing. So, pushing up a typo correction often only costs for the part that actually changed.
+Additionally, Cloudflare's AI Gateway has a built-in 7-day cache: for the same request asked a second time, it returns the previous answer directly without charging. Therefore, pushing a fix for a typo often only costs the amount for the part that actually changed.
 
-Test data: Free plan provides 10,000 neurons per day (Cloudflare's computing unit), translating a 3,000-word article into one language takes about 50-160 neurons — translating a dozen articles a day would not use them all up.
+Real-world numbers: The free plan offers 10,000 neurons per day (Cloudflare's compute unit). Translating a 3,000-word article into one language takes about 50-160 neurons—you won't run out even if you translate over a dozen articles a day.
 
-##  4. Chinese abstract is also managed by it
+##  IV. Chinese abstracts are also managed by it
 
-Sometimes after writing an article, the abstract is forgotten. If the pipeline finds a Chinese article without `description`, it automatically writes a 70-160 word abstract based on the main text and writes it back to the article file. All three language abstracts are translated from this source — ** the three-language abstracts always talk about the same thing **. After that, when you manually edit and save the abstract in the CMS, the three languages are automatically updated.
+Sometimes after writing an article, you forget to fill in the abstract. The pipeline detects that the Chinese article lacks an `description` and automatically writes a 70-160 word abstract based on the body text, writing it back to the article file. The abstracts for all three languages are translated from this source—** the three-language abstracts will always say the same thing **. Afterward, if you manually edit and save the abstract in the CMS, all three languages will update automatically.
 
-##  5. Humans always have a vote
+##  V. Humans always have the final say
 
-The easiest direction for automation to go off track is "fully automatic machine, no human intervention possible." This pipeline leaves a complete handover path for humans:
+The direction automation most easily goes astray is "fully automated by machines, with no way for humans to intervene." This pipeline leaves a complete path for human intervention:
 
--  In the CMS, check **"Lock Translation"** for a certain translation: this translation is henceforth treated as a manually written article, never overwritten, never deleted, and no longer synchronized with the Chinese original text
--  In the CMS, check **"Do Not Translate"** for a Chinese article: this article directly exits the pipeline
--  Proofread machine translation will not be blindly re-translated: as long as the corresponding part of the Chinese original text is not changed, the fingerprint remains the same, and there is no cost for re-translation
--  Lifecycle is automatically synchronized: when the Chinese article is deleted, the translation is cleaned up as well; when the Chinese article is converted to a draft, the translation is also taken offline
+-  Check **"Lock Translation"** for a specific translation in the CMS: This translation will henceforth be treated as a human-written draft, never overwritten or deleted, and will no longer sync even if the Chinese original is updated.
+-  Check **"Do Not Translate"** for a Chinese article in the CMS: This article will exit the pipeline directly.
+-  Proofread machine translations won't be blindly re-translated: As long as the corresponding part of the Chinese original hasn't changed, the fingerprint remains the same, so no money is spent on re-translation.
+-  Automatic lifecycle synchronization: If a Chinese article is deleted, the translations are cleaned up accordingly; if a Chinese article is moved to drafts, the translations are taken down accordingly.
 
-##  6. Pits we've fallen into (if you also want to set up one)
+##  VI. Pitfalls encountered (if you want to build one too)
 
-Some lessons learned through real money (and time):
+A few lessons learned through spending real money (and time):
 
-- ** Proactively adapt to rate limits **. Cloudflare's rate limiting is easier to trigger than what is stated in the documentation. It is much more efficient to have the client deliberately slow down the request speed (one every 2 seconds) than to back off after the fact.
-- **Do not let AI output the main text in JSON format**. Markdown put into JSON will be disassembled by the model, the main text must be plain text
-- **When failing, better to be conservative**. If the translation is questionable, do not publish it, keep the old version, wait for the next retry - the "old" in a static blog is not as fatal as "bad"
-- **Each defense line must have an offline self-test**. This system has dozens of assertion checks, run them each time there is a change, with zero API consumption
+- ** Proactively adapt to rate limits **. Cloudflare's rate limiting is easier to trigger than what is stated in the documentation; having the client consistently slow down the request rate (one every 2 seconds) is much more hassle-free than handling backoff after the fact.
+- **Don't let the AI output the main body in JSON format**. Stuffing Markdown into JSON causes the model to mangle it; the body text must be sent as plain text.
+- **When in doubt, err on the side of caution**. If a translation is questionable, don't publish it; keep the old version live and wait for the next attempt—for a static blog, "old" is far less fatal than "broken."
+- **Every line of defense must include offline self-testing**. This system's validation logic consists of dozens of assertions; run them with every change for zero API cost.
 
-## 7. This is the living example
+## VII. This post is a living example.
 
-The Japanese and English versions you are seeing now were automatically translated and deployed within minutes after this push. Switch to the language switcher at the top of the page to compare - whether the AI translation is natural or not, it's immediately obvious.
+The Japanese and English versions you see now were automatically translated and deployed within minutes of this recent push. Use the language switcher at the top of the page to compare them—you'll be able to tell at a glance whether the AI's translation sounds natural.
