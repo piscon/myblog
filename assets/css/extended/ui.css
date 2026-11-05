@@ -1,19 +1,17 @@
 /* UI / spacing polish */
 .post-entry {
-  margin-bottom: 1.5rem;
+  /* Card gutter = φ⁻¹·gap (12.4px), the same single coefficient the list
+     cards use internally — compact rows read as a list, not floating tiles */
+  margin-bottom: calc(var(--gap) * 0.618);
 }
 
 .entry-header {
   margin-bottom: 0.5rem;
 }
 
-.post-content {
-  line-height: 1.75;
-}
-
-.post-content p {
-  margin-bottom: 1.2em;
-}
+/* Body leading + paragraph spacing moved to typography.css (golden-ratio
+   system, 2026-11-05). This file loads after it in the extended bundle, so
+   redefining those properties here would silently override the system. */
 
 /* Slightly tighter code blocks */
 .post-content pre {
@@ -177,26 +175,55 @@ html[lang^="en"] body {
   font-weight: 600;
 }
 
-/* Floating side TOC on wide screens: pin beside the 720px content column,
-   vertically centered in the viewport (clear of the header row) via
-   translateY(-50%). Max height is tunable through --toc-max-height;
-   details forced open by site.js (summary hidden only when open, so the
-   JS-off fallback keeps the inline collapsed bar). Scrolls independently
-   when the TOC itself outgrows the cap. */
+/* Floating side TOC on wide screens: docs-standard sidebar on the LEFT of
+   the 720px content column (right edge one --gap off the column), vertically
+   centered in the viewport via translate(-100%,-50%). Width/typography follow
+   the conventions shared by MDN/Bootstrap docs/Docusaurus/Material nav
+   drawers: 240px box, 14px (0.875rem) items at 1.5 line height, 16px per
+   hierarchy level, muted inactive links. Max height tunable through
+   --toc-max-height; details forced open by site.js (summary hidden only when
+   open, so the JS-off fallback keeps the inline collapsed bar). Scrolls
+   independently when the TOC itself outgrows the cap. */
 @media screen and (min-width: 1280px) {
   details.toc[open] {
     position: fixed;
     top: 50%;
-    left: calc(50% + (var(--main-width) / 2) + 24px);
-    width: 230px;
+    left: calc(50% - (var(--main-width) / 2) - var(--gap));
+    width: 240px;
     max-height: var(--toc-max-height, 80vh);
-    transform: translateY(-50%);
+    transform: translate(-100%, -50%);
     margin: 0;
     overflow-y: auto;
   }
 
   details.toc[open] > summary {
     display: none;
+  }
+
+  /* Slim the theme's 2.4rem inner margins for the narrow floating box,
+     one size step below body text, no bullets, 16px per level (theme's
+     24px margin-inline-start would eat the 240px box) */
+  details.toc[open] .inner {
+    margin: 0.4rem 0.9rem 0.9rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  details.toc[open] .inner ul {
+    list-style: none;
+  }
+
+  details.toc[open] .inner li ul {
+    margin-inline-start: 0;
+    padding-left: 16px;
+  }
+
+  details.toc[open] .inner li {
+    padding: 0.2rem 0;
+  }
+
+  details.toc[open] .inner a {
+    color: var(--secondary);
   }
 }
 
@@ -205,6 +232,25 @@ html[lang^="en"] body {
   display: block;
   max-width: 100%;
   overflow-x: auto;
+}
+
+/* List pagination pills: the theme paints them background:var(--primary)
+   (inverted black/white — the ONLY high-contrast surface on the page),
+   13px text, 18px pill radius, no hover state. Re-skin to the theme's own
+   post-tags language: code-bg + border + --radius, 14px, hover feedback. */
+.pagination a {
+  font-size: 14px;
+  line-height: 34px;
+  padding: 0 14px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--secondary);
+}
+
+.pagination a:hover {
+  background: var(--border);
+  color: var(--primary);
 }
 
 /* Header search item: icon+text alignment (icon tracks font size,
