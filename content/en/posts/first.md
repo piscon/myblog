@@ -4,15 +4,13 @@ title = 'Hello, World'
 date = '2025-11-26'
 draft = false
 source_hash = '5d767c9c18ed1d4edbb8b7902d498500efb4c9067e036cdfc20cd44543d68120'
-source_fields_hash = 'c8dfc055a41309fd380095f79d255fa4c0240f14676e29224599d0db3c40c153'
-description = 'A new beginning, a new start! This is my first blog post, commemorating this moment.'
+source_fields_hash = '52ab825fc7957a0fe2184a675c5c5233e19a9470e27337267ed31d4eb954890f'
+description = 'The first article of the blog: documenting the birth of this trilingual static blog - built with Hugo + PaperMod, deployed on Netlify, and edited online with Pages CMS, as well as thanking the three open-source projects Hugo, PaperMod, and Pages CMS.'
 categories = ['Daily']
 tags = ['Blog', 'Start']
 
 [cover]
   image = '/images/grass.jpg'
-  alt = 'Beyond the Web'
-  caption = 'Beyond the Web'
 +++
 > This article was machine-translated by AI and may contain inaccuracies. See the [Chinese original](/zh/posts/first/) for the authoritative version.
 

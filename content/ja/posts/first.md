@@ -4,15 +4,13 @@ title = 'こんにちは、世界'
 date = '2025-11-26'
 draft = false
 source_hash = '5d767c9c18ed1d4edbb8b7902d498500efb4c9067e036cdfc20cd44543d68120'
-source_fields_hash = 'c8dfc055a41309fd380095f79d255fa4c0240f14676e29224599d0db3c40c153'
-description = '新しい始まり、新しい出発です。'
+source_fields_hash = '52ab825fc7957a0fe2184a675c5c5233e19a9470e27337267ed31d4eb954890f'
+description = 'ブログの最初の記事です：この三語の静的ブログの誕生を記録します。Hugo + PaperMod で構築し、Netlify でデプロイし、Pages CMS でオンライン編集を行いました。また、Hugo、PaperMod および Pages CMS の3つのオープンソースプロジェクトに感謝します。'
 categories = ['日々']
 tags = ['ブログ', '開始']
 
 [cover]
   image = '/images/grass.jpg'
-  alt = 'ネットの外'
-  caption = 'ネットの外'
 +++
 > 本記事はAIによる自動翻訳です。表現が不自然な場合は[中文の原文](/zh/posts/first/)をご参照ください。
 
