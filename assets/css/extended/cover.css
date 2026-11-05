@@ -20,13 +20,13 @@
    min-height var(--thumb) with the text block centered as a whole — and the
    cover (when present) is a full-bleed square overlay hugging the card's
    left edge, with the text inset to the second column. Entries WITHOUT a
-   cover (cf-auto-translate) render the same 200px row, text-only, so the
+   cover (cf-auto-translate) render the same 176px row, text-only, so the
    list stays height-uniform instead of mixing two component shapes.
 
    .tag-entry is excluded EVERYWHERE: term pages keep the theme's compact
    rows. Their figures exist in the DOM but display:none (theme rule), and
-   :has(.entry-cover) alone would still match them — reserving a dead 200px
-   column and 200px row height on /tags/ (observed). Single pages keep the
+   :has(.entry-cover) alone would still match them — reserving a dead
+   --thumb column and row height on /tags/ (observed). Single pages keep the
    full-width 1.91:1 cover above; this section is scoped to .post-entry.
 
    Geometry (theme-coupling guarded by feature-check #29):
@@ -45,20 +45,24 @@
      sized by an OPTICAL rule, not taste: the worst-case text stack (2-line
      ladder title + 2-line summary + meta) is a FIXED 144.2px (explicit
      line-heights + clamps), and its vertical breathing must match the
-     horizontal text inset (--gap = 20px) — title half-leading (~3.4px) +
+     horizontal text inset (--u = 20px) — title half-leading (~3.4px) +
      breathing (16.1px) ≈ 19.5px to the glyphs ≈ the 20px side padding.
      156px broke that rule (ja titles are routinely two lines → ~6px to the
      glyphs: cramped); 200px overshot (airy, list reads slow). Row +
-     φ⁻¹·gap spacing = 188.8px → ~4.8 entries per 900px viewport.
+     φ⁻¹·u spacing = 188.8px → ~4.8 entries per 900px viewport.
      Overflow (a wrapped meta line) degrades gracefully to flush cropping,
      not a broken square. */
 .post-entry:not(.tag-entry) {
   --thumb: clamp(96px, 28vw, 176px);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  column-gap: var(--gap);
+  column-gap: var(--u); /* card-internal separation rides u, not the page
+                           gutter --gap (24px would widen the thumb→text gap
+                           beyond the designed 20px rhythm) */
   align-content: center;
-  padding: 0 var(--gap); /* horizontal only; centering owns the vertical */
+  padding: 0 var(--u); /* horizontal only; centering owns the vertical.
+                          --u (20px) not --gap (24px): the optical budget
+                          above matches breathing to THIS text inset */
   min-height: var(--thumb);
 }
 
@@ -86,18 +90,19 @@
 }
 
 /* Text children of the cover variant: inset to column 2 with the horizontal
-   padding the full-bleed figure removed */
+   padding the full-bleed figure removed (--u, same 20px inset as the
+   no-cover variant — the optical budget is shared) */
 .post-entry:not(.tag-entry):has(.entry-cover) > .entry-header,
 .post-entry:not(.tag-entry):has(.entry-cover) > .entry-content,
 .post-entry:not(.tag-entry):has(.entry-cover) > .entry-footer {
   grid-column: 2;
-  padding: 0 var(--gap);
+  padding: 0 var(--u);
 }
 
 /* One rhythm for EVERY list card, both variants (grid does not collapse
    margins: the theme's 8px header margin-bottom + 8px content margin-top
    would compound to 16px — zeroed and replaced by an explicit two-level
-   rhythm: 8px inside the title+summary group, φ⁻¹·gap (12.4px) between
+   rhythm: 8px inside the title+summary group, φ⁻¹·u (12.4px) between
    summary and meta. In the no-cover block-flow fallback 0 + 8px still
    collapses to 8px, so all three card kinds render the same gaps. */
 .post-entry > .entry-header {
@@ -105,7 +110,7 @@
 }
 
 .post-entry > .entry-content {
-  margin: 8px 0 calc(var(--gap) * 0.618);
+  margin: 8px 0 calc(var(--u) * 0.618);
 }
 
 /* Uniform rows: long titles wrap to at most two lines in list cards.
@@ -119,13 +124,14 @@
   font-size: 1.272em;
 }
 
-/* Phone pattern (≤768px, the theme's zmedia breakpoint): the 226px text
-   column cannot carry title + summary + meta — everything hit the 2-line
-   clamps and the screen filled with ellipses. News-app phone convention
-   applies instead: excerpt drops, title relaxes one ladder rung (20.3px =
-   φ^0.25) with a 3-line clamp so nothing truncates, meta follows directly.
-   Rows shrink to ~130px and density rises; term rows (block flow, theme
-   compact form) are untouched. */
+/* Phone pattern (≤768px, the theme's zmedia breakpoint): the ~210px text
+   column (375px device) cannot carry title + summary + meta — everything
+   hit the 2-line clamps and the screen filled with ellipses. News-app
+   phone convention applies instead: excerpt drops, title sits at the body
+   rung (18px = φ^0) with a 2-line clamp (≈21 CJK chars; longer titles
+   truncate with an ellipsis), meta follows directly at 12px single-row
+   (author + reading time hidden). Rows lock to the thumb height
+   (110-176px); term rows (block flow, theme compact form) are untouched. */
 @media screen and (max-width: 768px) {
   .post-entry:not(.tag-entry) {
     /* Lock the row to the thumb: uniform heights AND a strict square on

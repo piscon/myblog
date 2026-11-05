@@ -1,8 +1,28 @@
 /* UI / spacing polish */
+
+/* Spacing unit u (2026-11-06): every rhythm number in this system — card
+   gutter 12.4px, summary→meta step, the 176px optical budget, ~4.8 rows
+   per screen, 2u anchor headroom — is derived from u = 20px. The theme's
+   --gap is 24px (14px ≤768px) and stays page-gutter-only (.main/header/
+   footer padding, menu column-gap); if the rhythms bound to it they would
+   silently compute 14.8px while every comment says 12.4px (this exact
+   drift shipped for a day). Mirroring the mobile step keeps φ⁻¹·u at
+   12.4px desktop / 8.7px mobile. The system carries exactly two gaps:
+   u and φ⁻¹·u. */
+:root {
+  --u: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  :root {
+    --u: 14px;
+  }
+}
+
 .post-entry {
-  /* Card gutter = φ⁻¹·gap (12.4px), the same single coefficient the list
+  /* Card gutter = φ⁻¹·u (12.4px), the same single coefficient the list
      cards use internally — compact rows read as a list, not floating tiles */
-  margin-bottom: calc(var(--gap) * 0.618);
+  margin-bottom: calc(var(--u) * 0.618);
 }
 
 /* iOS Safari auto-zooms the viewport when an input with computed font-size
@@ -21,10 +41,12 @@
    system, 2026-11-05). This file loads after it in the extended bundle, so
    redefining those properties here would silently override the system. */
 
-/* Slightly tighter code blocks */
+/* Code block separation rides the system's √φ paragraph coefficient
+   (1.272em = 22.9px), same as hr/img/quote in typography.css — the old
+   1.2em was a pre-system straggler */
 .post-content pre {
   border-radius: var(--radius);
-  margin: 1.2em 0;
+  margin: 1.272em 0;
 }
 
 /* Profile buttons spacing */
@@ -245,7 +267,7 @@ html[lang^="en"] body {
 :is(h1, h2, h3, h4, h5, h6)[id],
 li[id^="fn:"],
 sup[id^="fnref:"] {
-  scroll-margin-top: calc(var(--gap) * 2);
+  scroll-margin-top: calc(var(--u) * 2);
 }
 
 /* Floating side TOC on wide screens: docs-standard sidebar on the LEFT of
@@ -329,7 +351,7 @@ sup[id^="fnref:"] {
 /* Search page (search.html): the last theme-default page — bring it onto
    the golden system. Same moves as elsewhere: fluid title clamp instead
    of the fixed 40px, 1em-tracked icons, pill language (entry/code-bg +
-   hairline border) instead of gray slabs, φ⁻¹·gap rhythm, gold reserved
+   hairline border) instead of gray slabs, φ⁻¹·u rhythm, gold reserved
    for interactive states. Shared selectors also cover archives and the
    two taxonomy index pages (same .page-header / .terms-tags markup). */
 
@@ -349,8 +371,12 @@ sup[id^="fnref:"] {
   vertical-align: -0.125em;
 }
 
+/* 标题→摘要 8px, same two-level rhythm as list cards — both surfaces.
+   (.post-header kept the theme's 10px until 2026-11-06; the hub pages
+   already rode the 8px rhythm.) */
+.post-header .post-description,
 .page-header .post-description {
-  margin-top: 8px; /* 标题→摘要 8px, same two-level rhythm as list cards */
+  margin-top: 8px;
 }
 
 /* Input: the theme's 2px tertiary border + bold text shout → quiet
@@ -370,15 +396,15 @@ sup[id^="fnref:"] {
 
 /* Result rows: an empty list (idle state) must not punch a ~40px margin
    hole between the input and the taxonomy hub; rows ride the list-card
-   rhythm (φ⁻¹·gap ≈ 12.4px); the chevron drops from fixed 24px ink to
+   rhythm (φ⁻¹·u = 12.4px); the chevron drops from fixed 24px ink to
    a muted 1em glyph; gold border as the hover signal */
 .searchResults:empty {
   display: none;
 }
 
 .searchResults {
-  margin: calc(var(--gap) * 0.618) 0;
-  gap: calc(var(--gap) * 0.618);
+  margin: calc(var(--u) * 0.618) 0;
+  gap: calc(var(--u) * 0.618);
 }
 
 .searchResults li {

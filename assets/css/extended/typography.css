@@ -82,6 +82,124 @@ html[lang^="en"] .post-header .post-description::before {
   letter-spacing: 0.2em;
 }
 
+/* Collapsed summary row (site.js feature 10, html.js-gated — same
+   first-paint contract as the hamburger/lang gates): the eyebrow becomes
+   a toggle on the LEFT of one grid row, the meta line sits
+   baseline-aligned on the RIGHT. Everything keys on html.js (set by
+   extend_head before first paint), so without JS the stacked fallback
+   above stays — description fully visible under the title, no chevron.
+   The raw description is a text node CSS cannot select, so the grid
+   mutes it with font-size:0 and site.js re-parents it into .desc-body —
+   a full-width third grid row under the label/meta line — which
+   restores the size explicitly (0.95em×18px = 17.1px; em would compute
+   against the muted 0, and the 13px eyebrow had to go explicit for the
+   same reason). Losing site.js after first paint keeps the text muted:
+   accepted, same trade the hamburger gate makes. */
+html.js .post-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: calc(var(--u) * 0.618); /* φ⁻¹·u — the card gutter */
+  align-items: baseline;
+}
+
+html.js .post-header .post-title {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+html.js .post-header .post-description {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 0; /* mute the text node until .desc-body re-parents it */
+  /* label+chevron are one unbreakable unit — a wide meta squeezing this
+     column to min-content must not wrap the chevron under the label
+     (observed at 375px with 更新于 present) */
+  white-space: nowrap;
+}
+
+html.js .post-header .post-description::before {
+  display: inline; /* share the line with the injected chevron */
+  margin-bottom: 0;
+  font-size: 13px;
+}
+
+html.js .post-header .post-meta {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+}
+
+/* Chevron-only toggle; the visible label is still the ::before eyebrow */
+.post-header .post-description .desc-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 3px;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: var(--secondary);
+  cursor: pointer;
+}
+
+.post-header .post-description .desc-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+.post-header .post-description .desc-toggle:hover {
+  color: var(--accent);
+}
+
+.post-header .post-description .desc-toggle:focus-visible {
+  color: var(--accent);
+  outline: 1px solid var(--accent);
+}
+
+/* Expansion row: spans both columns, below the label/meta line */
+.post-header .desc-body {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: none;
+  margin-top: 8px;
+  font-size: 17.1px;
+}
+
+.post-header.desc-open .desc-body {
+  display: block;
+}
+
+.post-header.desc-open .post-description .desc-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* Phones (≤768px, zmedia): the row must hold label+meta side by side
+   from 320px, so the meta drops to the compact date·cats pair the list
+   cards already use (阅读时长 is the low-value item there too). 更新于
+   repeats the full date (~312px of meta at 12px) and measured renders
+   overflow it into a wrapped chevron from 390px down, so it drops below
+   420px — mid-size phones lose the freshness mark, large phones/tablets
+   keep it (420-40px padding -46px label -φ⁻¹·u gap ≈ 322px ≥ 312px).
+   Hiding an item must pair-hide its LEADING .meta-sep — a sibling node
+   that display:none leaves behind (dangling `·` — post_meta.html
+   contract). */
+@media screen and (max-width: 768px) {
+  .post-header .post-meta {
+    font-size: 12px;
+  }
+
+  .post-header .post-meta .meta-read,
+  .post-header .post-meta .meta-sep:has(+ .meta-read) {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .post-header .post-meta .meta-updated,
+  .post-header .post-meta .meta-sep:has(+ .meta-updated) {
+    display: none;
+  }
+}
+
 /* Dates align vertically across the meta row (proportional figures wobble) */
 .post-meta,
 .breadcrumbs {

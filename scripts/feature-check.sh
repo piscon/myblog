@@ -100,8 +100,17 @@ check "RSS 列表页入口按钮"        "grep -q 'aria-label=\"RSS\"' '$OUT/zh/
 check "theme-color 兜底+双meta"   "grep -q 'name=\"theme-color\" content=\"#1d1e20\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: light)\" content=\"#ffffff\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: dark)\" content=\"#1d1e20\"' '$PAGE'"
 check "排版体系容器类名(耦合点)"   "grep -q 'post-content md-content' '$PAGE'"
 check "黄金字阶 CSS 进 bundle"    "grep -q 'hanging-punctuation' '$OUT'/assets/css/stylesheet.*.css && grep -q '2.058em' '$OUT'/assets/css/stylesheet.*.css"
+# 间距单位 --u（2026-11-06）：节奏公式（卡距/摘要→meta/搜索结果/折叠标题行 column-gap/锚跳余量）
+# 全部挂 u（20px，≤768px 镜像 14px）。勿迁回 --gap——主题 --gap=24px，此前公式误挂 --gap，
+# 实渲染 φ⁻¹·gap=14.8px 与全体系注释 12.4px 脱节；--gap 只许页面沟槽（.main/页眉/页脚）用
+check "间距单位(--u双断点)" "grep -q -- '--u:20px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--u:14px' '$OUT'/assets/css/stylesheet.*.css"
 # 摘要 eyebrow 标签：完整选择器含 .post-header 前缀（archives/search 复用裸 .post-description，不得命中）+ ja token「概要」（bundle 内唯一）
 check "摘要标签(CSS作用域+三语言)" "grep -q '.post-header .post-description::before' '$OUT'/assets/css/stylesheet.*.css && grep -q '概要' '$OUT'/assets/css/stylesheet.*.css"
+# 摘要折叠行（2026-11-06）：html.js 门控 grid——eyebrow+chevron 靠左、meta 同排 justify-self 靠右；
+# site.js 把描述文本再挂为 .desc-body（header 第 3 行通栏，.desc-open 切换展开）。文本节点不可
+# 被 CSS 选中 → grid font-size:0 先帧静音 + .desc-body 显式恢复字号。CSS token 守 minified
+# 选择器（空白剔除、结构保留，同汉堡断言形态），JS token 守 bundle（minifier 不改写字符串字面量）
+check "摘要折叠行(grid+JS包裹)" "grep -q 'html.js .post-header' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-open' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/js/site.*.js && grep -q 'desc-open' '$OUT'/js/site.*.js"
 # 列表缩略图行依赖主题 DOM 序（cover 先于 header，grid 自动落列）+ :has 门控选择器（须含 .tag-entry 排除）
 check "列表缩略图行(CSS门控+DOM序)" "grep -q 'post-entry:not(.tag-entry):has(.entry-cover)' '$OUT'/assets/css/stylesheet.*.css && grep -q '<article class=\"post-entry\">' '$OUT/zh/posts/index.html' && grep -q 'entry-cover' '$OUT/zh/posts/index.html' && [ \"\$(grep -om1 'entry-cover\|entry-header' '$OUT/zh/posts/index.html')\" = 'entry-cover' ]"
 # giscus 配色跟随站内主题：初值改写脚本标签属性（依赖 client.js 的 currentScript 语义）+

@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Nine self-gating features — each activates only when its DOM exists:
+   Ten self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -27,10 +27,19 @@
       it last but its DOM slot — the extend_post_content hook — is before
       the footer, making keyboard focus jump backwards). Without JS the
       order property alone keeps the identical visual position.
+   10. Collapsed SEO summary — the header .post-description (the
+      search-engine lede) folds into an eyebrow toggle on the meta row:
+      typography.css grids the header (label+chevron left, meta right,
+      keyed on html.js for first paint) and this script re-parents the
+      raw text into .desc-body (a full-width row below the label — CSS
+      cannot select a text node, so the grid mutes it with font-size:0
+      and the body restores the size). aria-label follows the page
+      language, same map as the hamburger. No JS → no toggle, the
+      description stays the stacked block under the title.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
    #menu / .header-nav / #searchInput / .lang-menu / .share-buttons /
-   .post-footer / .post-related; regression-guarded by feature-check
-   assertions. */
+   .post-footer / .post-related / .post-header .post-description;
+   regression-guarded by feature-check assertions. */
 (function () {
   'use strict';
 
@@ -331,5 +340,46 @@
   var footer = document.querySelector('.post-single > .post-footer');
   if (related && footer) {
     footer.insertAdjacentElement('afterend', related);
+  }
+
+  /* 10. Collapsed SEO summary: the theme renders the description as a
+     bare <div> of text between the title and the meta line; fold it into
+     an eyebrow toggle on the meta row (label+chevron left, meta right —
+     typography.css does the html.js-gated grid). The text is re-parented
+     into .desc-body — a header-level grid row that spans full width when
+     .desc-open is set — because CSS can't select a text node to hide it
+     (the grid mutes the original position with font-size:0 instead).
+     Inserted after .post-meta so DOM order matches the visual top-to-
+     bottom (title, label row, meta right, body below); the body carries
+     no interactive content, so tab order is unaffected. */
+  var header = document.querySelector('.post-header');
+  var desc = document.querySelector('.post-header .post-description');
+  var metaLine = document.querySelector('.post-header .post-meta');
+  if (header && desc) {
+    var descBody = document.createElement('div');
+    descBody.className = 'desc-body';
+    descBody.id = 'desc-body';
+    while (desc.firstChild) descBody.appendChild(desc.firstChild);
+    (metaLine || desc).insertAdjacentElement('afterend', descBody);
+    var descToggle = document.createElement('button');
+    descToggle.type = 'button';
+    descToggle.className = 'desc-toggle';
+    descToggle.setAttribute('aria-controls', 'desc-body');
+    descToggle.setAttribute('aria-expanded', 'false');
+    descToggle.setAttribute('aria-label', {
+      zh: '摘要',
+      ja: '概要',
+      en: 'Summary'
+    }[(document.documentElement.getAttribute('lang') || 'zh').slice(0, 2)] || 'Summary');
+    descToggle.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
+      ' width="14" height="14" fill="none" stroke="currentColor"' +
+      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+      ' aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+    descToggle.addEventListener('click', function () {
+      var open = header.classList.toggle('desc-open');
+      descToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    desc.appendChild(descToggle);
   }
 })();
