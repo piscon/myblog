@@ -8,9 +8,11 @@
       language-correct source of truth)
    5. Language switcher — PaperMod only renders the OTHER languages, so
       the list members swap on every switch; prepend the current language
-      (from <html lang>) at its weight position, marked non-clickable.
-      Falls back to the theme's behavior without JS. Language names mirror
-      hugo.toml labels.
+      (from <html lang>) at its weight position, marked non-clickable,
+      retargeted to the same page via the head hreflang links. Phones fold
+      the row into a globe toggle whose panel mirrors the hamburger's;
+      desktop keeps the inline names. Falls back to the theme's behavior
+      without JS. Language names mirror hugo.toml labels.
    6. Floating side TOC — wide screens (≥1280px) pin the toc beside the
       content column and force the details open; below the breakpoint the
       inline collapsed details is restored (see ui.css media block).
@@ -37,9 +39,9 @@
       language, same map as the hamburger. No JS → no toggle, the
       description stays the stacked block under the title.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
-   #menu / .header-nav / #searchInput / .lang-menu / .share-buttons /
-   .post-footer / .post-related / .post-header .post-description;
-   regression-guarded by feature-check assertions. */
+   #menu / .header-nav / .logo-switches / #searchInput / .lang-menu /
+   .share-buttons / .post-footer / .post-related / .post-header
+   .post-description; regression-guarded by feature-check assertions. */
 (function () {
   'use strict';
 
@@ -160,29 +162,20 @@
      hreflang> per translation, self included): a translated page gets its
      sibling permalink, an untranslated one keeps the theme's language
      homepage link (never a 404). JS disabled → theme default (homepage
-     links). Every item gets a dual label — full name (≥768px) / short code
-     (<768px, keeps the crowded mobile header on one line). The switcher is
-     marked translate=no so Chrome Translate never mangles language names
-     or re-prompts off them. */
+     links). On phones (≤768px, ui.css) the inline row is replaced by an
+     injected globe toggle that opens the list as a full-width panel under
+     the header — the hamburger panel's geometry; desktop keeps the inline
+     full names. The switcher is marked translate=no so Chrome Translate
+     never mangles language names or re-prompts off them. */
   var langMenu = document.querySelector('.lang-menu');
   if (langMenu) {
     langMenu.setAttribute('translate', 'no');
     langMenu.classList.add('notranslate');
     var docLang = (document.documentElement.getAttribute('lang') || '').slice(0, 2);
     var langMeta = {
-      zh: { name: '简体中文', short: 'ZH', order: 0 },
-      ja: { name: '日本語', short: 'JA', order: 1 },
-      en: { name: 'English', short: 'EN', order: 2 }
-    };
-    var dualLabel = function (text, short) {
-      var full = document.createElement('span');
-      full.className = 'lang-full';
-      full.textContent = text;
-      var s = document.createElement('span');
-      s.className = 'lang-short';
-      s.textContent = short;
-      s.setAttribute('translate', 'no');
-      return [full, s];
+      zh: { name: '简体中文', order: 0 },
+      ja: { name: '日本語', order: 1 },
+      en: { name: 'English', order: 2 }
     };
     /* this page's per-language permalinks from head (x-default and the RSS
        alternates carry no 2-letter hreflang, so they drop out) */
@@ -199,11 +192,6 @@
       var lang = m[1];
       a.dataset.lang = lang;
       if (pageLangs[lang]) a.href = pageLangs[lang];
-      var text = a.textContent;
-      a.textContent = '';
-      dualLabel(text, langMeta[lang].short).forEach(function (sp) {
-        a.appendChild(sp);
-      });
     });
     var meta = langMeta[docLang];
     var listed = meta && langMenu.querySelector('a[data-lang="' + docLang + '"]');
@@ -212,9 +200,7 @@
       li.className = 'current-lang';
       var label = document.createElement('span');
       label.setAttribute('aria-current', 'true');
-      dualLabel(meta.name, meta.short).forEach(function (sp) {
-        label.appendChild(sp);
-      });
+      label.textContent = meta.name;
       li.appendChild(label);
       var before = null;
       langMenu.querySelectorAll('a').forEach(function (a) {
@@ -222,6 +208,64 @@
         if (a.dataset.lang && langMeta[a.dataset.lang].order > meta.order) before = a.parentElement;
       });
       langMenu.insertBefore(li, before);
+    }
+    /* Mobile globe (≤768px): the theme's inline row collapses into one
+       icon — the list opens as the hamburger panel's twin (same geometry,
+       same outside-click/Escape contract, and the two header panels are
+       mutually exclusive: opening one closes the other). The button goes
+       after the list inside .logo-switches, so the header row reads
+       logo · theme · globe; ui.css does the breakpoint switch (the list
+       hides, the button shows, .lang-open renders the panel). Desktop
+       keeps the inline names and display:none's the button. */
+    var headerNav = document.querySelector('.header-nav');
+    var switchWrap = langMenu.closest('.logo-switches');
+    if (headerNav && switchWrap) {
+      langMenu.id = 'lang-menu';
+      var langToggle = document.createElement('button');
+      langToggle.type = 'button';
+      langToggle.className = 'lang-toggle';
+      langToggle.setAttribute('aria-controls', 'lang-menu');
+      langToggle.setAttribute('aria-expanded', 'false');
+      langToggle.setAttribute('aria-label', {
+        zh: '语言',
+        ja: '言語',
+        en: 'Language'
+      }[docLang] || 'Language');
+      langToggle.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
+        ' width="20" height="20" fill="none" stroke="currentColor"' +
+        ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+        ' aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2"' +
+        ' y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10' +
+        ' 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1' +
+        ' 4-10z"/></svg>';
+      var setLangOpen = function (open) {
+        langMenu.classList.toggle('lang-open', open);
+        langToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+      langToggle.addEventListener('click', function () {
+        var open = !langMenu.classList.contains('lang-open');
+        if (open) {
+          var mt = headerNav.querySelector('.menu-toggle');
+          if (mt) {
+            headerNav.classList.remove('menu-open');
+            mt.setAttribute('aria-expanded', 'false');
+          }
+        }
+        setLangOpen(open);
+      });
+      document.addEventListener('click', function (e) {
+        if (langMenu.classList.contains('lang-open') &&
+            !langMenu.contains(e.target) && !langToggle.contains(e.target)) {
+          setLangOpen(false);
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && langMenu.classList.contains('lang-open')) {
+          setLangOpen(false);
+        }
+      });
+      switchWrap.appendChild(langToggle);
     }
   }
 
@@ -312,6 +356,17 @@
     var setOpen = function (open) {
       nav.classList.toggle('menu-open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) {
+        /* the header hosts two panels (menu + language) — mutually
+           exclusive: opening one closes the other (mirrored inside
+           feature 5's lang toggle) */
+        var openLang = document.querySelector('.lang-menu.lang-open');
+        if (openLang) {
+          openLang.classList.remove('lang-open');
+          var lt = document.querySelector('.lang-toggle');
+          if (lt) lt.setAttribute('aria-expanded', 'false');
+        }
+      }
     };
     toggle.addEventListener('click', function () {
       setOpen(!nav.classList.contains('menu-open'));

@@ -176,8 +176,15 @@ html[lang^="en"] body {
   padding: 10px;
 }
 
-.post-single > .post-footer > .share-buttons a:hover {
-  color: var(--accent);
+/* Hover feedback is pointer-only: touch browsers latch :hover onto the
+   tapped element and hold the gold state until the next tap somewhere
+   blank — and the native-share entry stays on the page after firing, so
+   the stuck state sat right there. Keyboard users keep the global
+   :focus-visible outline. */
+@media (hover: hover) {
+  .post-single > .post-footer > .share-buttons a:hover {
+    color: var(--accent);
+  }
 }
 
 .post-single > .post-related {
@@ -397,6 +404,13 @@ sup[id^="fnref:"] {
 .searchbox input::placeholder {
   color: var(--secondary);
   font-weight: 400;
+}
+
+/* The native WebKit clear button (type=search) ships UA blue — off the
+   site's monochrome-plus-gold language. The glyph is a baked-in
+   background image, so filter is the only paint hook that reaches it. */
+.searchbox input::-webkit-search-cancel-button {
+  filter: grayscale(1) brightness(0.55);
 }
 
 /* Result rows: an empty list (idle state) must not punch a ~40px margin
@@ -647,29 +661,90 @@ sup[id^="fnref:"] {
   cursor: default;
 }
 
-/* Dual labels: full names on wide screens, short ZH/JA/EN codes on mobile
-   (three full names + logo + theme toggle would wrap on small screens) */
-.lang-menu .lang-short {
+/* FOUC gate (all viewports, same pattern as the hamburger): until site.js
+   prepends the current language, the theme's raw switcher — other
+   languages only — shows through on every page transition. visibility
+   (not display) keeps the header row layout stable, and the stale
+   pre-injection links are unclickable. No JS → no .js class → the theme's
+   switcher stays as the fallback. */
+.js .lang-menu:not(:has(.current-lang)) {
+  visibility: hidden;
+}
+
+/* Mobile globe (site.js feature 5): ≤768px the inline row never shows —
+   the injected globe toggle opens the list as a full-width panel dropped
+   under the header, the hamburger panel's exact geometry (entry surface +
+   hairline + radius, ~44px rows, current language bold and unclickable).
+   The hide rule and the panel rule share specificity (0,2,0) — the panel
+   rule MUST stay after the hide rule so source order decides (same
+   contract as the hamburger block). Desktop keeps the inline full names
+   and display:none's the button; no JS → no button, the theme's inline
+   switcher stays as the fallback. */
+.lang-toggle {
   display: none;
 }
 
 @media screen and (max-width: 768px) {
-  .lang-menu .lang-full {
+  /* one grouped rule = one minified token: the list AND its "|" separator
+     hide together — otherwise the pipe dangles between the theme and
+     globe toggles once the list is gone */
+  .js .lang-menu,
+  .js .nav-sep {
     display: none;
   }
 
-  .lang-menu .lang-short {
-    display: inline;
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    /* nav line-height is var(--header-height) = 60px; a button would
+       stretch to a 60px line box without this (same as .menu-toggle) */
+    line-height: 1;
+    padding: 12px;
+    background: none;
+    border: 0;
+    color: var(--primary);
+    cursor: pointer;
   }
 
-  /* FOUC gate (same pattern as the hamburger): until site.js wraps the
-     labels into the dual spans, the theme's raw switcher — other languages
-     only, full names as bare text — shows through on every page
-     transition. visibility (not display) keeps the header row layout
-     stable, and the stale pre-injection links are unclickable. No JS →
-     no .js class → the theme's switcher stays as the fallback. */
-  .js .lang-menu:not(:has(.lang-short)) {
-    visibility: hidden;
+  .lang-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lang-menu.lang-open {
+    display: flex;
+    flex-direction: column;
+    /* theme .logo-switches>* centers items; on a column flexbox that
+       would center every row horizontally — rows must fill the width */
+    align-items: stretch;
+    gap: 0;
+    list-style: none;
+    position: absolute;
+    top: 100%;
+    left: var(--gap);
+    right: var(--gap);
+    z-index: 90;
+    margin: 0;
+    padding: 6px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  /* rows: the a (or the bare current-lang li) carries the 12px/14px
+     padding — padding BOTH levels double-pads to 72px rows (48+24);
+     li only unblocks the theme's display:inherit flex leak */
+  .lang-menu.lang-open li {
+    display: block;
+  }
+
+  .lang-menu.lang-open a,
+  .lang-menu.lang-open li.current-lang {
+    display: block;
+    padding: 12px 14px;
+    /* the nav's line-height: var(--header-height) leaks in here and
+       inflates each row (same as the hamburger panel rows) */
+    line-height: 1.5;
   }
 }
 

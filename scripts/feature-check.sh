@@ -56,7 +56,9 @@ check "video 播放器渲染"        "grep -q '<video src=\"/video/feature-check
 check "置顶 CSS 注入(order)"    "grep -q 'post-single>.post-media{order:1' '$PAGE'"
 check "og:audio meta"          "grep -q 'property=\"og:audio\"' '$PAGE'"
 check "og:video meta"          "grep -q 'property=\"og:video\"' '$PAGE'"
-check "品牌 favicon 引用"       "grep -q '/branding/favicon.ico' '$PAGE'"
+# 根 /favicon.ico 直击（部分抓取器/老浏览器）经 netlify.toml 301 到 /branding/
+# 单一事实源（2026-11-06 全站巡检发现根路径 404 后补）
+check "品牌 favicon 引用"       "grep -q '/branding/favicon.ico' '$PAGE' && grep -q 'from = \"/favicon.ico\"' netlify.toml && grep -q 'to = \"/branding/favicon.ico\"' netlify.toml"
 check "og:image 品牌图"         "grep -q 'branding/og-default.jpg' '$PAGE'"
 check "自定义 404 页存在"        "test -f '$OUT/zh/404.html'"
 check "404 en 文案分流"         "grep -q 'Page not found' '$OUT/en/404.html'"
@@ -78,10 +80,10 @@ check "相关文章推荐渲染"        "grep -q 'post-related' '$PAGE' && grep 
 check "站点 JS 加载"            "grep -q '/js/site\.' '$PAGE'"
 check "搜索页输入框存在"        "grep -q 'searchInput' '$OUT/zh/search/index.html' && grep -q '/search/' '$OUT/zh/index.html'"
 # 语言切换器：主题裸输出仅「其他语言」全名（zh 首页/文章页静态可验）；site.js 注入全量常驻
-# 列表+双标签 span（≥768px 全名 / <768px 短码）。手机端 FOUC 门控：注入完成前（无 .lang-short
-# span）以 .js+.lang-menu:not(:has(.lang-short)) 先行 visibility:hidden——首帧到注入之间不再闪现
+# 列表+当前语言标记。FOUC 门控（全视口）：注入完成前（无 .current-lang 条目）以
+# .js+.lang-menu:not(:has(.current-lang)) 先行 visibility:hidden——首帧到注入之间不再闪现
 # 主题裸开关（visibility 不位移、裸链接不可点；JS 禁用无 .js 类走主题回退）；token 守 bundle
-check "语言切换全名显示"        "grep -q '日本語' '$OUT/zh/index.html' && grep -q 'English' '$OUT/zh/index.html' && grep -q '日本語' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q '.js .lang-menu:not(:has(.lang-short)){visibility:hidden' '$OUT'/assets/css/stylesheet.*.css"
+check "语言切换全名显示"        "grep -q '日本語' '$OUT/zh/index.html' && grep -q 'English' '$OUT/zh/index.html' && grep -q '日本語' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q '.js .lang-menu:not(:has(.current-lang)){visibility:hidden' '$OUT'/assets/css/stylesheet.*.css"
 check "aliases 跳转页生成"      "test -f '$OUT/zh/posts/alias-test/index.html'"
 check "llms.txt 站点索引生成"    "test -f '$OUT/zh/llms.txt' && grep -q 'Feature health check' '$OUT/zh/llms.txt'"
 check "归档页 zh 本地化(年/月)"  "grep -q 'archive-year-header' '$OUT/zh/archives/index.html' && grep -q '2026年' '$OUT/zh/archives/index.html' && grep -q '11月' '$OUT/zh/archives/index.html'"
@@ -144,9 +146,10 @@ check "原生分享按钮(手机)"       "grep -q 'navigator.share' '$OUT'/js/si
 check "封面 sizes 分流(列表/单页)" "grep -q '176px, 28vw' '$OUT/zh/posts/index.html' && grep -q '720px, 100vw' '$OUT/zh/posts/first/index.html'"
 # 分享并入标签行（2026-11-06）：ui.css 把 post-footer 改 grid——第一行 tags 左/share 右、
 # 第二行 paginav 通栏；分享去盒装、图标 18px 次级色（CSS 压过主题 svg 的 30px 属性宽高，
-# 也压过 site.js 注入的原生分享 svg 26px）。耦合点=footer 三子元素类名（皆主题 DOM）；
-# minifier 剔空白但保留选择器与值，grid-area token 稳定
-check "分享并入标签行(bundle)"   "grep -q 'grid-area:share' '$OUT'/assets/css/stylesheet.*.css && grep -q 'grid-area:nav' '$OUT'/assets/css/stylesheet.*.css && grep -q 'post-footer>.share-buttons svg{width:18px' '$OUT'/assets/css/stylesheet.*.css"
+# 也压过 site.js 注入的原生分享 svg 26px）。hover 金色门控 @media(hover:hover)（2026-11-06
+# 手机点按粘滞 :hover 事故：原生分享不跳转，金色选中态挂到点空白才释放）。耦合点=footer
+# 三子元素类名（皆主题 DOM）；minifier 剔空白但保留选择器与值，grid-area/@media token 稳定
+check "分享并入标签行(bundle)"   "grep -q 'grid-area:share' '$OUT'/assets/css/stylesheet.*.css && grep -q 'grid-area:nav' '$OUT'/assets/css/stylesheet.*.css && grep -q 'post-footer>.share-buttons svg{width:18px' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-single>.post-footer>.share-buttons a:hover{color:var(--accent)}' '$OUT'/assets/css/stylesheet.*.css"
 # 手机端汉堡菜单（2026-11-06）：site.js 注入 .menu-toggle（.header-nav 末位→space-between 行右上角），
 # ui.css ≤768px 经 html.js 门控收纳 #menu、.menu-open 展开为下拉面板——JS 禁用时无 .js 类，
 # 主题折行菜单原样回退；.js 由 extend_head 首帧前内联脚本打上（:has(>.menu-toggle) 版本要等
@@ -154,6 +157,14 @@ check "分享并入标签行(bundle)"   "grep -q 'grid-area:share' '$OUT'/assets
 # 耦合点=主题 .header-nav/#menu 类名；两条 minified CSS token、首帧脚本与
 # aria-expanded 属性名（minifier 不改写属性名）守 bundle
 check "汉堡菜单(手机)"           "grep -q '.js .header-nav>#menu{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.menu-open>#menu{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q 'documentElement.classList.add(.js.)' '$PAGE' && grep -q 'menu-toggle' '$OUT'/js/site.*.js && grep -q 'aria-expanded' '$OUT'/js/site.*.js"
+# 手机端语言globe（2026-11-06）：≤768px 内联切换行（原 ZH/JA/EN 短码，双标签 span 已删）收纳为
+# site.js 注入的 .lang-toggle（Feather globe，aria-controls=#lang-menu，.logo-switches 末位），
+# 点开为汉堡面板同几何的通栏下拉（.lang-open，全名行、当前语言加粗不可点）。隐藏规则
+# .js .lang-menu,.js .nav-sep{display:none 与面板规则同特异性 (0,2,0)，面板必须排其后靠源序
+# 取胜（同汉堡契约）；桌面 .lang-toggle 基础 display:none 保留内联全名。双面板互斥在 JS 层
+# （开启一方关闭另一方）。JS token 守 bundle（类名字面量不经 minifier），CSS token 守
+# 收纳/面板/按钮三端
+check "语言globe(手机)"          "grep -q 'lang-toggle' '$OUT'/js/site.*.js && grep -q 'lang-open' '$OUT'/js/site.*.js && grep -q '.js .lang-menu,.js .nav-sep{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-menu.lang-open{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-toggle{display:none' '$OUT'/assets/css/stylesheet.*.css"
 # 文章导航（2026-11-06）：站点 i18n/{zh-CN,ja,en}.toml 平面键覆盖主题 prev_page/next_page
 # （「上一页/下一页」→「上一篇/下一篇」；ja/en 顺带文章化）。文件名规则系实证：zh 必须
 # locale 全名 zh-CN.toml（zh.toml 平局输给主题 zh.yaml）、ja/en 必须基名（ja-JP.toml 会把

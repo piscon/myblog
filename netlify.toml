@@ -60,6 +60,13 @@
   to = "/zh/llms.txt"
   status = 301
 
+# 根路径 favicon 约定请求（部分抓取器/老浏览器直击 /favicon.ico）——真实文件
+# 只有 /branding/favicon.ico 一份（单一事实源），301 转发；浏览器会缓存重定向
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/branding/favicon.ico"
+  status = 301
+
 # 404 按语言前缀分流（无真实文件命中时才触发）
 [[redirects]]
   from = "/ja/*"
