@@ -65,12 +65,13 @@ const LANGS = ['ja', 'en'];
 
 // 模型选型（2026-11-05 实测定案）：gemma-4-26b-a4b-it 在中译日（敬语一致性/比喻理解/
 // 术语执行）与中译英全面优于 qwen3-30b（16 样本实测，详见 AGENTS.md）。它是思考型
-// 模型（reasoning_effort 可调，mandatory=false），统一加 reasoning_effort:'none' 压思考
-// 消耗；qwen3 不认识该参数时会忽略，故无需分模型处理。qwen3-30b 保留为一行回退。
+// 模型（思考型），统一加 Gemma 原生 chat_template_kwargs:{enable_thinking:false}
+// 关思考（reasoning_effort 对 Gemma 4 完全无效，实测浪费 23 倍 token）；qwen3 不认识
+// 该字段会忽略，无需分模型处理。qwen3-30b 保留为一行回退。
 const MODEL = process.env.TRANSLATE_MODEL || '@cf/google/gemma-4-26b-a4b-it';
 const PROMPT_VERSION_BODY = 'v8';   // 正文提示词（极简：角色+目标+编号契约+单一译本，gemma A/B 实测与 3 规则版并列）
 const PROMPT_VERSION_FIELDS = 'v6'; // 字段提示词（极简化，术语规则保留）
-// gemma-4-26b 思考型：即使 reasoning_effort=none 仍有思考开销，输出预算按 ~2x 留足；
+// 输出预算留足余量（关思考后实际用量很小，但长块+二分降级仍需空间）；
 // 截断守卫（finish_reason=length）会在重试时自动追加
 const MAX_TOKENS_FIELDS = 4000;
 const MAX_TOKENS_BODY = 9000;
@@ -307,9 +308,12 @@ function cfRestAvailable() {
 
 async function runModel(bodyObj) {
   await throttle(); // 统一限速：所有调用与重试都排队，峰值固定 30 req/min
-  // reasoning_effort:'none'：gemma-4-26b 思考型模型的压耗开关（实测仍会有少量思考，
-  // 但显著减少）；qwen3 等不认识该参数的模型会忽略。response_format 混入时避免覆盖。
-  const payload = JSON.stringify({ temperature: 0.2, reasoning_effort: 'none', ...bodyObj });
+  // gemma-4-26b 是思考型：实测 reasoning_effort 的 none/null/low 全部无效（隐式思考
+  // 仍烧 ~1600 token/请求、单块 ~32s），真正的开关是 Gemma 原生的
+  // chat_template_kwargs:{enable_thinking:false}（实测 73 token、~2s，23 倍差距）。
+  // 2026-11-05 v8 首跑误用 'none' 导致全量重译 28 分钟/1621 neurons，此处为修复。
+  // qwen3 等不认识该字段会忽略，无需分模型处理。
+  const payload = JSON.stringify({ temperature: 0.2, chat_template_kwargs: { enable_thinking: false }, ...bodyObj });
   let stdout;
   if (cfRestAvailable()) {
     const account = process.env.CLOUDFLARE_ACCOUNT_ID;
