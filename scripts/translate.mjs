@@ -22,6 +22,9 @@
 //   - Markdown 占位符保护：围栏/链接 URL/行内代码/骨架标记替换为 «n» 后模型只译散文，
 //     译后校验每个占位符恰好一次且位置合法（缺/重/越位即重试），再做结构计数保险丝；
 //     模型接触不到语法，链接打散/标记吞入在架构上不可能发生
+//   - 分段翻译：按空行切块、大块再按行切（每块 ≤20 token，编号每块从 0 开始），
+//     每块独立调用/还原；2026-11-05 压力测试实测 qwen3 在 64+ 编号 token 的长序列上
+//     稳定丢失小语法 token，分段后单块最大 11 token
 //
 // 增量机制（字段与正文拆分，互不连坐）：
 //   - front matter `source_hash` = 正文 hash（PROMPT_VERSION_BODY + MODEL + body）
@@ -43,7 +46,7 @@ const ZH_POSTS = join(ROOT, 'content/zh/posts');
 const LANGS = ['ja', 'en'];
 
 const MODEL = process.env.TRANSLATE_MODEL || '@cf/qwen/qwen3-30b-a3b-fp8';
-const PROMPT_VERSION_BODY = 'v4';   // 正文提示词（占位符保护 + 简化规则；改动使旧译文 hash 失配，全量重译一次）
+const PROMPT_VERSION_BODY = 'v5';   // 正文提示词（占位符保护 + 分段翻译；改动使旧译文 hash 失配，全量重译一次）
 const PROMPT_VERSION_FIELDS = 'v4'; // 字段提示词（/no_think + json_schema）
 const MAX_TOKENS_FIELDS = 2000;
 const MAX_TOKENS_BODY = 6000;
@@ -522,8 +525,59 @@ function structuralIssues(src, dst) {
 const TOKEN_REMINDER =
   '\n\n（重要：上一版输出弄丢了编号标记。«0» 这类标记必须原样保留、位置不变、每个恰好出现一次；不要翻译、改写、增删或合并它们。）';
 
+// 按空行把正文切成块：段落/标题各自成块，表格与列表因行间无空行天然整块。
+// 每块独立 protect → 独立调用 → 独立还原，token 编号每块从 0 开始。
+// 2026-11-05 压力测试实测：qwen3 在 64+ 编号 token 的长序列上稳定丢失小语法
+// token（** / [^2] / | / ### ），把序列压到每块 ~20 以内后保真率可用。
+// 超过 MAX_TOKENS_PER_BLOCK 的大块（长表格/长列表）再按行切，行间用 \n 拼回，
+// 保证 Markdown 结构不变（表格行/列表项本就是独立行）。
+const MAX_TOKENS_PER_BLOCK = 20;
+
+function splitBlocks(src) {
+  const paragraphs = [];
+  let cur = [];
+  let fence = false;
+  for (const line of src.split('\n')) {
+    if (/^\s*```/.test(line)) fence = !fence;
+    if (!fence && /^\s*$/.test(line)) {
+      if (cur.length) paragraphs.push({ text: cur.join('\n'), sep: '\n\n' });
+      cur = [];
+      continue;
+    }
+    cur.push(line);
+  }
+  if (cur.length) paragraphs.push({ text: cur.join('\n'), sep: '' });
+  // 大块按行二次切分：每行独立调用，行间分隔符为 \n
+  const blocks = [];
+  for (const p of paragraphs) {
+    if (protectBody(p.text).tokens.length <= MAX_TOKENS_PER_BLOCK) { blocks.push(p); continue; }
+    const lines = p.text.split('\n');
+    lines.forEach((line, i) => {
+      // 行间用 \n；该段最后一行的分隔符沿用原段落 sep（通常是 \n\n），
+      // 否则空行结构在拼接时丢失
+      blocks.push({ text: line, sep: i < lines.length - 1 ? '\n' : p.sep });
+    });
+  }
+  return blocks;
+}
+
 async function translateBody(lang, srcBody) {
-  const { text: protectedText, tokens } = protectBody(srcBody);
+  const blocks = splitBlocks(srcBody);
+  let neurons = 0;
+  const out = [];
+  for (const b of blocks) {
+    const r = await translateOneBlock(lang, b.text);
+    out.push(r.body + b.sep);
+    neurons += r.neurons ?? 0;
+  }
+  const body = out.join('');
+  const issues = structuralIssues(srcBody, body); // 全局保险丝
+  if (issues.length) throw new Retry(`结构 QA 门未过（${issues.join('，')}）`);
+  return { body, neurons };
+}
+
+async function translateOneBlock(lang, block) {
+  const { text: protectedText, tokens } = protectBody(block);
   return withRetry(`正文 ${lang}`, async (attempt) => {
     const { text, usage } = await runModel({
       max_tokens: MAX_TOKENS_BODY + (attempt - 1) * 3000, // 截断重试时自动加预算
@@ -535,9 +589,6 @@ async function translateBody(lang, srcBody) {
     let t = stripThinking(text);
     if (!t) throw new Retry('正文空响应');
     t = restoreBody(protectedText, t, tokens); // 完整性门：缺/重复/越位即重试，绝不落盘
-    // 保险丝：还原后的最终 Markdown 与原文做结构计数比对（正常路径下恒过）
-    const issues = structuralIssues(srcBody, t);
-    if (issues.length) throw new Retry(`结构 QA 门未过（${issues.join('，')}）`);
     return { body: t, neurons: usage?.neurons };
   });
 }
@@ -569,7 +620,15 @@ function selfTest() {
     check(JSON.stringify(srcLiterals) === JSON.stringify(outLiterals), `${name}：还原后 «n» 字面量与原文不一致`);
     const issues = structuralIssues(src, rebuilt);
     check(issues.length === 0, `${name}：模拟译文触发结构门 ${issues.join('，')}`);
-    console.log(`✓ ${name}：${tokens.length} 个占位符，恒等往返/模拟译文/结构门全通`);
+    // ③ 分段恒等往返：splitBlocks → 每块 protect/restore（token 原样）→ 按 sep 拼回
+    //    必须与全文恒等；分段不得改变 Markdown 的空行结构
+    const segParts = splitBlocks(src).map((b) => {
+      const bp = protectBody(b.text);
+      return restoreBody(bp.text, bp.text, bp.tokens) + b.sep;
+    });
+    check(segParts.join('') === src, `${name}：分段恒等往返不一致`);
+    const maxPerBlock = Math.max(...splitBlocks(src).map((b) => protectBody(b.text).tokens.length));
+    console.log(`✓ ${name}：${tokens.length} 个占位符，恒等往返/模拟译文/结构门/分段(最大块 ${maxPerBlock}) 全通`);
   }
 
   // 合成损伤样本：逐一验证完整性门
