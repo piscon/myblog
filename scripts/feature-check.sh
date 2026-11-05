@@ -94,17 +94,23 @@ check "giscus 主题跟随(耦合点)"  "grep -q 'id=\"giscus-script\"' '$PAGE' 
 check "元信息行条目类名+图标"    "grep -q 'meta-item meta-date' '$PAGE' && grep -q 'meta-cats' '$PAGE' && grep -q 'meta-sep' '$PAGE'"
 # 作者已从 meta 行整体移除（hideAuthor=true 纯配置；head <meta name=author> 走 author.html 不受影响）；编辑链接已停用
 check "作者已移除(head保留)"     "! grep -q 'meta-author' '$PAGE' && ! grep -q 'meta-author' '$OUT/zh/posts/index.html' && ! grep -q 'meta-author' '$OUT/zh/archives/index.html' && grep -q 'name=\"author\"' '$PAGE' && ! grep -q '在 GitHub 上改进本文' '$PAGE'"
-# 语言列表：文字标签换 globe 图标（translation_list 站点覆盖，tier-3 主题耦合）+ 文章页 flex 右对齐进 bundle
-check "语言列表图标+右对齐"      "grep -q 'meta-lang' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q '语言:' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q '.post-single .post-meta .meta-lang' '$OUT'/assets/css/stylesheet.*.css && grep -q 'i18n_list' themes/PaperMod/layouts/_partials/translation_list.html"
+# 语言切换同页化：head hreflang 互译链接（主题每页无条件发出）是 site.js 运行时重写
+# href 为同页译文 URL 的数据源——HTML 守数据源、JS bundle 守重写逻辑（含 data-lang 打标）
+check "语言切换同页(数据源+JS)"  "grep -q 'hreflang=\"ja\"' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q 'hreflang=\"en\"' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q 'hreflang' '$OUT'/js/site.*.js && grep -q 'data-lang' '$OUT'/js/site.*.js"
+# 语言列表已收敛：文章页/搜索页无任何翻译列表 DOM（translation_list 空 stub 压掉主题 partial），
+# 语言入口仅头部切换器一处；stub 文件须存在且不得把主题列表逻辑克隆回来
+check "语言列表已收敛(仅头部)"   "! grep -q 'i18n_list' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q 'meta-lang' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q '语言:' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q 'i18n_list' '$OUT/zh/search/index.html' && test -f layouts/_partials/translation_list.html && ! grep -q 'i18n_list' layouts/_partials/translation_list.html"
 # 搜索页分类/标签聚合标题三语本地化（ja/en 曾硬编码中文「分类/标签」）
 check "搜索页标题本地化"        "grep -q 'カテゴリ' '$OUT/ja/search/index.html' && grep -q 'Categories' '$OUT/en/search/index.html' && ! grep -q '🧩 分类' '$OUT/ja/search/index.html'"
 # 搜索页视觉体系：页面 h1 流式字阶（theme 固定 40px 耦合点）+ 输入框/词条胶囊重皮 + 聚合标题字阶进 bundle；
 # emoji 已从标题串移除，Feather 图标在模板层（h2.taxonomy-heading 与 svg 同现，ui.css 按 svg 后代选择器出 1em）
 check "搜索页视觉体系(bundle)"   "grep -q '.page-header h1 svg' '$OUT'/assets/css/stylesheet.*.css && grep -q '.searchbox input' '$OUT'/assets/css/stylesheet.*.css && grep -q '.terms-tags a sup sup' '$OUT'/assets/css/stylesheet.*.css && grep -q '.taxonomy-heading' '$OUT'/assets/css/stylesheet.*.css"
 check "聚合标题图标(emoji已除)"  "grep -q 'taxonomy-heading' '$OUT/zh/search/index.html' && grep -A2 'taxonomy-heading' '$OUT/zh/search/index.html' | grep -q '<svg' && ! grep -q '🧩\|🏷️' '$OUT/zh/search/index.html'"
-# 原生分享按钮（手机）：site.js 运行时注入 navigator.share 入口——依赖主题 .share-buttons 容器存在；
-# JS token 守 bundle、容器守主题 DOM（桌面/无 navigator.share 环境按钮不出现，属预期）
-check "原生分享按钮(手机)"       "grep -q 'navigator.share' '$OUT'/js/site.*.js && grep -q 'share-buttons' '$PAGE'"
+# 原生分享按钮（手机）：site.js 运行时注入 navigator.share 入口，并在同一门控下隐藏
+# 不可达的 X/Telegram intent 链接（style.display——属性名不被 minifier 改写，token 稳定）；
+# 依赖主题 .share-buttons 容器存在；JS token 守 bundle、容器守主题 DOM
+# （桌面/无 navigator.share 环境按钮不出现且 intent 链接保留，属预期）
+check "原生分享按钮(手机)"       "grep -q 'navigator.share' '$OUT'/js/site.*.js && grep -q 'style.display' '$OUT'/js/site.*.js && grep -q 'share-buttons' '$PAGE'"
 # cover.html 站点覆盖（tier-3）：sizes 按上下文分流——列表卡 176px/28vw，单页 720px/100vw（first.md 有 cover 且 slug 稳定）
 check "封面 sizes 分流(列表/单页)" "grep -q '176px, 28vw' '$OUT/zh/posts/index.html' && grep -q '720px, 100vw' '$OUT/zh/posts/first/index.html'"
 

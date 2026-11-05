@@ -135,10 +135,11 @@ html[lang^="en"] body {
   margin-bottom: 0.3rem;
 }
 
-.post-related-date {
-  color: var(--secondary);
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
+.post-related-list a {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Reading progress bar (site.js, article pages only) */

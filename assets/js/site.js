@@ -15,8 +15,9 @@
       content column and force the details open; below the breakpoint the
       inline collapsed details is restored (see ui.css media block).
    7. Native share — on touch screens the system share sheet replaces the
-      X/Telegram link flow (both unreachable from mainland phones); gated
-      on navigator.share + coarse pointer, desktop keeps the links.
+      X/Telegram link flow (both unreachable from mainland phones): the
+      theme's intent links are hidden under the same gate and the sheet
+      entry is injected first. Desktop keeps the icon links.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
    #menu / #searchInput / .lang-menu / .share-buttons; regression-guarded
    by feature-check assertions. */
@@ -230,12 +231,16 @@
   }
 
   /* 7. Native share on phones: system share sheet instead of the X/
-     Telegram intent links (mainland-unreachable networks, and the sheet
-     carries any installed target). Touch-only gate — desktop browsers
-     that expose navigator.share keep the icon links. */
+     Telegram intent links (both unreachable from mainland phones, and
+     the sheet carries any installed target). Under the same gate the
+     theme's intent links are hidden, so touch devices see one clean
+     entry; desktop browsers that expose navigator.share keep the links. */
   var shareButtons = document.querySelector('.share-buttons');
   if (shareButtons && navigator.share &&
       window.matchMedia('(pointer: coarse)').matches) {
+    shareButtons.querySelectorAll('li').forEach(function (li) {
+      li.style.display = 'none';
+    });
     var shareLi = document.createElement('li');
     var shareBtn = document.createElement('a');
     shareBtn.href = '#';

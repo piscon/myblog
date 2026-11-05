@@ -66,10 +66,7 @@
   <h2 class="post-related-title">{{ $relHeading }}</h2>
   <ul class="post-related-list">
     {{- range . }}
-    <li>
-      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-      <span class="post-related-date">{{ .Date | time.Format ":date_long" }}</span>
-    </li>
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
     {{- end }}
   </ul>
 </div>
