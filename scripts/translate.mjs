@@ -668,7 +668,27 @@ async function translateOneBlock(lang, block, depth = 0) {
   } catch (err) {
     if (depth >= 3 || !block.includes('\n')) throw err;
     const lines = block.split('\n');
-    // 从中点向外找「两半各自 protect/restore 恒等」的最近安全切点：
+    // 深度 ≥1：不再二分（表格片段越切越怪，模型对裸管道符行更不稳定），
+    // 改为逐行重试——单表格行/单列表项是模型最稳定的粒度。
+    // 单行最终失败时原样保留该行（一行未译远好于整篇失败；下次 zh 变更会重试）。
+    if (depth >= 1) {
+      const parts = [];
+      let neurons = 0;
+      for (const line of lines) {
+        try {
+          const r = await translateOneBlock(lang, line, depth + 1);
+          parts.push(r.body);
+          neurons += r.neurons ?? 0;
+        } catch (lineErr) {
+          const p = protectBody(line);
+          if (p.tokens.length === 0) throw lineErr; // 纯文本行失败仍是失败
+          console.warn(`  ↳ ${lang} 单行重译仍失败，原样保留该行（${JSON.stringify(line.slice(0, 40))}…）`);
+          parts.push(line);
+        }
+      }
+      return { body: parts.join('\n'), neurons };
+    }
+    // 深度 0：从中点向外找「两半各自 protect/restore 恒等」的最近安全切点：
     // 避免把围栏/表格劈开，也避免切出 1 行碎块（1-token 块会被模型重复/越界输出）。
     const safeAt = (i) => {
       if (i < 1 || i >= lines.length) return false;
