@@ -114,8 +114,8 @@ const FIELDS_SCHEMA = {
 };
 
 const LANG_FIELDS_PROMPT = {
-  ja: `你是个人技术博客的日文译者。把 JSON 各字段的中文译成自然的日语（です・ます体）：title 简洁、description 1-2 句完整句（源为 null 则据 body 概括）、categories/tags 用日语惯用词且专有名词保留原文、「中文」写作「中国語」、cover_alt/cover_caption 源为 null 则输出 null。/no_think`,
-  en: `You are the English translator for a personal tech blog. Translate the Chinese in each JSON field into natural English: concise title, 1-2 full sentences for description (summarize from body if null), common English equivalents for categories/tags keeping proper nouns as-is, "中文" as "Chinese", null for null cover_alt/cover_caption. /no_think`,
+  ja: `你是个人技术博客的日文译者。把 JSON 各字段的中文译成自然的日语（です・ます体）：title 简洁、description 1-2 句完整句（源为 null 则据 context 概括）、categories/tags 用日语惯用词且专有名词保留原文、「中文」写作「中国語」、cover_alt/cover_caption 源为 null 则输出 null。/no_think`,
+  en: `You are the English translator for a personal tech blog. Translate the Chinese in each JSON field into natural English: concise title, 1-2 full sentences for description (summarize from context if null), common English equivalents for categories/tags keeping proper nouns as-is, "中文" as "Chinese", null for null cover_alt/cover_caption. /no_think`,
 };
 // zh 摘要缺失时自动补写（写回 zh front matter；用户可在 CMS 改写，改后 fHash 失配自动重译三语字段）
 const DESC_PROMPT = `用 70-160 个汉字为这篇中文博客文章写一段 SEO 摘要。要求：单行纯文本；不要引号、Markdown、换行或任何解释；第一句概括文章核心（搜索结果只展示前约 80 字）；客观自然，不夸张推销。/no_think`;
@@ -448,17 +448,23 @@ async function translateFields(lang, slim) {
       const { text, usage } = await runModel(body);
       const data = extractJSON(text, `字段 ${lang}`);
       // 字段值卫生门（2026-11-05 gemma 事故）：json_schema 只保证「合法 JSON 对象」，
-      // 不保证字符串内容干净——v8 首跑的 cover_caption 曾输出 `ネットワークの外',`
-      // （尾部多出引号逗号，来自模型把 JSON 定界符混进值里）。检查「引号/逗号收尾」
-      // 与控制字符，异常即重试；正常译文不以这些字符结尾。
-      const dirty = (s) => /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
+      // 不保证字符串内容干净——v8 首跑的 cover_caption 曾输出 `ネットワークの外',`，
+      // 长文首跑更把后续 `","body":"## …` 整段 JSON 碎片吞进 caption 值里。
+      // 三重检查：①键集合必须恰好是 schema 的 6 键（无多余键）；②字符串值不得含
+      // JSON 结构碎片 `","` / `":"` / `\n##`（模型串位的典型形态）；③尾部引号/控制字符。
+      const REQUIRED_KEYS = Object.keys(FIELDS_SCHEMA.properties);
+      const extra = Object.keys(data).filter((k) => !REQUIRED_KEYS.includes(k));
+      if (extra.length) throw new Retry(`字段响应多出非 schema 键：${extra.join(',')}`);
+      const dirty = (s) =>
+        /["']\s*,\s*"|"\s*:\s*"|\n#{1,6}\s|\\n/.test(s) ||
+        /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
       for (const [k, v] of Object.entries(data)) {
         if (v != null && typeof v === 'string' && dirty(v)) {
-          throw new Retry(`字段 ${k} 值含尾部引号/控制字符：${JSON.stringify(v)}`);
+          throw new Retry(`字段 ${k} 值含 JSON 碎片/控制字符：${JSON.stringify(v.slice(0, 60))}`);
         }
         if (Array.isArray(v)) for (const x of v) {
           if (typeof x === 'string' && dirty(x)) {
-            throw new Retry(`字段 ${k} 数组项含尾部引号/控制字符：${JSON.stringify(x)}`);
+            throw new Retry(`字段 ${k} 数组项含 JSON 碎片/控制字符：${JSON.stringify(x.slice(0, 60))}`);
           }
         }
       }
@@ -917,9 +923,10 @@ function selfTest() {
     `共 ${totalCalls} 次；节流后峰值 ${peakPerMin} req/min（上游 300），总耗时约 ${Math.round(totalCalls * REQUEST_INTERVAL_MS / 1000)}s`);
 
   // 字段值卫生门：模型把 JSON 定界符混进字符串值（v8 实测 `ネットワークの外',`）
-  const dirty = (s) => /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
+  const dirty = (s) => /["']\s*,\s*"|"\s*:\s*"|\n#{1,6}\s|\\n/.test(s) || /(?:['"]\s*,?\s*|,\s*)$/.test(s.trim()) || /[\x00-\x1f]/.test(s);
   check(dirty("ネットワークの外',"), '字段卫生门：尾部引号逗号应被拦下');
-  check(!dirty('ネットワークの外'), '字段卫生门：正常字段值应放行');
+  check(dirty('日が沈み始めたばかりの通り","body":"## 一、地下鉄…'), '字段卫生门：JSON 碎片吞入应被拦下');
+  check(!dirty('天刚暗下来的那条街'), '字段卫生门：正常字段值应放行');
 
   console.log(fails ? `\n自测失败 ${fails} 项` : '\n自测全部通过');
   if (fails) process.exit(1);
@@ -1097,7 +1104,7 @@ async function main() {
           : null;
 
       try {
-        const fieldsRes = reuseFields ? { data: reuseFields, neurons: 0 } : await translateFields(lang, { ...fParts, body: body.slice(0, 2000) });
+        const fieldsRes = reuseFields ? { data: reuseFields, neurons: 0 } : await translateFields(lang, { ...fParts, context: body.slice(0, 1200) });
         const bodyRes = reuseBody ? { body: reuseBody, neurons: 0 } : await translateBody(lang, body);
         const fields = fieldsRes.data;
         const tBodyRaw = bodyRes.body;
