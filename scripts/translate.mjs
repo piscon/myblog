@@ -668,17 +668,24 @@ async function translateOneBlock(lang, block, depth = 0) {
   } catch (err) {
     if (depth >= 3 || !block.includes('\n')) throw err;
     const lines = block.split('\n');
-    // 只在「两半各自 protect/restore 恒等」的边界切，避免把围栏/表格从中间劈开
-    let mid = -1;
-    for (let i = 1; i < lines.length; i++) {
+    // 从中点向外找「两半各自 protect/restore 恒等」的最近安全切点：
+    // 避免把围栏/表格劈开，也避免切出 1 行碎块（1-token 块会被模型重复/越界输出）。
+    const safeAt = (i) => {
+      if (i < 1 || i >= lines.length) return false;
       const a = lines.slice(0, i).join('\n');
       const b = lines.slice(i).join('\n');
       const pa = protectBody(a), pb = protectBody(b);
-      let ok = true;
       try {
-        ok = restoreBody(pa.text, pa.text, pa.tokens) === a && restoreBody(pb.text, pb.text, pb.tokens) === b;
-      } catch { ok = false; }
-      if (ok) { mid = i; break; }
+        return restoreBody(pa.text, pa.text, pa.tokens) === a && restoreBody(pb.text, pb.text, pb.tokens) === b;
+      } catch { return false; }
+    };
+    const midPoint = Math.ceil(lines.length / 2);
+    let mid = -1;
+    for (let off = 0; off < lines.length; off++) {
+      for (const i of [midPoint - off, midPoint + off]) {
+        if (safeAt(i)) { mid = i; break; }
+      }
+      if (mid !== -1) break;
     }
     if (mid === -1) throw err; // 无安全切点（如围栏整块），不勉强
     console.warn(`  ↳ ${lang} 块完整性门连续失败，二分降级重译（${lines.length} 行 → ${mid}/${lines.length - mid} 行，深度 ${depth + 1}）`);
