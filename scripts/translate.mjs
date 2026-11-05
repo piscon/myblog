@@ -216,11 +216,19 @@ async function runModel(bodyObj) {
     const host = GATEWAY
       ? `https://gateway.ai.cloudflare.com/v1/${account}/${GATEWAY}/workers-ai/${MODEL}`
       : `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${MODEL}`;
+    // Gateway 认证（新建 gateway 强制开启）要求专用 AI Gateway token，
+    // 普通 API token 会被 401；未设置时回退 API token 并给出明确提示
+    const bearer = GATEWAY
+      ? (process.env.AI_GATEWAY_TOKEN || process.env.CLOUDFLARE_API_TOKEN)
+      : process.env.CLOUDFLARE_API_TOKEN;
+    if (GATEWAY && !process.env.AI_GATEWAY_TOKEN) {
+      console.warn('  ⚠ AI_GATEWAY 已设置但缺 AI_GATEWAY_TOKEN：gateway 强制认证，普通 API token 会 401；请在 dashboard 创建 gateway token 并配为 Secret');
+    }
     let res;
     try {
       res = await fetch(host, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${bearer}`, 'Content-Type': 'application/json' },
         body: payload,
         signal: AbortSignal.timeout(REST_TIMEOUT_MS),
       });
