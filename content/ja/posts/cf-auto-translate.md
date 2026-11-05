@@ -2,6 +2,7 @@
 lang = 'ja'
 title = 'Cloudflare Workers AIでブログに自動翻訳パイプラインを構築する'
 date = '2026-11-05'
+lastmod = '2026-11-05'
 draft = false
 source_hash = '5b09db79430abfb8cbcf134c109e450623104455c390519bbb8dc5bef6634762'
 source_fields_hash = 'c1b3b3cb2793487ece0c966fe0f5e1ee56e9e7e3825edbe6eb768fbe8a2b5350'

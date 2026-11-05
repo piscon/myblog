@@ -2,6 +2,7 @@
 lang = 'ja'
 title = 'こんにちは、世界'
 date = '2025-11-26'
+lastmod = '2026-11-05'
 draft = false
 source_hash = '5d767c9c18ed1d4edbb8b7902d498500efb4c9067e036cdfc20cd44543d68120'
 source_fields_hash = '52ab825fc7957a0fe2184a675c5c5233e19a9470e27337267ed31d4eb954890f'
