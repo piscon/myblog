@@ -27,7 +27,7 @@ const ZH_POSTS = join(ROOT, 'content/zh/posts');
 const LANGS = ['ja', 'en'];
 
 const MODEL = process.env.TRANSLATE_MODEL || '@cf/qwen/qwen3-30b-a3b-fp8';
-const PROMPT_VERSION = 'v2'; // v2：两段式调用（字段 JSON + 正文纯文本），修复 JSON 内链接语法被打散
+const PROMPT_VERSION = 'v3'; // v3：两段式调用 + /no_think 关思考（v2 曾因 reasoning 烧尽 max_tokens 空响应）
 const MAX_TOKENS_FIELDS = 2000; // qwen3 思考 token 也计入 max_tokens，预算要给思考留余地
 const MAX_TOKENS_BODY = 6000;
 
@@ -47,20 +47,22 @@ const DISCLAIMER = {
   en: (link) => `> This article was machine-translated by AI and may contain inaccuracies. See the [Chinese original](${link}) for the authoritative version.\n\n`,
 };
 
-// 字段走小 JSON 调用（title/description 等短文本，模型处理 JSON 可靠）
+// 字段走小 JSON 调用（title/description 等短文本，模型处理 JSON 可靠）。
+// /no_think：qwen3 的官方软开关，关掉思考模式——reasoning 也烧 max_tokens，
+// 曾把字段调用的预算耗尽导致 content 空响应，翻译任务也不需要推理
 const LANG_FIELDS_PROMPT = {
-  ja: `把 JSON 中 title/description/categories/tags/cover_alt/cover_caption 的中文翻译成自然的日语（です・ます体）。规则：title 简洁；description 1-2 句完整句（源为 null 时根据 body 概括写出）；categories/tags 用日语惯用词，专有名词（AI、Hugo 等）保留原文；cover_alt/cover_caption 源为 null 输出 null。只输出一个合法 JSON 对象，键与输入一致，不要代码围栏、不要解释。`,
-  en: `Translate the Chinese in the JSON fields title/description/categories/tags/cover_alt/cover_caption into natural English. Rules: title concise; description 1-2 full sentences (if null, summarize from body); categories/tags use common English equivalents, keep proper nouns (AI, Hugo) as-is; cover_alt/cover_caption output null if null. Output ONLY one valid JSON object with the same keys — no fences, no explanations.`,
+  ja: `把 JSON 中 title/description/categories/tags/cover_alt/cover_caption 的中文翻译成自然的日语（です・ます体）。规则：title 简洁；description 1-2 句完整句（源为 null 时根据 body 概括写出）；categories/tags 用日语惯用词，专有名词（AI、Hugo 等）保留原文；cover_alt/cover_caption 源为 null 输出 null。只输出一个合法 JSON 对象，键与输入一致，不要代码围栏、不要解释。/no_think`,
+  en: `Translate the Chinese in the JSON fields title/description/categories/tags/cover_alt/cover_caption into natural English. Rules: title concise; description 1-2 full sentences (if null, summarize from body); categories/tags use common English equivalents, keep proper nouns (AI, Hugo) as-is; cover_alt/cover_caption output null if null. Output ONLY one valid JSON object with the same keys — no fences, no explanations. /no_think`,
 };
 // 正文走纯文本调用（Markdown 链接/结构在 JSON 里会被模型打散，纯文本则保真）
 const LANG_BODY_PROMPT = {
-  ja: `你是个人技术博客的专业翻译。把用户的 Markdown 正文翻译成自然的日语（です・ます体）。
+  ja: `你是个人技术博客的专业翻译。把用户的 Markdown 正文翻译成自然的日语（です・ます体）。/no_think
 - 只输出翻译后的 Markdown，不要任何解释、不要代码围栏
 - 所有中文文字必须翻译，绝不能原样复制中文
 - 保持 Markdown 结构不变：标题层级、列表（有序/无序）、引用块、斜体/粗体标记原样保留
 - 行内链接必须保持 [文字](URL) 语法，只译链接文字，URL 原样
 - 图片语法、行内代码、代码块、URL 原样保留；代码块内容除注释外不翻译`,
-  en: `You are a professional translator for a personal tech blog. Translate the user's Markdown body into natural English.
+  en: `You are a professional translator for a personal tech blog. Translate the user's Markdown body into natural English. /no_think
 - Output ONLY the translated Markdown — no explanations, no code fences
 - ALL Chinese text must be translated — never copy the Chinese verbatim
 - Keep the Markdown structure intact: heading levels, ordered/unordered lists, blockquotes, italic/bold markers preserved
@@ -226,7 +228,9 @@ function extractJSON(text) {
   if (fence) t = fence[1].trim();
   const s = t.indexOf('{');
   const e = t.lastIndexOf('}');
-  if (s === -1 || e === -1 || e <= s) throw new Error('输出中没有 JSON 对象');
+  if (s === -1 || e === -1 || e <= s) {
+    throw new Error(`输出中没有 JSON 对象（原文前 200 字：${text.slice(0, 200).replace(/\s+/g, ' ')}）`);
+  }
   return JSON.parse(t.slice(s, e + 1));
 }
 
