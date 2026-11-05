@@ -46,10 +46,10 @@ content:
       - name: description
         label: 摘要（SEO）
         type: string
-        description: 120-160字，用于搜索摘要和分享预览；单行
+        description: 70-160字，用于搜索摘要和分享预览；搜索结果约展示前 80 字（中日文），首句必须承载重点；单行
         pattern:
-          regex: '^(.{120,160})?$'
-          message: 摘要需 120-160 字，留空则不生成摘要
+          regex: '^(.{70,160})?$'
+          message: 摘要建议 70-160 字（首句放重点），留空则不生成摘要
       - name: date
         label: 日期
         type: date
