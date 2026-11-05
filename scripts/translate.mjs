@@ -22,7 +22,7 @@
 //   - Markdown 占位符保护：围栏/链接 URL/行内代码/骨架标记替换为 «n» 后模型只译散文，
 //     译后校验每个占位符恰好一次且位置合法（缺/重/越位即重试），再做结构计数保险丝；
 //     模型接触不到语法，链接打散/标记吞入在架构上不可能发生
-//   - 贪心分段：按行切单元后贪心合并到每块 ≤28 token（空行参与合并而非强制断块），
+//   - 贪心分段：按行切单元后贪心合并到每块 ≤20 token（空行参与合并而非强制断块），
 //     编号每块从 0 开始、独立调用/还原；极小尾块并入前块。
 //     CI 实测边界：19 token 短文成功、64+ token 长序列稳定丢小语法 token、
 //     1-token 块会被重复输出、按空行碎块会调用数暴涨撞限流。
@@ -575,9 +575,10 @@ const TOKEN_REMINDER =
 //   - 但按空行碎成 1-token 小块会 (a) 模型重复输出 «0» (b) 调用数暴涨撞 429
 //   - 收敛：按行切最小单元后贪心合并，每块 token 数落在 [MIN, MAX] 区间；
 //     空行作为独立可拼接单元保留，保证恒等往返
-// 块上限 28 token：实测 19 token 短文成功、64+ token 长序列稳定丢 token，
-// 取中间值并留余量；比 16 减少约一半调用数（5000 字文章 36 → ~20 块）。
-const MAX_TOKENS_PER_BLOCK = 28;
+// 块上限 20 token：实测 19 token 短文成功、28 token 块偶发丢/重复 token
+// （en/cf-auto-translate 完整性门「缺失 1:16 → 重复 1:0」）、64+ token 长序列
+// 稳定丢 token。取 20 贴近已验证的成功区间；5000 字文章约 20-24 块。
+const MAX_TOKENS_PER_BLOCK = 20;
 
 function splitBlocks(src) {
   // 最小单元是「行」；空行不是断块信号，而是参与贪心合并的填充（用 \n 拼接），
@@ -744,12 +745,15 @@ function selfTest() {
   const callsPerDocPerLang = longBlocks.length + 1; // +1 = 字段调用
   const totalCalls = callsPerDocPerLang * 2 /* langs */ * 2 /* docs */;
   const peakPerMin = Math.ceil(60_000 / REQUEST_INTERVAL_MS);
-  check(peakPerMin < 100, `峰值 ${peakPerMin} req/min 未低于网关上限 100`);
+  // 2026-11-05 已将 gateway rate limiting 关闭（实测 61 次/60s 即触发 429，
+  // 100/60s 的数字并非元凶，关开关后 429 立即消失）；节流仍须远低于上游
+  // Workers AI text-generation 默认 300 req/min，并给免费 neuron 日额度留余量。
+  check(peakPerMin < 300, `峰值 ${peakPerMin} req/min 未低于上游 300`);
   const worstCaseMinute = Math.min(totalCalls, peakPerMin);
-  check(worstCaseMinute <= 100, `2 篇中长文最坏窗口 ${worstCaseMinute} 请求超出网关 100/min`);
+  check(worstCaseMinute <= 300, `2 篇中长文最坏窗口 ${worstCaseMinute} 请求超出上游 300/min`);
   check(segRoundtrip(longDoc), '合成中长文分段恒等往返不一致');
   console.log(`✓ 速率预算：2 篇 ${longDoc.length} 字中长文 → ${callsPerDocPerLang} 调用/篇/语言，` +
-    `共 ${totalCalls} 次；节流后峰值 ${peakPerMin} req/min（网关 100），总耗时约 ${Math.round(totalCalls * REQUEST_INTERVAL_MS / 1000)}s`);
+    `共 ${totalCalls} 次；节流后峰值 ${peakPerMin} req/min（上游 300），总耗时约 ${Math.round(totalCalls * REQUEST_INTERVAL_MS / 1000)}s`);
 
   console.log(fails ? `\n自测失败 ${fails} 项` : '\n自测全部通过');
   if (fails) process.exit(1);
