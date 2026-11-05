@@ -28,7 +28,7 @@ const LANGS = ['ja', 'en'];
 
 const MODEL = process.env.TRANSLATE_MODEL || '@cf/qwen/qwen3-30b-a3b-fp8';
 const PROMPT_VERSION = 'v2'; // v2：两段式调用（字段 JSON + 正文纯文本），修复 JSON 内链接语法被打散
-const MAX_TOKENS_FIELDS = 1000;
+const MAX_TOKENS_FIELDS = 2000; // qwen3 思考 token 也计入 max_tokens，预算要给思考留余地
 const MAX_TOKENS_BODY = 6000;
 
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -204,14 +204,17 @@ async function runModel(bodyObj) {
   if (env.success === false || env.errors?.length) {
     throw new Error(`Workers AI 错误：${String(JSON.stringify(env.errors ?? env)).slice(0, 500)}`);
   }
-  // REST 返回 {result:{…}} 信封；cf -q 对部分模型直接输出裸 chat completion——两种形态都兼容
+  // 响应形态实测有四种（REST: result 直接是 completion；cf CLI: result.response 包一层；
+  // 老模型: result.response 是纯字符串；偶发: 裸 completion 无信封）——按序取第一个命中的
   const container = env.result ?? env;
+  const usage = container.usage ?? env.usage;
   const resp = container.response;
-  const usage = container.usage;
-  const text = typeof resp === 'string'
-    ? resp
-    : resp?.choices?.[0]?.message?.content ?? env.choices?.[0]?.message?.content;
-  if (!text) {
+  const text =
+    (typeof resp === 'string' ? resp.trim() : undefined)
+    ?? resp?.choices?.[0]?.message?.content
+    ?? container.choices?.[0]?.message?.content
+    ?? env.choices?.[0]?.message?.content;
+  if (!text || !text.trim()) {
     throw new Error(`Workers AI 响应缺 content：${String(JSON.stringify(container) ?? '').slice(0, 300)}`);
   }
   return { text, usage };
