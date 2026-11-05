@@ -1,0 +1,262 @@
+/* Golden-ratio typography system (site layer, 2026-11-05).
+   Research anchors: Pearson's Golden Ratio Typography (grtcalculator.com/math),
+   Baymard line-length study (50–75 CPL), WCAG 2.2 §1.4.8 (≤80 glyphs,
+   ≤40 for CJK; leading ≥1.5), W3C clreq/jlreq screen conventions.
+
+   Fixed anchors (do not touch):
+   - Body is the theme's 18px; column stays 720px → 720/18 = 40 CJK glyphs
+     per line, exactly the WCAG CJK cap. Widening the column would break it.
+   - Ladder: every heading step is ×φ^¼ ≈ 1.127 (φ = 1.618), body = φ^0:
+     title φ^1.5 = 2.058em (37px) · h1 φ^1.25 = 1.825em (32.9px) ·
+     h2 φ^1 = 1.618em (29.1px) · h3 φ^0.75 = 1.437em (25.9px) ·
+     h4 φ^0.5 = 1.272em (22.9px) · h5 φ^0.25 = 1.127em (20.3px) ·
+     h6 φ^0 = 1em (18px).  Theme shipped h4 = 16px BELOW the 18px body
+     (inverted hierarchy) and a 40px fixed title that wraps badly on CJK
+     phones — both fixed here. Theme rules are equal-specificity ties that
+     we win by load order (extended bundle concatenates after core).
+   - Leading: Latin from the GRT formula, 18px @ 720px → 1.572 → 1.6;
+     CJK full-width squares carry no ascender/descender rhythm, screen
+     convention (clreq/jlreq practice) is 1.7–1.9 → 1.75.
+   - Heading margins: top:bottom = φ:1 (1.618em : 0.618em of own size), so
+     section breaks scale with heading size and always exceed the √φ
+     paragraph gap (1.272em = 22.9px).
+   - One restrained gold accent, interactive/selection/focus states only;
+   text stays monochrome. Dark variant follows the theme-vars :root pattern.
+
+   Selectors mirror the theme's .md-content shapes (same specificity) —
+   we win ties by bundle order, and scripts/feature-check.sh guards the
+   coupling points (content container class + emitted CSS tokens). */
+
+:root {
+  --accent: rgb(176, 128, 32); /* ~4.3:1 on white — ≥3:1 non-text (WCAG 1.4.11) */
+}
+
+:root[data-theme="dark"] {
+  --accent: rgb(219, 168, 75); /* ~7:1 on rgb(29,30,32) */
+}
+
+/* ---- Title block ---------------------------------------------------- */
+
+/* Fluid title: 2.058em on desktop (φ^1.5), relaxes to ~1.7em on phones so
+   long zh titles wrap into balanced 2 lines instead of a 40px wall.
+   balance = even line lengths in wrapped titles (progressive, Chromium 114+). */
+.post-title {
+  font-size: clamp(1.55em, 1.35em + 1.8vw, 2.058em);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+/* SEO summary under the title: one quiet step down, not a second headline.
+   Eyebrow label separates it from the author's own lede. Neutral word on
+   purpose (摘要/概要/Summary) — descriptions come from both the AI pipeline
+   and hand edits, so an "AI" badge would mislabel half of them. Scoped to
+   .post-header: archives/search reuse the bare class and stay unlabeled. */
+.post-description {
+  color: var(--secondary);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.post-header .post-description::before {
+  content: "摘要";
+  display: block;
+  margin-bottom: 0.4em;
+  font-size: 0.72em;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+}
+
+html[lang^="ja"] .post-header .post-description::before {
+  content: "概要";
+}
+
+html[lang^="en"] .post-header .post-description::before {
+  content: "Summary";
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Dates align vertically across the meta row (proportional figures wobble) */
+.post-meta,
+.post-lastmod,
+.breadcrumbs {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Body leading ---------------------------------------------------- */
+
+.post-content {
+  line-height: 1.75;
+}
+
+/* Latin-only pages: GRT says 1.572 for 18px @ 720px; round to 1.6.
+   CJK pages keep 1.75 (see header comment). */
+html[lang^="en"] .post-content {
+  line-height: 1.6;
+}
+
+/* Paragraph gap = φ^½ em (22.9px @ 18px), from the previous 20px.
+   Selector mirrors the theme's :not(:last-child) shape — the theme rule
+   is specificity (0,2,1) and a bare .post-content p (0,1,1) would lose. */
+.post-content p:not(:last-child) {
+  margin-bottom: 1.272em;
+}
+
+/* Progressive (Chromium 117+): avoid single-word/单字 orphan last lines */
+.post-content p {
+  text-wrap: pretty;
+}
+
+/* CJK punctuation may hang into the margin (Safari progressive; clreq §F) */
+html[lang^="zh"] .post-content,
+html[lang^="ja"] .post-content {
+  hanging-punctuation: first allow-end;
+}
+
+/* ---- Heading ladder --------------------------------------------------- */
+
+/* Sizes per ladder above; 1.3 leading because zh headings routinely wrap
+   (theme's global 1.2 is tuned for single-line Latin). balance keeps
+   two-line headings even. */
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 {
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.post-content h1 {
+  margin: 1.618em auto 0.618em;
+  font-size: 1.825em;
+}
+
+.post-content h2 {
+  margin: 1.618em auto 0.618em;
+  font-size: 1.618em;
+}
+
+/* h3-h6 share the theme's grouped margin rule shape */
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 {
+  margin: 1.618em 0 0.618em;
+}
+
+.post-content h3 {
+  font-size: 1.437em;
+}
+
+.post-content h4 {
+  font-size: 1.272em;
+}
+
+.post-content h5 {
+  font-size: 1.127em;
+}
+
+.post-content h6 {
+  font-size: 1em;
+}
+
+/* No extra air between the content start and its first heading: the 30px
+   content block margin already provides the section gap */
+.post-content > h1:first-child,
+.post-content > h2:first-child,
+.post-content > h3:first-child {
+  margin-top: 0;
+}
+
+.post-content li::marker {
+  color: var(--secondary);
+}
+
+/* ---- Links ------------------------------------------------------------ */
+
+/* Keep the theme's underline/offset; add the accent as the hover signal and
+   animate the decoration color (ink-only change, no reflow) */
+.post-content a:not(.anchor) {
+  transition: text-decoration-color 0.2s ease;
+}
+
+.post-content a:not(.anchor):hover {
+  text-decoration-color: var(--accent);
+}
+
+/* ---- Code ------------------------------------------------------------- */
+
+/* 0.78em dips under comfortable size next to 18px CJK body text */
+.post-content code {
+  font-size: 0.85em;
+}
+
+.post-content pre code {
+  line-height: 1.6;
+}
+
+/* ---- Quotes / rules / tables / media ----------------------------------- */
+
+/* Theme quotes carry a 0.3rem near-black border and body-colored text —
+   they shout. Muted text + gold rule reads as a citation, not an alarm */
+.post-content blockquote {
+  margin: 1.272em 0;
+  padding: 0.25em 1.25em;
+  border-inline-start: 3px solid var(--accent);
+  color: var(--secondary);
+}
+
+/* φ² block separation (2.618em = 47px), short centered hairline instead of
+   a full-width 2px slab */
+.post-content hr {
+  margin: 2.618em auto;
+  width: 25%;
+  height: 1px;
+}
+
+/* :not guard keeps highlight-table line numbers out of the skin */
+.post-content table th {
+  background: var(--code-bg);
+}
+
+.post-content table:not(.highlight table, .gist .highlight) th,
+.post-content table:not(.highlight table, .gist .highlight) td {
+  padding: 0.5rem 0.875rem;
+}
+
+.post-content table:not(.highlight table, .gist .highlight) tbody tr:nth-child(2n) td {
+  background: color-mix(in srgb, var(--secondary) 5%, transparent);
+}
+
+/* Captions annotate; they don't compete with body text */
+.post-content figure > figcaption {
+  color: var(--secondary);
+  font-size: 0.85em;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.post-content img {
+  margin: 1.272em 0;
+}
+
+/* ---- Global states ----------------------------------------------------- */
+
+/* Gold wash on selected text — the one place the accent touches content */
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Polished theme toggle; skippable for vestibular-sensitive users */
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    transition: background-color 0.25s ease;
+  }
+}
