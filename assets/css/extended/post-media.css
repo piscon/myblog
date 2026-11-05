@@ -1,6 +1,7 @@
-.post-media {
-  margin: 1.5rem 0;
-}
+/* Vertical spacing is owned by ui.css (.post-single > .post-media, the
+   0/24 margin compensation in the flex column) — .post-media only ever
+   renders as a direct child of .post-single (extend_post_content), so a
+   base margin here would be dead weight (was 1.5rem, unreachable). */
 
 .post-media audio,
 .post-media video {

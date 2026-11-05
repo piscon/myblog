@@ -356,11 +356,16 @@ sup[id^="fnref:"] {
    two taxonomy index pages (same .page-header / .terms-tags markup). */
 
 /* Page h1: the theme's fixed 40px is the same CJK phone-wrap problem
-   typography.css fixed for .post-title — same fluid clamp. The h1's
-   magnifier icon tracks text size and sits optically on the baseline
-   (meta-item convention). */
+   typography.css fixed for .post-title — now the exact SAME fluid curve.
+   The previous clamp(1.55em, 1.35em + 1.8vw, …) had a steeper slope that
+   rendered hub titles ~31px on phones while article titles sat at
+   24.3px, and its floor never bound (positive vw slope always exceeds
+   it) — unifying the curve is the only real alignment. Hub titles are
+   short (搜索/归档/分类/标签), so the smaller phone size is safe. The
+   h1's magnifier icon tracks text size and sits optically on the
+   baseline (meta-item convention). */
 .page-header h1 {
-  font-size: clamp(1.55em, 1.35em + 1.8vw, 2.058em);
+  font-size: clamp(1.35em, 1.1em + 1.2vw, 2.058em);
   line-height: 1.3;
   text-wrap: pretty;
 }
@@ -452,7 +457,7 @@ sup[id^="fnref:"] {
    language (14px, code-bg + hairline, like the pagination pills); the
    count flattens to one quiet figure; gold border on hover only */
 .terms-tags {
-  gap: 10px;
+  gap: calc(var(--u) * 0.618); /* φ⁻¹·u — was 10px, off-grid */
 }
 
 .terms-tags a {
@@ -465,6 +470,12 @@ sup[id^="fnref:"] {
 
 .terms-tags a:hover {
   border-color: var(--accent);
+}
+
+/* Article tag pills: same chip language as the term pills, same φ⁻¹·u row
+   gap (theme 10px — the last off-grid chip spacing) */
+.post-tags {
+  gap: calc(var(--u) * 0.618);
 }
 
 /* Markup is <sup><strong><sup>N</sup></strong></sup> (theme
@@ -586,6 +597,29 @@ sup[id^="fnref:"] {
 .entry-footer,
 .archive-meta {
   font-variant-numeric: tabular-nums;
+}
+
+/* Card meta joins the 14px (φ^-0.5) rung the other two meta containers
+   already ride (article .post-meta, .archive-meta — and the pagination/
+   term pills). The theme's 13px sat BETWEEN rungs; at 14px the card's
+   worst-case text stack grows ~1.5px (144.2 → ~145.7) against the 176px
+   budget — safe. Mobile stays 12px (cover.css). */
+.entry-footer {
+  font-size: 14px;
+}
+
+/* Archive page (theme utilitarian layout): the year heading inherited the
+   16px list size and stood out by margin only — promote it one ladder
+   rung (1.272em × 16px context = 20.3px = φ^0.25), month header margins
+   onto u (theme 25px is off-grid). The 40px year top margin is 2u already;
+   the 10px/5px entry-row chrome stays theme (row leading, not section
+   rhythm). */
+.archive-year-header {
+  font-size: 1.272em;
+}
+
+.archive-month-header {
+  margin: var(--u) 0;
 }
 
 /* Freshness ("meta-updated") belongs to the article header only — the

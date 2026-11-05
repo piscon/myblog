@@ -104,6 +104,9 @@ check "黄金字阶 CSS 进 bundle"    "grep -q 'hanging-punctuation' '$OUT'/ass
 # 全部挂 u（20px，≤768px 镜像 14px）。勿迁回 --gap——主题 --gap=24px，此前公式误挂 --gap，
 # 实渲染 φ⁻¹·gap=14.8px 与全体系注释 12.4px 脱节；--gap 只许页面沟槽（.main/页眉/页脚）用
 check "间距单位(--u双断点)" "grep -q -- '--u:20px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--u:14px' '$OUT'/assets/css/stylesheet.*.css"
+# 字阶补全（2026-11-06）：归档年份 1.272em（主题继承 16px 与条目同阶，仅靠 margin 撑）+
+# 首页 profileMode h1 显式流式 clamp（主题零样式，原落 UA 默认 36px）
+check "字阶补全(归档年份+首页h1)" "grep -q 'archive-year-header{font-size:1.272em' '$OUT'/assets/css/stylesheet.*.css && grep -q '.profile h1{font-size:clamp(1.35em' '$OUT'/assets/css/stylesheet.*.css"
 # 摘要 eyebrow 标签：完整选择器含 .post-header 前缀（archives/search 复用裸 .post-description，不得命中）+ ja token「概要」（bundle 内唯一）
 check "摘要标签(CSS作用域+三语言)" "grep -q '.post-header .post-description::before' '$OUT'/assets/css/stylesheet.*.css && grep -q '概要' '$OUT'/assets/css/stylesheet.*.css"
 # 摘要折叠行（2026-11-06）：html.js 门控 grid——eyebrow+chevron 靠左、meta 同排 justify-self 靠右；
