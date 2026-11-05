@@ -2,7 +2,7 @@
 lang = 'ja'
 title = '引っ越し後の初の週末：雨、古本、そして繋がらないプリンター'
 date = '2026-11-05'
-draft = false
+draft = true
 source_hash = 'c50fdc123dc89b9206d59894c1fc50c0480128df485a344eeffdb717944bdb15'
 source_fields_hash = '502b691599702afb7d6dd1a97b078ff96ef677f97e0a02504e42a18fd86fa6c9'
 description = '引っ越しの雑事についてのエッセイです。段ボールから出てきた古本や、一整天を費やしたプリンターのトラブル、そして夕方の紅茶を飲む時間まで、普通の週末にあった意味のないが忘れられない小さな出来事を紹介します。'

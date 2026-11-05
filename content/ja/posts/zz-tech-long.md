@@ -2,7 +2,7 @@
 lang = 'ja'
 title = '静的サイト多言語パイプラインの実践：コンテンツモデリングからビルド結果まで'
 date = '2026-11-05'
-draft = false
+draft = true
 source_hash = 'ecbc67b445d90cb1653d60d4fab8073944a87227f370669317e7e13473994112'
 source_fields_hash = '9b22d7a6f9598d97322997fb2e900e5622fb15e5fe3ed225b9f4ef20f0fe8842'
 description = 'この記事では、Hugoの静的ブログにおける多言語環境での工程的選択について体系的に整理し、コンテンツディレクトリの設計、front matterのフィールドモデリング、翻訳パイプラインのブロック戦略、構造の保真性検証、およびビルド時と実行時の責任の境界について説明します。'

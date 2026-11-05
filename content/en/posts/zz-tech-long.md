@@ -2,7 +2,7 @@
 lang = 'en'
 title = 'Engineering a Multilingual Static Site Pipeline: From Content Modeling to Build Output'
 date = '2026-11-05'
-draft = false
+draft = true
 source_hash = 'ecbc67b445d90cb1653d60d4fab8073944a87227f370669317e7e13473994112'
 source_fields_hash = '9b22d7a6f9598d97322997fb2e900e5622fb15e5fe3ed225b9f4ef20f0fe8842'
 description = 'This article systematically outlines the engineering trade-offs of using Hugo for a multilingual static blog, covering content directory design, front matter field modeling, chunking strategies for translation pipelines, structural fidelity verification, and the division of responsibilities between build and runtime.'

@@ -2,7 +2,7 @@
 lang = 'en'
 title = "The First Weekend After Moving: Rain, Old Books, and a Printer That Won't Connect"
 date = '2026-11-05'
-draft = false
+draft = true
 source_hash = 'c50fdc123dc89b9206d59894c1fc50c0480128df485a344eeffdb717944bdb15'
 source_fields_hash = '502b691599702afb7d6dd1a97b078ff96ef677f97e0a02504e42a18fd86fa6c9'
 description = 'A casual essay about the mundane tasks of moving: old books found while packing, a printer that took all day to fix, and a cup of tea finally enjoyed in the evening. It records the small, useless yet memorable things of an ordinary weekend.'
