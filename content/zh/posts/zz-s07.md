@@ -1,6 +1,7 @@
 +++
 title = '配置文件里那行注释，救了一次线上部署'
 date = '2026-11-05'
+lastmod = '2026-11-05'
 draft = true
 description = '一次 netlify.toml 的分支名写错，让全站「在 GitHub 上改进本文」链接 404。复盘为什么构建全绿、测试全过，却没人发现一个写死的 main。'
 categories = ['技术']
