@@ -11,12 +11,23 @@
 {{- $iconWords := printf "%s%s</svg>" $svgOpen `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>` }}
 {{- $iconUser := printf "%s%s</svg>" $svgOpen `<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>` }}
 {{- $iconFolder := printf "%s%s</svg>" $svgOpen `<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>` }}
+{{- $iconRefresh := printf "%s%s</svg>" $svgOpen `<polyline points="23 4 23 10 17 10"/><polyline points="1 10 1 4 7 4"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>` }}
 
 {{- $meta := slice }}
 {{- $sep := "" }}
 
 {{- if not .Date.IsZero -}}
     {{- $meta = $meta | append (printf "%s<span class=\"meta-item meta-date\" title='%s'>%s&nbsp;%s</span>" $sep (.Date | time.Format "2006-01-02T15:04:05-07:00") $iconDate (.Date | time.Format (default ":date_long" site.Params.DateFormat))) }}
+    {{- $sep = `<span class="meta-sep" aria-hidden="true">&nbsp;·&nbsp;</span>` }}
+{{- end }}
+
+{{- /* Freshness at first sight: the publish date alone can mislead on
+       revised posts (the old "last updated" line sat at the very end).
+       Same +1day guard the end-of-page line used; cards and archive rows
+       hide this item in ui.css — their compact rows stay single-date.
+       Label via i18n "updatedOn" (site toml overrides, all 3 languages). */ -}}
+{{- if (.Lastmod.After (.Date.AddDate 0 0 1)) -}}
+    {{- $meta = $meta | append (printf "%s<span class=\"meta-item meta-updated\" title='%s'>%s&nbsp;%s %s</span>" $sep (.Lastmod | time.Format "2006-01-02T15:04:05-07:00") $iconRefresh (i18n "updatedOn") (.Lastmod | time.Format (default ":date_long" site.Params.DateFormat))) }}
     {{- $sep = `<span class="meta-sep" aria-hidden="true">&nbsp;·&nbsp;</span>` }}
 {{- end }}
 

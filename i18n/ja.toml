@@ -4,3 +4,7 @@
 # 见 i18n/zh-CN.toml 头注释与 AGENTS.md。feature-check 以「目次」作主题文案存活探针。
 prev_page = "前の記事"
 next_page = "次の記事"
+# 記事ページ meta 行の「最終更新」（post_meta.html が i18n "updatedOn" で消費）。以前は
+# 記事末尾にあった更新日を、ファーストビューの meta 行へ移動。リストカードとアーカイブ
+# 行でもレンダリングされるが、ui.css が .entry-footer/.archive-meta で display:none。
+updatedOn = "最終更新"

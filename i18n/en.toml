@@ -5,3 +5,7 @@
 # feature-check uses "Table of Contents" as the theme-strings-survive probe.
 prev_page = "Previous"
 next_page = "Next"
+# Article meta line "Updated on" (consumed by post_meta.html via i18n
+# "updatedOn"): freshness moved from the article end-matter to the header
+# meta row. Cards and archive rows render it too; ui.css hides it there.
+updatedOn = "Updated on"

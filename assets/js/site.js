@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Eight self-gating features — each activates only when its DOM exists:
+   Nine self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -22,9 +22,15 @@
       inline menu row into a dropdown panel on phones (≤768px, the actual
       show/hide lives in ui.css; the theme has no hamburger of its own).
       No JS → no button → the theme's inline wrapped menu stays.
+   9. Related-after-footer — moves .post-related after .post-footer so
+      DOM/tab order matches the visual flex order (ui.css order:5 places
+      it last but its DOM slot — the extend_post_content hook — is before
+      the footer, making keyboard focus jump backwards). Without JS the
+      order property alone keeps the identical visual position.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
-   #menu / .header-nav / #searchInput / .lang-menu / .share-buttons;
-   regression-guarded by feature-check assertions. */
+   #menu / .header-nav / #searchInput / .lang-menu / .share-buttons /
+   .post-footer / .post-related; regression-guarded by feature-check
+   assertions. */
 (function () {
   'use strict';
 
@@ -312,5 +318,18 @@
       }
     });
     nav.appendChild(toggle);
+  }
+
+  /* 9. Related posts after the footer: the visual order (ui.css) shows
+     related LAST (order:5, after tags/share/paginav), but its DOM slot
+     — the extend_post_content hook inside the theme's single.html — is
+     BEFORE the footer, so keyboard focus ran content → related → tags
+     while the screen showed content → tags → related. Moving the node
+     aligns tab order with the visual order; ui.css order:5 stays as the
+     no-JS fallback and yields the identical visual position either way. */
+  var related = document.querySelector('.post-single > .post-related');
+  var footer = document.querySelector('.post-single > .post-footer');
+  if (related && footer) {
+    footer.insertAdjacentElement('afterend', related);
   }
 })();

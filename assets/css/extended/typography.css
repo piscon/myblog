@@ -84,7 +84,6 @@ html[lang^="en"] .post-header .post-description::before {
 
 /* Dates align vertically across the meta row (proportional figures wobble) */
 .post-meta,
-.post-lastmod,
 .breadcrumbs {
   font-variant-numeric: tabular-nums;
 }

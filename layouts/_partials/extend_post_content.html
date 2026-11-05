@@ -35,20 +35,6 @@
 </div>
 {{- end -}}
 
-{{- /* "Last updated" line: shown when .Lastmod (front matter → git → date,
-       per [frontmatter] config) trails .Date by more than a day. Date is
-       CLDR-localized by Hugo; styling in ui.css; participates in the
-       media-top flex ordering via extend_head. */ -}}
-{{- $lastmodLabel := "Last updated" }}
-{{- if eq .Site.Language.Lang "zh" }}
-{{- $lastmodLabel = "最后更新于" }}
-{{- else if eq .Site.Language.Lang "ja" }}
-{{- $lastmodLabel = "最終更新" }}
-{{- end }}
-{{- if .Lastmod.After (.Date.AddDate 0 0 1) }}
-<div class="post-lastmod">{{ $lastmodLabel }} {{ .Lastmod | time.Format ":date_long" }}</div>
-{{- end }}
-
 {{- /* Related posts: Hugo built-in Related Content over tags/categories
        (see [related] in hugo.toml), restricted to mainSections so structural
        pages (search etc.) never surface. Localized heading; styles in

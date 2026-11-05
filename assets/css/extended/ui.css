@@ -60,8 +60,9 @@ html[lang^="en"] body {
     sans-serif;
 }
 
-/* Article end-matter ordering (gold standard): content → media → last
-   updated → tags → share → prev/next → related → comments.
+/* Article end-matter ordering (gold standard): content → media →
+   tags → share → prev/next → related → comments. Freshness moved to
+   the header meta row (post_meta.html "meta-updated", 2026-11-06).
    .post-single is a flex column; default-order children (header/toc/
    content) keep DOM order, the rest are placed by order below. Margin
    compensations keep spacing identical to the theme's block layout
@@ -80,9 +81,6 @@ html[lang^="en"] body {
   margin: 0 0 24px;
 }
 
-.post-single > .post-lastmod {
-  order: 3;
-}
 
 .post-single > .post-footer {
   order: 4;
@@ -156,13 +154,6 @@ html[lang^="en"] body {
 
 .post-single > .giscus-wrapper {
   order: 6;
-}
-
-/* Last-updated line (rendered by extend_post_content) */
-.post-lastmod {
-  color: var(--secondary);
-  font-size: 0.85rem;
-  margin: 0 0 20px;
 }
 
 /* Related posts (rendered by extend_post_content) */
@@ -538,6 +529,19 @@ html[lang^="en"] body {
   width: 1em;
   height: 1em;
   vertical-align: -0.125em;
+}
+
+/* Freshness ("meta-updated") belongs to the article header only — the
+   partial feeds cards (.entry-footer) and archive rows (.archive-meta)
+   too, and their compact skeletons stay single-date. Hiding an item
+   must pair-hide its LEADING separator (the meta-sep sibling before
+   it) or the previous item's `·` doubles up — same rule as the mobile
+   meta-read hiding in cover.css. */
+.entry-footer .meta-updated,
+.archive-meta .meta-updated,
+.entry-footer .meta-sep:has(+ .meta-updated),
+.archive-meta .meta-sep:has(+ .meta-updated) {
+  display: none;
 }
 
 /* Language switcher: current language marked (injected by site.js);

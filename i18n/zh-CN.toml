@@ -6,3 +6,7 @@
 #    以「分钟」作存活探针。« » 箭头是 post_nav_links.html 模板硬编码，不进文案。
 prev_page = "上一篇"
 next_page = "下一篇"
+# 文章页 meta 行「更新于」（post_meta.html 消费，i18n "updatedOn"）：文章修改超一天时
+# 首屏显示刷新图标+最后修改日期（原「最后更新于」在文末，首屏无时效信号）。列表卡/归档行
+# 同样渲染该条目，由 ui.css 按 .entry-footer/.archive-meta 容器 display:none 关掉。
+updatedOn = "更新于"

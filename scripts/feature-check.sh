@@ -60,7 +60,20 @@ check "品牌 favicon 引用"       "grep -q '/branding/favicon.ico' '$PAGE'"
 check "og:image 品牌图"         "grep -q 'branding/og-default.jpg' '$PAGE'"
 check "自定义 404 页存在"        "test -f '$OUT/zh/404.html'"
 check "404 en 文案分流"         "grep -q 'Page not found' '$OUT/en/404.html'"
-check "最后更新时间显示"        "grep -q '最后更新于' '$PAGE'"
+# 时效入首屏（2026-11-06）：meta 行「更新于」条目（post_meta.html，Lastmod>+1d 守卫，
+# i18n updatedOn 三语键）替代文末 post-lastmod 行——修订过的文章首屏不再只显示旧日期。
+# 三语渲染经 first.md 实页验证（其 Lastmod>Date+1d，首屏必出更新条目）。卡片/归档行
+# 是否含该条目取决于语料的 lastmod 状态（条件渲染），不作静态断言；其「单日期」视觉
+# 由 ui.css 容器门控 token 守卫——条目 display:none + 前导 meta-sep 配对隐藏防双 ·
+# （:has(+ .meta-updated)，同 cover.css mobile 门控模式）；extend_post_content 不再
+# 输出 post-lastmod（负断言守删除）
+check "更新于入首屏meta(门控)"  "grep -q 'meta-item meta-updated' '$PAGE' && grep -q '更新于' '$PAGE' && grep -q 'updatedOn' i18n/zh-CN.toml && grep -q 'updatedOn' i18n/ja.toml && grep -q 'updatedOn' i18n/en.toml && grep -q '最終更新' '$OUT/ja/posts/first/index.html' && grep -q 'Updated on' '$OUT/en/posts/first/index.html' && grep -q '.entry-footer .meta-updated' '$OUT'/assets/css/stylesheet.*.css && grep -q 'meta-sep:has(+.meta-updated)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q '最后更新于' '$PAGE' && ! grep -q 'post-lastmod' '$PAGE' && ! grep -q 'post-lastmod' layouts/_partials/extend_post_content.html"
+# 相关文章焦点归位（2026-11-06）：视觉序（ui.css order:5）related 在 footer 后、DOM 序
+# （extend_post_content 钩子在主题 single.html 里的位置）在 footer 前，键盘 Tab 焦点
+# 与视觉脱节（WCAG 2.4.3）。site.js 把节点搬到 footer 后（无 after-footer 钩子，不开
+# single.html tier-3 覆盖），无 JS 时 order:5 仍保持同位——CSS 是回退不是依赖；
+# insertAdjacentElement/afterend token 守 bundle（选择器字符串字面量不经 minifier，不盯）
+check "相关文章焦点归位(焦点序)" "grep -q 'insertAdjacentElement' '$OUT'/js/site.*.js && grep -q 'afterend' '$OUT'/js/site.*.js && grep -q 'post-related' '$OUT'/js/site.*.js"
 check "相关文章推荐渲染"        "grep -q 'post-related' '$PAGE' && grep -q '你好，世界' '$PAGE'"
 check "站点 JS 加载"            "grep -q '/js/site\.' '$PAGE'"
 check "搜索页输入框存在"        "grep -q 'searchInput' '$OUT/zh/search/index.html' && grep -q '/search/' '$OUT/zh/index.html'"
