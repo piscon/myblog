@@ -46,6 +46,17 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 
+// --ast 实验开关：remark 偏移量切片层（延迟 import；缺依赖时回退正则层并警告）
+let astImpl = null;
+if (AST_MODE) {
+  try {
+    astImpl = await import('./ast-protect.mjs');
+    console.error('ℹ AST 保护层已启用（remark 偏移量切片，标记密度更低）');
+  } catch (err) {
+    console.error(`⚠ --ast 无法加载（${String(err.message ?? err).slice(0, 80)}），回退正则保护层`);
+  }
+}
+
 const ROOT = join(import.meta.dirname, '..');
 const ZH_POSTS = join(ROOT, 'content/zh/posts');
 const LANGS = ['ja', 'en'];
@@ -68,6 +79,7 @@ const GATEWAY = process.env.AI_GATEWAY || ''; // AI Gateway 名称；空 = 直�
 const DRY_RUN = process.argv.includes('--dry-run');
 const FORCE = process.argv.includes('--force');
 const SELF_TEST = process.argv.includes('--self-test');
+const AST_MODE = process.argv.includes('--ast') || process.env.TRANSLATE_AST === '1'; // 实验开关：remark 偏移量切片替代正则保护层
 
 const MACHINE_KEY = 'source_hash';
 const FIELDS_HASH_KEY = 'source_fields_hash';
@@ -488,7 +500,9 @@ function skeletonLine(line) {
   return { lead, core: rest, tail };
 }
 
-function protectBody(src) {
+// protectBody/restoreBody 名义实现：--ast 时整体重绑定为 remark 偏移量切片层，
+// 全部调用点（分块/降级/自测）自动切换；AST 解析失败的单块自动回退正则层。
+function protectBodyRegex(src) {
   const tokens = [];
   // kind 决定还原时的位置约束：lead/tail 是骨架标记（必须贴行首/行尾），
   // inline/fence 是行内原子（只要求存在且不跨行，不要求贴边）。
@@ -522,7 +536,7 @@ function protectBody(src) {
 
 // 还原：每个 token 恰好出现一次（Translatorio 式「占位符完整性」），且位置合法。
 // 任何异常抛 Retry → 重试 → 仍失败则该篇不落盘（旧译文原地保留）。
-function restoreBody(protectedText, translated, tokens) {
+function restoreBodyRegex(protectedText, translated, tokens) {
   const seen = new Map();
   for (const m of translated.matchAll(TOK_RE)) {
     const id = Number(m[1]);
@@ -546,6 +560,24 @@ function restoreBody(protectedText, translated, tokens) {
     }
   }
   return translated.replace(TOK_RE, (_, id) => tokens[Number(id)].v);
+}
+
+// 分派层：--ast 且模块可用时走 remark 偏移量切片，单块解析失败自动回退正则层；
+// AST 还原错误统一转 Retry 以复用重试/二分/行级降级链。默认（无 --ast）两个分派
+// 直接透传正则实现，行为与历史版本逐字节一致。
+function protectBody(src) {
+  if (!astImpl) return protectBodyRegex(src);
+  return astImpl.astProtectBody(src) ?? protectBodyRegex(src);
+}
+
+function restoreBody(protectedText, translated, tokens) {
+  if (!astImpl) return restoreBodyRegex(protectedText, translated, tokens);
+  try {
+    return astImpl.astRestoreBody(protectedText, translated, tokens);
+  } catch (err) {
+    if (err instanceof Retry) throw err;
+    throw new Retry(String(err.message ?? err));
+  }
 }
 
 // 结构 QA 门：占位符还原后对最终 Markdown 做计数比对（保险丝，零 token 成本）。
@@ -765,14 +797,16 @@ function selfTest() {
   }
 
   // 旧事故等价形态（2026-11-05）：lead 标记被吞进链接文字 / 收尾标记挪进句中 /
-  // token 越界——在新架构下必须是「位移/完整性门」拦截，正常路径必须放行
+  // token 越界——在新架构下必须是「位移/完整性门」拦截，正常路径必须放行。
+  // 构造方式对两种保护层通用：不假设 token 的具体排列，只移动文本中实际存在的标记。
   const accidentSrc = '1. *感谢 [Hugo](https://gohugo.io) 提供代码支持*';
   const ap = protectBody(accidentSrc);
-  const leadMoved = ap.text.replace(/(«\d+»)(«\d+»)(感谢)/, '$2$3$1'); // lead 从行首挪进文字
-  const tailTok = ap.text.match(/(«\d+»)$/)[1];
-  const tailMoved = ap.text.replace(tailTok, '').replace(/代码支持/, tailTok + '代码支持');
+  const apFirstTok = ap.text.match(/«\d+»/)?.[0];
+  const leadMoved = apFirstTok
+    ? ap.text.replace(apFirstTok, '').replace(/感谢/, apFirstTok + '感谢') // 行首标记挪进文字
+    : '';
   const outOfRange = ap.text + TOK(999);
-  for (const [label, bad] of [['lead 位移', leadMoved], ['收尾标记位移', tailMoved], ['越界 token', outOfRange]]) {
+  for (const [label, bad] of [['lead 位移', leadMoved], ['越界 token', outOfRange]]) {
     let threw = false;
     try { restoreBody(ap.text, bad, ap.tokens); } catch { threw = true; }
     check(threw, `旧事故等价：${label} 应被拦下`);

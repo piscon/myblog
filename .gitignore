@@ -2,3 +2,4 @@
 /resources
 /.cloudflare
 /.zcode/plans/
+node_modules/
