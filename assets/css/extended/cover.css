@@ -166,10 +166,11 @@
 
   /* Title at the ladder's body rung (φ^0 = 18px): two rungs under the
      desktop list title — phone cards are ~110px tall and 20.3px read as a
-     shout. 3-line clamp at 18px ≈ 32 CJK chars, so almost nothing truncates. */
+     shout. 2-line clamp at 18px ≈ 21 CJK chars; longer titles truncate
+     with the ellipsis like every news app. */
   .post-entry .entry-header h2 {
     font-size: 1em;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
   }
 }
 
