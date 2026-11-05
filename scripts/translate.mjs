@@ -628,21 +628,46 @@ async function translateBody(lang, srcBody) {
   return { body, neurons };
 }
 
-async function translateOneBlock(lang, block) {
+// 完整性门失败时的自适应降级：把多行块二分后各自重译，token 数减半可显著降低
+// 小语法原子（** / `code` / |）被模型吞掉的概率。只在失败路径多花调用，
+// 正常路径零开销；单行块无法再切才最终失败（该篇旧译文原地保留）。
+async function translateOneBlock(lang, block, depth = 0) {
   const { text: protectedText, tokens } = protectBody(block);
-  return withRetry(`正文 ${lang}`, async (attempt) => {
-    const { text, usage } = await runModel({
-      max_tokens: MAX_TOKENS_BODY + (attempt - 1) * 3000, // 截断重试时自动加预算
-      messages: [
-        { role: 'system', content: LANG_BODY_PROMPT[lang] },
-        { role: 'user', content: attempt >= 2 ? protectedText + TOKEN_REMINDER : protectedText },
-      ],
+  try {
+    return await withRetry(`正文 ${lang}`, async (attempt) => {
+      const { text, usage } = await runModel({
+        max_tokens: MAX_TOKENS_BODY + (attempt - 1) * 3000, // 截断重试时自动加预算
+        messages: [
+          { role: 'system', content: LANG_BODY_PROMPT[lang] },
+          { role: 'user', content: attempt >= 2 ? protectedText + TOKEN_REMINDER : protectedText },
+        ],
+      });
+      let t = stripThinking(text);
+      if (!t) throw new Retry('正文空响应');
+      t = restoreBody(protectedText, t, tokens); // 完整性门：缺/重复/越位即重试，绝不落盘
+      return { body: t, neurons: usage?.neurons };
     });
-    let t = stripThinking(text);
-    if (!t) throw new Retry('正文空响应');
-    t = restoreBody(protectedText, t, tokens); // 完整性门：缺/重复/越位即重试，绝不落盘
-    return { body: t, neurons: usage?.neurons };
-  });
+  } catch (err) {
+    if (depth >= 3 || !block.includes('\n')) throw err;
+    const lines = block.split('\n');
+    // 只在「两半各自 protect/restore 恒等」的边界切，避免把围栏/表格从中间劈开
+    let mid = -1;
+    for (let i = 1; i < lines.length; i++) {
+      const a = lines.slice(0, i).join('\n');
+      const b = lines.slice(i).join('\n');
+      const pa = protectBody(a), pb = protectBody(b);
+      let ok = true;
+      try {
+        ok = restoreBody(pa.text, pa.text, pa.tokens) === a && restoreBody(pb.text, pb.text, pb.tokens) === b;
+      } catch { ok = false; }
+      if (ok) { mid = i; break; }
+    }
+    if (mid === -1) throw err; // 无安全切点（如围栏整块），不勉强
+    console.warn(`  ↳ ${lang} 块完整性门连续失败，二分降级重译（${lines.length} 行 → ${mid}/${lines.length - mid} 行，深度 ${depth + 1}）`);
+    const a = await translateOneBlock(lang, lines.slice(0, mid).join('\n'), depth + 1);
+    const b = await translateOneBlock(lang, lines.slice(mid).join('\n'), depth + 1);
+    return { body: a.body + '\n' + b.body, neurons: (a.neurons ?? 0) + (b.neurons ?? 0) };
+  }
 }
 
 // ---------- 离线自测（--self-test，零 API 调用）----------
@@ -752,6 +777,20 @@ function selfTest() {
   const worstCaseMinute = Math.min(totalCalls, peakPerMin);
   check(worstCaseMinute <= 300, `2 篇中长文最坏窗口 ${worstCaseMinute} 请求超出上游 300/min`);
   check(segRoundtrip(longDoc), '合成中长文分段恒等往返不一致');
+  // 二分降级前提：多行块至少存在一个「两半各自恒等」的安全切点（围栏/表格不劈开）
+  let unsafeBlocks = 0;
+  for (const b of longBlocks) {
+    if (!b.text.includes('\n')) continue;
+    const lines = b.text.split('\n');
+    let safe = false;
+    for (let i = 1; i < lines.length && !safe; i++) {
+      const a = lines.slice(0, i).join('\n'), c = lines.slice(i).join('\n');
+      const pa = protectBody(a), pc = protectBody(c);
+      try { safe = restoreBody(pa.text, pa.text, pa.tokens) === a && restoreBody(pc.text, pc.text, pc.tokens) === c; } catch { /* 不安全 */ }
+    }
+    if (!safe) unsafeBlocks++;
+  }
+  check(unsafeBlocks === 0, `合成中长文有 ${unsafeBlocks} 个多行块无法安全二分`);
   console.log(`✓ 速率预算：2 篇 ${longDoc.length} 字中长文 → ${callsPerDocPerLang} 调用/篇/语言，` +
     `共 ${totalCalls} 次；节流后峰值 ${peakPerMin} req/min（上游 300），总耗时约 ${Math.round(totalCalls * REQUEST_INTERVAL_MS / 1000)}s`);
 
