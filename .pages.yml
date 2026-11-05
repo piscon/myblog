@@ -103,10 +103,6 @@ content:
         description: 数字越小排序越靠前，用于置顶文章；留空按日期排序
         options:
           min: 0
-      - name: showtoc
-        label: 显示目录
-        type: boolean
-        description: 文章页是否显示目录（站点默认开，不勾即用全局默认）
       - name: searchHidden
         label: 从站内搜索隐藏
         type: boolean
