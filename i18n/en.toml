@@ -1,0 +1,7 @@
+# Article nav (paginav): overrides the theme's prev_page/next_page
+# ("Prev"/"Next" → "Previous"/"Next" — these navigate posts, not pages).
+# Base-name en.toml wins over the theme's en.yaml per-key; full-locale
+# en-US.toml would drop the theme file entirely (see i18n/ja.toml header).
+# feature-check uses "Table of Contents" as the theme-strings-survive probe.
+prev_page = "Previous"
+next_page = "Next"

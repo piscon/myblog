@@ -1,0 +1,8 @@
+# 文章导航（paginav）文案：覆盖主题 PaperMod i18n/zh.yaml 的 prev_page/next_page
+# 「上一页/下一页」→「上一篇/下一篇」。机制要点（均 2026-11-06 实证，详见 AGENTS.md）：
+# ① 文件名必须用 locale 全名 zh-CN——zh.toml 会与主题 zh.yaml 平局且输（页面仍渲染主题文案）；
+# ② 不能用 yaml——与主题同名 yaml 会被整体顶掉（连文件内新键都查不到）；
+# ③ TOML 平面键按 key 合并，主题其余文案（read_time/toc 等）不受影响，feature-check
+#    以「分钟」作存活探针。« » 箭头是 post_nav_links.html 模板硬编码，不进文案。
+prev_page = "上一篇"
+next_page = "下一篇"

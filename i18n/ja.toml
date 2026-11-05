@@ -1,0 +1,6 @@
+# 文章导航（paginav）：覆盖主题 ja.yaml 的 prev_page/next_page（前へ/次へ → 前の記事/次の記事）。
+# 基名 ja.toml 即可胜出主题 ja.yaml（按 key 合并）；实测 ja-JP.toml（locale 全名）反而会把
+# 主题 ja.yaml 整体顶掉（toc 回退成 zh 的「目录」），故 ja/en 必须用基名——与 zh 的规则相反，
+# 见 i18n/zh-CN.toml 头注释与 AGENTS.md。feature-check 以「目次」作主题文案存活探针。
+prev_page = "前の記事"
+next_page = "次の記事"

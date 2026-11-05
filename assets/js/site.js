@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Seven self-gating features — each activates only when its DOM exists:
+   Eight self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -18,9 +18,13 @@
       X/Telegram link flow (both unreachable from mainland phones): the
       theme's intent links are hidden under the same gate and the sheet
       entry is injected first. Desktop keeps the icon links.
+   8. Mobile hamburger — injects a top-right toggle that collapses the
+      inline menu row into a dropdown panel on phones (≤768px, the actual
+      show/hide lives in ui.css; the theme has no hamburger of its own).
+      No JS → no button → the theme's inline wrapped menu stays.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
-   #menu / #searchInput / .lang-menu / .share-buttons; regression-guarded
-   by feature-check assertions. */
+   #menu / .header-nav / #searchInput / .lang-menu / .share-buttons;
+   regression-guarded by feature-check assertions. */
 (function () {
   'use strict';
 
@@ -260,5 +264,53 @@
     });
     shareLi.appendChild(shareBtn);
     shareButtons.insertBefore(shareLi, shareButtons.firstChild);
+  }
+
+  /* 8. Mobile hamburger: the toggle is appended LAST in .header-nav so
+     the space-between row lands it top-right, opposite the logo; ui.css
+     (≤768px) does the actual collapsing via the html.js gate (set by
+     extend_head's first-paint inline script — a :has(>.menu-toggle) hide
+     only matched after this script ran, flashing the theme's wrapped menu
+     on every page transition) and the .menu-open panel. Outside clicks
+     and Escape close it; navigating away resets it naturally. aria-label
+     follows the page language. */
+  var nav = document.querySelector('.header-nav');
+  var menuList = document.getElementById('menu');
+  if (nav && menuList) {
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'menu-toggle';
+    toggle.setAttribute('aria-controls', 'menu');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', {
+      zh: '菜单',
+      ja: 'メニュー',
+      en: 'Menu'
+    }[(document.documentElement.getAttribute('lang') || 'zh').slice(0, 2)] || 'Menu');
+    toggle.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
+      ' width="20" height="20" fill="none" stroke="currentColor"' +
+      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+      ' aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/>' +
+      '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18"' +
+      ' x2="21" y2="18"/></svg>';
+    var setOpen = function (open) {
+      nav.classList.toggle('menu-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    toggle.addEventListener('click', function () {
+      setOpen(!nav.classList.contains('menu-open'));
+    });
+    document.addEventListener('click', function (e) {
+      if (nav.classList.contains('menu-open') && !nav.contains(e.target)) {
+        setOpen(false);
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('menu-open')) {
+        setOpen(false);
+      }
+    });
+    nav.appendChild(toggle);
   }
 })();

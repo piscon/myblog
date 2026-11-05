@@ -1,5 +1,12 @@
 {{- /* og:audio/og:video for pages with media fields (theme's og partial only
        reads reserved array params, so we emit string-field metas here) */ -}}
+{{- /* JS-availability mark, set before first paint (synchronous head script).
+       The mobile hamburger's menu hide in ui.css keys on .js instead of
+       :has(>.menu-toggle) — the button only exists after the deferred site.js
+       runs, so a :has-gated hide left one frame of the theme's wrapped menu
+       on every page transition (FOUC). No-JS browsers never get the class,
+       theme menu fallback intact. */ -}}
+<script>document.documentElement.classList.add('js')</script>
 {{- with .Params.audio_file -}}
 <meta property="og:audio" content="{{ . | absURL }}">
 {{- end -}}

@@ -86,17 +86,68 @@ html[lang^="en"] body {
 
 .post-single > .post-footer {
   order: 4;
-  display: flex;
-  flex-direction: column;
+  /* Share merged into the tags line (2026-11-06): the theme renders
+     .share-buttons as a full-width centered box (code-bg + border, 30px
+     filled glyphs) — an entire grey bar for two icons. Grid turns the
+     footer into two lines: tags left / share icons right, paginav below.
+     Reading order is unchanged (tags → share → prev/next). */
+  display: grid;
+  grid-template-areas:
+    "tags share"
+    "nav nav";
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  /* theme's rhythm was .post-footer > * { margin-bottom: 10px }; flex
+     never collapses margins, grid keeps each margin in its cell — the
+     10px rhythm is re-expressed as row-gap and the margins zeroed.
+     margin-bottom restores the footer→related boundary: it used to be
+     paginav's in-footer 10px + .post-related's margin-top 2rem = 42px
+     (no collapsing in the flex column), keep exactly that */
+  row-gap: 10px;
   margin-top: 0;
+  margin-bottom: 10px;
 }
 
-.post-single > .post-footer > .share-buttons {
-  order: 1;
+.post-single > .post-footer > * {
+  margin-bottom: 0;
+}
+
+.post-single > .post-footer > .post-tags {
+  grid-area: tags;
 }
 
 .post-single > .post-footer > .paginav {
-  order: 2;
+  grid-area: nav;
+}
+
+.post-single > .post-footer > .share-buttons {
+  grid-area: share;
+  background: none;
+  border: 0;
+  padding: 0;
+  overflow-x: visible;
+  justify-content: flex-end;
+  /* spacing is owned by the links' zero-shift padding below */
+  gap: 0;
+}
+
+/* Site icon language: muted monochrome, --accent only on hover. CSS
+   width/height overrides the 30px attributes on the theme's svgs and
+   the 26px ones site.js injects for the native share entry. */
+.post-single > .post-footer > .share-buttons svg {
+  width: 18px;
+  height: 18px;
+}
+
+.post-single > .post-footer > .share-buttons a {
+  display: inline-flex;
+  color: var(--secondary);
+  /* zero-shift hit area (≈38px, same trick as the footnote back-links) */
+  padding: 10px;
+}
+
+.post-single > .post-footer > .share-buttons a:hover {
+  color: var(--accent);
 }
 
 .post-single > .post-related {
@@ -409,6 +460,77 @@ html[lang^="en"] body {
   height: 1em;
 }
 
+/* Mobile hamburger (site.js feature 8): ≤768px the inline menu row
+   collapses into a dropdown panel dropped under the header. site.js
+   injects .menu-toggle as the LAST child of .header-nav, so on the
+   single header row it lands top-right (space-between puts it opposite
+   the logo). Self-gating twice: no JS → extend_head's first-paint script
+   never sets html.js → the theme's inline wrapped menu stays; JS on →
+   .js hides #menu from the FIRST PAINT (a :has(>.menu-toggle) hide here
+   only matched once site.js injected the button, flashing the wrapped
+   menu on every page transition), and .menu-open re-shows it as the
+   panel (entry surface + hairline, the site pill language; full-width
+   rows give ~44px tap targets). The hide rule and the panel rule share
+   specificity (1,2,0) — the panel rule MUST stay after the hide rule so
+   source order decides. */
+.menu-toggle {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .js .header-nav {
+    position: relative; /* panel anchor */
+  }
+
+  .js .header-nav > #menu {
+    display: none;
+  }
+
+  .header-nav.menu-open > #menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: visible;
+    position: absolute;
+    top: 100%;
+    left: var(--gap);
+    right: var(--gap);
+    z-index: 90;
+    margin: 0;
+    padding: 6px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .header-nav.menu-open > #menu a {
+    padding: 12px 14px;
+    /* the nav's line-height: var(--header-height) leaks in here and
+       inflates each row to ~84px — back to normal text leading */
+    line-height: 1.5;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    /* nav line-height is var(--header-height) = 60px; a button would
+       stretch to a 60px line box without this */
+    line-height: 1;
+    padding: 12px;
+    /* right edge optically flush with the nav content edge, no shift */
+    margin-right: -12px;
+    background: none;
+    border: 0;
+    color: var(--primary);
+    cursor: pointer;
+  }
+
+  .menu-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
 /* Post meta line (post_meta.html): per-item feather-style icons track
    the meta font size, dropped slightly below the baseline for optical
    centering against the text */
@@ -444,6 +566,16 @@ html[lang^="en"] body {
   .lang-menu .lang-short {
     display: inline;
   }
+
+  /* FOUC gate (same pattern as the hamburger): until site.js wraps the
+     labels into the dual spans, the theme's raw switcher — other languages
+     only, full names as bare text — shows through on every page
+     transition. visibility (not display) keeps the header row layout
+     stable, and the stale pre-injection links are unclickable. No JS →
+     no .js class → the theme's switcher stays as the fallback. */
+  .js .lang-menu:not(:has(.lang-short)) {
+    visibility: hidden;
+  }
 }
 
 /* Phone tap targets: pagination pills and taxonomy chips sit under the
@@ -476,5 +608,19 @@ html[lang^="en"] body {
       linear-gradient(270deg, var(--theme), transparent) right / 24px 100% no-repeat local,
       linear-gradient(90deg, var(--border), transparent) left / 12px 100% no-repeat scroll,
       linear-gradient(270deg, var(--border), transparent) right / 12px 100% no-repeat scroll;
+  }
+}
+
+/* Article nav (paginav): the two links sit side by side at 50% width, so
+   a long title wraps endlessly inside a ~150px column on phones and
+   stretches the row. Cap the article title at 2 lines with ellipsis —
+   the full title lives one click away, the direction label (.title) is
+   the theme's small uppercase line and stays as-is. */
+@media screen and (max-width: 768px) {
+  .paginav a > span:not(.title) {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
   }
 }
