@@ -659,6 +659,10 @@ async function translateOneBlock(lang, block, depth = 0) {
       let t = stripThinking(text);
       if (!t) throw new Retry('正文空响应');
       t = restoreBody(protectedText, t, tokens); // 完整性门：缺/重复/越位即重试，绝不落盘
+      // 块级结构门：模型可能在译文里自创 Markdown 结构（2026-11-05 实测列表项
+      // 17→19 / 23→24）。块级拦截才能定位到块并享受二分降级；全局保险丝另保留。
+      const issues = structuralIssues(block, t);
+      if (issues.length) throw new Retry(`块结构门未过（${issues.join('，')}）`);
       return { body: t, neurons: usage?.neurons };
     });
   } catch (err) {
@@ -750,6 +754,20 @@ function selfTest() {
   let normalOk = true;
   try { restoreBody(ap.text, normal, ap.tokens); } catch { normalOk = false; }
   check(normalOk, '旧事故等价：正常译文路径应放行');
+
+  // 模型自创 Markdown 结构（2026-11-05 实测列表项 17→19）：译文里多出列表行
+  // 必须被块级结构门拦下；token 原样保留的正常译文放行。
+  // （改写/吞掉标记属于完整性门管辖，不在本组用例内。）
+  const listSrc = '第一段说明文字。\n\n- 项目一\n- 项目二\n\n第二段收尾。';
+  const lp2 = protectBody(listSrc);
+  const xlate = (t) => restoreBody(t, t.replace(/[^\n«»\d]+/g, (m) => 'x'.repeat(m.length)), lp2.tokens);
+  const blockGood = xlate(lp2.text);
+  check(structuralIssues(listSrc, blockGood).length === 0, '块结构门：token 原样保留的译文应放行');
+  const tailInvented = blockGood + '\n- 模型自创的列表项';
+  check(structuralIssues(listSrc, tailInvented).length > 0, '块结构门：文末自创列表项应被拦下');
+  const lines2 = blockGood.split('\n');
+  lines2.splice(lines2.length - 1, 0, '- 模型自创的列表项');
+  check(structuralIssues(listSrc, lines2.join('\n')).length > 0, '块结构门：段中自创列表项应被拦下');
 
   // 边界：正文含 «n» 字面量（法文引号/书名号/任意手写）时，必须被原子化保护，
   // 否则 TOK_RE 会把它误认成占位符导致该篇永久翻译失败。
