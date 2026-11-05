@@ -90,6 +90,23 @@ check "列表缩略图行(CSS门控+DOM序)" "grep -q 'post-entry:not(.tag-entry
 # giscus 配色跟随站内主题：初值改写脚本标签属性（依赖 client.js 的 currentScript 语义）+
 # 切换经 html[data-theme] postMessage 转发——主题 head 脚本给 <html> 设 data-theme 是前提
 check "giscus 主题跟随(耦合点)"  "grep -q 'id=\"giscus-script\"' '$PAGE' && grep -q 'iframe.giscus-frame' '$PAGE' && grep -q 'dataset.theme' themes/PaperMod/layouts/_partials/head.html"
+# 元信息行条目类名+图标：post_meta.html 覆盖层输出（图标+类名消歧各段；分类保持真实 <a>）
+check "元信息行条目类名+图标"    "grep -q 'meta-item meta-date' '$PAGE' && grep -q 'meta-cats' '$PAGE' && grep -q 'meta-sep' '$PAGE'"
+# 作者已从 meta 行整体移除（hideAuthor=true 纯配置；head <meta name=author> 走 author.html 不受影响）；编辑链接已停用
+check "作者已移除(head保留)"     "! grep -q 'meta-author' '$PAGE' && ! grep -q 'meta-author' '$OUT/zh/posts/index.html' && ! grep -q 'meta-author' '$OUT/zh/archives/index.html' && grep -q 'name=\"author\"' '$PAGE' && ! grep -q '在 GitHub 上改进本文' '$PAGE'"
+# 语言列表：文字标签换 globe 图标（translation_list 站点覆盖，tier-3 主题耦合）+ 文章页 flex 右对齐进 bundle
+check "语言列表图标+右对齐"      "grep -q 'meta-lang' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q '语言:' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q '.post-single .post-meta .meta-lang' '$OUT'/assets/css/stylesheet.*.css && grep -q 'i18n_list' themes/PaperMod/layouts/_partials/translation_list.html"
+# 搜索页分类/标签聚合标题三语本地化（ja/en 曾硬编码中文「分类/标签」）
+check "搜索页标题本地化"        "grep -q 'カテゴリ' '$OUT/ja/search/index.html' && grep -q 'Categories' '$OUT/en/search/index.html' && ! grep -q '🧩 分类' '$OUT/ja/search/index.html'"
+# 搜索页视觉体系：页面 h1 流式字阶（theme 固定 40px 耦合点）+ 输入框/词条胶囊重皮 + 聚合标题字阶进 bundle；
+# emoji 已从标题串移除，Feather 图标在模板层（h2.taxonomy-heading 与 svg 同现，ui.css 按 svg 后代选择器出 1em）
+check "搜索页视觉体系(bundle)"   "grep -q '.page-header h1 svg' '$OUT'/assets/css/stylesheet.*.css && grep -q '.searchbox input' '$OUT'/assets/css/stylesheet.*.css && grep -q '.terms-tags a sup sup' '$OUT'/assets/css/stylesheet.*.css && grep -q '.taxonomy-heading' '$OUT'/assets/css/stylesheet.*.css"
+check "聚合标题图标(emoji已除)"  "grep -q 'taxonomy-heading' '$OUT/zh/search/index.html' && grep -A2 'taxonomy-heading' '$OUT/zh/search/index.html' | grep -q '<svg' && ! grep -q '🧩\|🏷️' '$OUT/zh/search/index.html'"
+# 原生分享按钮（手机）：site.js 运行时注入 navigator.share 入口——依赖主题 .share-buttons 容器存在；
+# JS token 守 bundle、容器守主题 DOM（桌面/无 navigator.share 环境按钮不出现，属预期）
+check "原生分享按钮(手机)"       "grep -q 'navigator.share' '$OUT'/js/site.*.js && grep -q 'share-buttons' '$PAGE'"
+# cover.html 站点覆盖（tier-3）：sizes 按上下文分流——列表卡 176px/28vw，单页 720px/100vw（first.md 有 cover 且 slug 稳定）
+check "封面 sizes 分流(列表/单页)" "grep -q '176px, 28vw' '$OUT/zh/posts/index.html' && grep -q '720px, 100vw' '$OUT/zh/posts/first/index.html'"
 
 FAILED=0
 {

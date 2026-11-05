@@ -5,6 +5,14 @@
   margin-bottom: calc(var(--gap) * 0.618);
 }
 
+/* iOS Safari auto-zooms the viewport when an input with computed font-size
+   below 16px gets focus. Form controls do NOT inherit the body size, so
+   the search box (the only input on the site) computes ~13px without this
+   — 16px is exactly the no-zoom threshold. */
+.searchbox input {
+  font-size: 16px;
+}
+
 .entry-header {
   margin-bottom: 0.5rem;
 }
@@ -253,6 +261,140 @@ html[lang^="en"] body {
   color: var(--primary);
 }
 
+/* Search page (search.html): the last theme-default page — bring it onto
+   the golden system. Same moves as elsewhere: fluid title clamp instead
+   of the fixed 40px, 1em-tracked icons, pill language (entry/code-bg +
+   hairline border) instead of gray slabs, φ⁻¹·gap rhythm, gold reserved
+   for interactive states. Shared selectors also cover archives and the
+   two taxonomy index pages (same .page-header / .terms-tags markup). */
+
+/* Page h1: the theme's fixed 40px is the same CJK phone-wrap problem
+   typography.css fixed for .post-title — same fluid clamp. The h1's
+   magnifier icon tracks text size and sits optically on the baseline
+   (meta-item convention). */
+.page-header h1 {
+  font-size: clamp(1.55em, 1.35em + 1.8vw, 2.058em);
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+.page-header h1 svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
+.page-header .post-description {
+  margin-top: 8px; /* 标题→摘要 8px, same two-level rhythm as list cards */
+}
+
+/* Input: the theme's 2px tertiary border + bold text shout → quiet
+   field. Focus is covered by the global :focus-visible accent outline
+   (typography.css) — text inputs match :focus-visible on any focus. */
+.searchbox input {
+  padding: 10px 14px;
+  font-weight: 500;
+  background: var(--entry);
+  border: 1px solid var(--border);
+}
+
+.searchbox input::placeholder {
+  color: var(--secondary);
+  font-weight: 400;
+}
+
+/* Result rows: an empty list (idle state) must not punch a ~40px margin
+   hole between the input and the taxonomy hub; rows ride the list-card
+   rhythm (φ⁻¹·gap ≈ 12.4px); the chevron drops from fixed 24px ink to
+   a muted 1em glyph; gold border as the hover signal */
+.searchResults:empty {
+  display: none;
+}
+
+.searchResults {
+  margin: calc(var(--gap) * 0.618) 0;
+  gap: calc(var(--gap) * 0.618);
+}
+
+.searchResults li {
+  padding: 12px 16px;
+}
+
+.searchResults li:hover,
+.searchResults li:focus-within {
+  border-color: var(--accent);
+}
+
+.searchResults li svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  color: var(--secondary);
+}
+
+/* Taxonomy hub headings: Feather icon + text per the site icon
+   convention (emoji removed from the title strings), h4 rung of the
+   ladder (φ^0.5 = 1.272em), φ:1 margin rhythm at own size. The pills'
+   theme margin-top would collapse over the heading's bottom margin —
+   zero it so the heading owns the gap. */
+.taxonomy-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 1.618em 0 0.618em;
+  font-size: 1.272em;
+  line-height: 1.3;
+}
+
+.taxonomy-heading svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.taxonomy-heading + .terms-tags {
+  margin-top: 0;
+}
+
+/* Term chips (search hub + taxonomy index pages): the theme paints
+   tertiary slabs with a double-superscript bold count → the site's pill
+   language (14px, code-bg + hairline, like the pagination pills); the
+   count flattens to one quiet figure; gold border on hover only */
+.terms-tags {
+  gap: 10px;
+}
+
+.terms-tags a {
+  padding: 4px 10px;
+  font-size: 14px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+.terms-tags a:hover {
+  border-color: var(--accent);
+}
+
+/* Markup is <sup><strong><sup>N</sup></strong></sup> (theme
+   taxonomy.html, mirrored in our search.html); flatten both sup levels
+   and the bold into a single quiet figure */
+.terms-tags a sup,
+.terms-tags a sup strong {
+  font-size: 0.78em;
+  font-weight: 500;
+  vertical-align: baseline;
+}
+
+.terms-tags a sup sup {
+  font-size: 1em;
+}
+
+.terms-tags a > sup {
+  margin-inline-start: 0.3em;
+  color: var(--secondary);
+}
+
 /* Header search item: icon+text alignment (icon tracks font size,
    flex centers it vertically) */
 #menu a[href*="/search/"] span {
@@ -264,6 +406,15 @@ html[lang^="en"] body {
 #menu a[href*="/search/"] svg {
   width: 1em;
   height: 1em;
+}
+
+/* Post meta line (post_meta.html): per-item feather-style icons track
+   the meta font size, dropped slightly below the baseline for optical
+   centering against the text */
+.meta-item svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
 }
 
 /* Language switcher: current language marked (injected by site.js);
@@ -291,5 +442,38 @@ html[lang^="en"] body {
 
   .lang-menu .lang-short {
     display: inline;
+  }
+}
+
+/* Phone tap targets: pagination pills and taxonomy chips sit under the
+   ~44px accessibility guideline at their desktop paddings (this block must
+   stay AFTER the desktop pagination re-skin above — same specificity, so
+   source order decides). The footnote backref grows its hit area WITHOUT
+   layout shift: the negative margin cancels the padding's flow impact. */
+@media screen and (max-width: 768px) {
+  .pagination a {
+    padding: 12px 16px;
+    line-height: 1.4;
+  }
+
+  .terms-tags a {
+    padding: 10px 14px;
+  }
+
+  .footnotes a.footnote-backref {
+    padding: 8px;
+    margin: -8px;
+  }
+
+  /* Scroll affordance for wide tables: a faded edge stays pinned at each
+     side while there is overflow (classic dual background-attachment trick
+     — the `local` layer scrolls away with the content and covers the
+     `scroll`-pinned shadow once that edge is reached). */
+  .post-content table {
+    background:
+      linear-gradient(90deg, var(--theme), transparent) left / 24px 100% no-repeat local,
+      linear-gradient(270deg, var(--theme), transparent) right / 24px 100% no-repeat local,
+      linear-gradient(90deg, var(--border), transparent) left / 12px 100% no-repeat scroll,
+      linear-gradient(270deg, var(--border), transparent) right / 12px 100% no-repeat scroll;
   }
 }

@@ -45,7 +45,9 @@
    full lines + orphan avoidance is the clreq-conformant behavior. pretty
    is progressive (Chromium 117+), older engines fall back to normal. */
 .post-title {
-  font-size: clamp(1.55em, 1.35em + 1.8vw, 2.058em);
+  /* 24px floor on phones (was 1.55em≈28px — a 24-char zh title wrapped to
+     3 lines and ate a third of the viewport), same 37px desktop peak. */
+  font-size: clamp(1.35em, 1.1em + 1.2vw, 2.058em);
   line-height: 1.3;
   text-wrap: pretty;
 }
@@ -200,6 +202,13 @@ html[lang^="ja"] .post-content {
 
 .post-content pre code {
   line-height: 1.6;
+}
+
+/* Phones: one step up — 0.85em of 18px ≈ 15.3px is tight at arm's length */
+@media screen and (max-width: 768px) {
+  .post-content code {
+    font-size: 0.9em;
+  }
 }
 
 /* ---- Quotes / rules / tables / media ----------------------------------- */

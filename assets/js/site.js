@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Six self-gating features — each activates only when its DOM exists:
+   Seven self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -14,9 +14,12 @@
    6. Floating side TOC — wide screens (≥1280px) pin the toc beside the
       content column and force the details open; below the breakpoint the
       inline collapsed details is restored (see ui.css media block).
+   7. Native share — on touch screens the system share sheet replaces the
+      X/Telegram link flow (both unreachable from mainland phones); gated
+      on navigator.share + coarse pointer, desktop keeps the links.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
-   #menu / #searchInput / .lang-menu; regression-guarded by feature-check
-   assertions. */
+   #menu / #searchInput / .lang-menu / .share-buttons; regression-guarded
+   by feature-check assertions. */
 (function () {
   'use strict';
 
@@ -131,8 +134,13 @@
     }
   });
 
-  /* 5. Language switcher: stable full list (all languages, current marked).
-     Every item gets a dual label — full name (≥768px) / short code
+  /* 5. Language switcher: stable full list (all languages, current marked),
+     switching to the SAME page in the target language. Data source is the
+     head hreflang links the theme emits on every page (<link rel=alternate
+     hreflang> per translation, self included): a translated page gets its
+     sibling permalink, an untranslated one keeps the theme's language
+     homepage link (never a 404). JS disabled → theme default (homepage
+     links). Every item gets a dual label — full name (≥768px) / short code
      (<768px, keeps the crowded mobile header on one line). The switcher is
      marked translate=no so Chrome Translate never mangles language names
      or re-prompts off them. */
@@ -142,9 +150,9 @@
     langMenu.classList.add('notranslate');
     var docLang = (document.documentElement.getAttribute('lang') || '').slice(0, 2);
     var langMeta = {
-      zh: { name: '简体中文', short: 'ZH', home: '/zh/', order: 0 },
-      ja: { name: '日本語', short: 'JA', home: '/ja/', order: 1 },
-      en: { name: 'English', short: 'EN', home: '/en/', order: 2 }
+      zh: { name: '简体中文', short: 'ZH', order: 0 },
+      ja: { name: '日本語', short: 'JA', order: 1 },
+      en: { name: 'English', short: 'EN', order: 2 }
     };
     var dualLabel = function (text, short) {
       var full = document.createElement('span');
@@ -156,18 +164,29 @@
       s.setAttribute('translate', 'no');
       return [full, s];
     };
+    /* this page's per-language permalinks from head (x-default and the RSS
+       alternates carry no 2-letter hreflang, so they drop out) */
+    var pageLangs = {};
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(function (l) {
+      var m = (l.getAttribute('hreflang') || '').match(/^[a-z]{2}(?=-|$)/i);
+      if (m && langMeta[m[0].toLowerCase()] && l.href) pageLangs[m[0].toLowerCase()] = l.href;
+    });
+    /* tag each anchor with its target language BEFORE rewriting hrefs —
+       theme hrefs are always language homepages (/zh/ style) */
     langMenu.querySelectorAll('a').forEach(function (a) {
       var m = (a.getAttribute('href') || '').match(/\/(zh|ja|en)\/?$/);
       if (!m) return;
-      var meta = langMeta[m[1]];
+      var lang = m[1];
+      a.dataset.lang = lang;
+      if (pageLangs[lang]) a.href = pageLangs[lang];
       var text = a.textContent;
       a.textContent = '';
-      dualLabel(text, meta.short).forEach(function (sp) {
+      dualLabel(text, langMeta[lang].short).forEach(function (sp) {
         a.appendChild(sp);
       });
     });
     var meta = langMeta[docLang];
-    var listed = meta && langMenu.querySelector('a[href$="' + meta.home + '"]');
+    var listed = meta && langMenu.querySelector('a[data-lang="' + docLang + '"]');
     if (meta && !listed) {
       var li = document.createElement('li');
       li.className = 'current-lang';
@@ -180,8 +199,7 @@
       var before = null;
       langMenu.querySelectorAll('a').forEach(function (a) {
         if (before) return;
-        var m = (a.getAttribute('href') || '').match(/\/(zh|ja|en)\/?$/);
-        if (m && langMeta[m[1]].order > meta.order) before = a.parentElement;
+        if (a.dataset.lang && langMeta[a.dataset.lang].order > meta.order) before = a.parentElement;
       });
       langMenu.insertBefore(li, before);
     }
@@ -209,5 +227,33 @@
       wideToc.addListener(syncToc);
     }
     syncToc();
+  }
+
+  /* 7. Native share on phones: system share sheet instead of the X/
+     Telegram intent links (mainland-unreachable networks, and the sheet
+     carries any installed target). Touch-only gate — desktop browsers
+     that expose navigator.share keep the icon links. */
+  var shareButtons = document.querySelector('.share-buttons');
+  if (shareButtons && navigator.share &&
+      window.matchMedia('(pointer: coarse)').matches) {
+    var shareLi = document.createElement('li');
+    var shareBtn = document.createElement('a');
+    shareBtn.href = '#';
+    shareBtn.setAttribute('aria-label', 'share this page');
+    shareBtn.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
+      ' width="26" height="26" fill="none" stroke="currentColor"' +
+      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+      ' aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6"' +
+      ' cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59"' +
+      ' y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51"' +
+      ' x2="8.59" y2="10.49"/></svg>';
+    shareBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      navigator.share({ title: document.title, url: location.href })
+        .catch(function () {}); // user dismiss of the sheet is not an error
+    });
+    shareLi.appendChild(shareBtn);
+    shareButtons.insertBefore(shareLi, shareButtons.firstChild);
   }
 })();
