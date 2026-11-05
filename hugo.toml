@@ -264,3 +264,17 @@ isPlainText = true
 
     [languages.en.params.editPost]
       Text = 'Edit on GitHub'
+
+# 把 static/images 追加挂载进 assets 文件系统：封面图单轨存放（CMS 上传/
+# 正文引用都在 static/images），cover.html 的 resources 查找却能命中并做
+# srcset 缩放——Hugo resources 只索引 assets/，无此挂载时 srcset 静默失效。
+# 追加式挂载，默认 static/ → / 映射保留，品牌/favicon/音视频不受影响。
+[module]
+  # static/images 追加挂载进 assets 文件系统：封面图单轨存放（CMS 上传/正文
+  # 引用都在 static/images），cover.html 的 resources 查找却能命中并做 srcset。
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
+  [[module.mounts]]
+    source = "static/images"
+    target = "assets/images"
