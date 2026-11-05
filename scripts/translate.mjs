@@ -22,10 +22,14 @@
 //   - Markdown 占位符保护：围栏/链接 URL/行内代码/骨架标记替换为 «n» 后模型只译散文，
 //     译后校验每个占位符恰好一次且位置合法（缺/重/越位即重试），再做结构计数保险丝；
 //     模型接触不到语法，链接打散/标记吞入在架构上不可能发生
-//   - 贪心分段：按行切单元后贪心合并到每块 ≤16 token（空行参与合并而非强制断块），
-//     编号每块从 0 开始、独立调用/还原、块间 150ms 节流防 429；极小尾块并入前块。
-//     两轮 CI 实测：64+ token 长序列稳定丢小语法 token；1-token 块会被重复输出；
-//     按空行碎块会调用数暴涨撞限流。收敛后每篇 2-10 次调用、块大小 6-17 token
+//   - 贪心分段：按行切单元后贪心合并到每块 ≤28 token（空行参与合并而非强制断块），
+//     编号每块从 0 开始、独立调用/还原；极小尾块并入前块。
+//     CI 实测边界：19 token 短文成功、64+ token 长序列稳定丢小语法 token、
+//     1-token 块会被重复输出、按空行碎块会调用数暴涨撞限流。
+//   - 统一请求节流（runModel 入口，含重试）：REQUEST_INTERVAL_MS=2000 固定 30 req/min
+//     峰值（网关 rate_limiting_limit=100/60s 滑动窗口，留 3 倍余量）；
+//     429 读 Retry-After / 等满 60s 窗口、最多 3 次长等待（2s/8s 退避远短于冷却期）。
+//     离线速率预算断言：2 篇 ~5000 汉字中长文 → 17 调用/篇/语言、共 68 次、136s
 //
 // 增量机制（字段与正文拆分，互不连坐）：
 //   - front matter `source_hash` = 正文 hash（PROMPT_VERSION_BODY + MODEL + body）
@@ -54,6 +58,11 @@ const MAX_TOKENS_BODY = 6000;
 const REST_TIMEOUT_MS = 180_000;
 const SPAWN_TIMEOUT_MS = 240_000;
 const RETRY_BACKOFF_MS = [2000, 8000];
+// 统一请求节流：AI Gateway 上限 100 req/60s 滑动窗口，Workers AI 免费层另有更严的
+// 上游配额（2026-11-05 实测 58 次非缓存/77s 后触发持续 429）。取 30 req/min 留出
+// 3 倍安全边际；所有 API 调用（含字段/摘要/重试）都必须过这一层。
+const REQUEST_INTERVAL_MS = 2000;
+const RATE_LIMIT_WINDOW_MS = 60_000;
 const GATEWAY = process.env.AI_GATEWAY || ''; // AI Gateway 名称；空 = 直连
 
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -142,22 +151,48 @@ const LANG_BODY_PROMPT = {
 
 // ---------- 错误分类 ----------
 // transient=true → 指数退避重试；内容错误（空响应/解析失败/截断）→ 快速重试；致命 → 立即失败
+// rateLimited=true → 429：等满网关 60s 窗口（而非 2s/8s），最多 3 次长等待
 class Retry extends Error {
-  constructor(msg, { transient = false } = {}) {
+  constructor(msg, { transient = false, rateLimited = false } = {}) {
     super(msg);
     this.transient = transient;
+    this.rateLimited = rateLimited;
   }
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const shortErr = (e) => String(e.message ?? e).slice(0, 140);
 
+// 全局节流：串行化所有 API 调用，保证任意时刻相邻请求间隔 >= REQUEST_INTERVAL_MS。
+// 用一个 promise 链做门，重试同样排队（不会因并发重试击穿配额）。
+let lastRequestAt = 0;
+let throttleChain = Promise.resolve();
+function throttle() {
+  const next = throttleChain.then(async () => {
+    const wait = Math.max(0, lastRequestAt + REQUEST_INTERVAL_MS - Date.now());
+    if (wait) await sleep(wait);
+    lastRequestAt = Date.now();
+  });
+  throttleChain = next.catch(() => {});
+  return next;
+}
+
 async function withRetry(label, fn) {
   let backoffIdx = 0;
+  let rateLimitWaits = 0;
   for (let attempt = 1; ; attempt++) {
     try {
       return await fn(attempt);
     } catch (err) {
-      if (err.fatal || attempt >= 3) throw err;
+      if (err.fatal) throw err;
+      if (err.rateLimited) {
+        if (rateLimitWaits >= 3) throw err; // 3 分钟冷却仍失败 = 放弃，避免无限等待
+        rateLimitWaits++;
+        const wait = err.waitMs ?? RATE_LIMIT_WINDOW_MS;
+        console.warn(`  ⚠ ${label} 被限流，等待 ${Math.round(wait / 1000)}s 窗口滚过（第 ${rateLimitWaits}/3 次）`);
+        await sleep(wait);
+        continue;
+      }
+      if (attempt >= 3) throw err;
       const wait = err.transient ? (RETRY_BACKOFF_MS[backoffIdx++] ?? RETRY_BACKOFF_MS.at(-1)) : 500;
       console.warn(`  ⚠ ${label} 第 ${attempt} 次失败（${shortErr(err)}），${wait}ms 后重试`);
       await sleep(wait);
@@ -252,6 +287,7 @@ function cfRestAvailable() {
 }
 
 async function runModel(bodyObj) {
+  await throttle(); // 统一限速：所有调用与重试都排队，峰值固定 30 req/min
   const payload = JSON.stringify({ temperature: 0.2, ...bodyObj });
   let stdout;
   if (cfRestAvailable()) {
@@ -285,7 +321,15 @@ async function runModel(bodyObj) {
     }
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      const transient = [429, 500, 502, 503, 504].includes(res.status);
+      if (res.status === 429) {
+        // 网关 code 2003 / 上游 429 都算限流：必须等满 60s 窗口，2s/8s 退避无效。
+        // Retry-After 优先（秒或 HTTP-date），无则按网关 rate_limiting_interval。
+        const ra = res.headers.get('retry-after');
+        const retryAfterMs = ra ? (Number.isFinite(Number(ra)) ? Number(ra) * 1000 : Math.max(0, new Date(ra) - Date.now())) : 0;
+        const waitMs = Math.min(Math.max(retryAfterMs, RATE_LIMIT_WINDOW_MS), 120_000);
+        throw new Retry(`HTTP 429（限流，需等 ${Math.round(waitMs / 1000)}s）：${text.slice(0, 200)}`, { rateLimited: true, waitMs });
+      }
+      const transient = [500, 502, 503, 504].includes(res.status);
       throw new Retry(`HTTP ${res.status}：${text.slice(0, 300)}`, { transient });
     }
     stdout = await res.text();
@@ -531,8 +575,9 @@ const TOKEN_REMINDER =
 //   - 但按空行碎成 1-token 小块会 (a) 模型重复输出 «0» (b) 调用数暴涨撞 429
 //   - 收敛：按行切最小单元后贪心合并，每块 token 数落在 [MIN, MAX] 区间；
 //     空行作为独立可拼接单元保留，保证恒等往返
-const MAX_TOKENS_PER_BLOCK = 16;
-const BLOCK_GAP_MS = 150; // 块间节流，防 AI Gateway 429
+// 块上限 28 token：实测 19 token 短文成功、64+ token 长序列稳定丢 token，
+// 取中间值并留余量；比 16 减少约一半调用数（5000 字文章 36 → ~20 块）。
+const MAX_TOKENS_PER_BLOCK = 28;
 
 function splitBlocks(src) {
   // 最小单元是「行」；空行不是断块信号，而是参与贪心合并的填充（用 \n 拼接），
@@ -575,7 +620,6 @@ async function translateBody(lang, srcBody) {
     const r = await translateOneBlock(lang, b.text);
     out.push(r.body + b.sep);
     neurons += r.neurons ?? 0;
-    if (BLOCK_GAP_MS) await sleep(BLOCK_GAP_MS); // 节流防 429
   }
   const body = out.join('');
   const issues = structuralIssues(srcBody, body); // 全局保险丝
@@ -629,11 +673,7 @@ function selfTest() {
     check(issues.length === 0, `${name}：模拟译文触发结构门 ${issues.join('，')}`);
     // ③ 分段恒等往返：splitBlocks → 每块 protect/restore（token 原样）→ 按 sep 拼回
     //    必须与全文恒等；分段不得改变 Markdown 的空行结构
-    const segParts = splitBlocks(src).map((b) => {
-      const bp = protectBody(b.text);
-      return restoreBody(bp.text, bp.text, bp.tokens) + b.sep;
-    });
-    check(segParts.join('') === src, `${name}：分段恒等往返不一致`);
+    check(segRoundtrip(src), `${name}：分段恒等往返不一致`);
     const maxPerBlock = Math.max(...splitBlocks(src).map((b) => protectBody(b.text).tokens.length));
     console.log(`✓ ${name}：${tokens.length} 个占位符，恒等往返/模拟译文/结构门/分段(最大块 ${maxPerBlock}) 全通`);
   }
@@ -688,8 +728,39 @@ function selfTest() {
     check(threw, `${label} 应被完整性门拦下`);
   }
 
+  // ④ 中长文速率预算：合成 2 篇 5000 字以内的 Markdown（含表格/列表/代码/链接），
+  //    验证分段后调用数与峰值速率。目标：2 篇 × 2 语言连续跑不被限流。
+  //    统一节流 2000ms/请求 → 峰值 30 req/min（网关上限 100，余量 3 倍）。
+  const longDoc = Array.from({ length: 54 }, (_, i) => {
+    const head = i % 12 === 0 ? `## 第 ${i / 12 + 1} 节：模型结构保真性\n\n` : '';
+    const para = `第 ${i + 1} 段讨论**占位符原子化**在长文档上的表现：链接 [示例 ${i}](https://example.com/${i}) 与行内代码 \`token_${i}\` 必须原样保留，列表标记不能进入锚文本。这是用于速率预算断言的合成语料，包含足够的自然语言密度以模拟真实研究文章的翻译负载。`;
+    const list = i % 5 === 0 ? `\n\n- 检查项 ${i}：完整性门与位置约束\n- 检查项 ${i}：结构计数保险丝\n- 检查项 ${i}：失败时旧译文原地保留` : '';
+    const table = i % 20 === 0 ? `\n\n| 阶段 | 输入 | 输出 |\n|---|---|---|\n| 保护 | 原文 | «n» 序列 |\n| 还原 | 译文 | Markdown |` : '';
+    return head + para + list + table;
+  }).join('\n\n');
+  const hanCount = (longDoc.match(/[\u4e00-\u9fff]/g) || []).length;
+  check(hanCount >= 4500 && hanCount <= 5500, `合成中长文汉字数 ${hanCount} 未落在 5000 字量级`);
+  const longBlocks = splitBlocks(longDoc).filter((b) => b.text.trim());
+  const callsPerDocPerLang = longBlocks.length + 1; // +1 = 字段调用
+  const totalCalls = callsPerDocPerLang * 2 /* langs */ * 2 /* docs */;
+  const peakPerMin = Math.ceil(60_000 / REQUEST_INTERVAL_MS);
+  check(peakPerMin < 100, `峰值 ${peakPerMin} req/min 未低于网关上限 100`);
+  const worstCaseMinute = Math.min(totalCalls, peakPerMin);
+  check(worstCaseMinute <= 100, `2 篇中长文最坏窗口 ${worstCaseMinute} 请求超出网关 100/min`);
+  check(segRoundtrip(longDoc), '合成中长文分段恒等往返不一致');
+  console.log(`✓ 速率预算：2 篇 ${longDoc.length} 字中长文 → ${callsPerDocPerLang} 调用/篇/语言，` +
+    `共 ${totalCalls} 次；节流后峰值 ${peakPerMin} req/min（网关 100），总耗时约 ${Math.round(totalCalls * REQUEST_INTERVAL_MS / 1000)}s`);
+
   console.log(fails ? `\n自测失败 ${fails} 项` : '\n自测全部通过');
   if (fails) process.exit(1);
+}
+
+// 分段恒等往返的公共实现（供语料循环与中长文速率预算复用）
+function segRoundtrip(src) {
+  return splitBlocks(src).map((b) => {
+    const p = protectBody(b.text);
+    return restoreBody(p.text, p.text, p.tokens) + b.sep;
+  }).join('') === src;
 }
 
 // ---------- 增量 hash ----------
