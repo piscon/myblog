@@ -22,9 +22,10 @@
 //   - Markdown 占位符保护：围栏/链接 URL/行内代码/骨架标记替换为 «n» 后模型只译散文，
 //     译后校验每个占位符恰好一次且位置合法（缺/重/越位即重试），再做结构计数保险丝；
 //     模型接触不到语法，链接打散/标记吞入在架构上不可能发生
-//   - 分段翻译：按空行切块、大块再按行切（每块 ≤20 token，编号每块从 0 开始），
-//     每块独立调用/还原；2026-11-05 压力测试实测 qwen3 在 64+ 编号 token 的长序列上
-//     稳定丢失小语法 token，分段后单块最大 11 token
+//   - 贪心分段：按行切单元后贪心合并到每块 ≤16 token（空行参与合并而非强制断块），
+//     编号每块从 0 开始、独立调用/还原、块间 150ms 节流防 429；极小尾块并入前块。
+//     两轮 CI 实测：64+ token 长序列稳定丢小语法 token；1-token 块会被重复输出；
+//     按空行碎块会调用数暴涨撞限流。收敛后每篇 2-10 次调用、块大小 6-17 token
 //
 // 增量机制（字段与正文拆分，互不连坐）：
 //   - front matter `source_hash` = 正文 hash（PROMPT_VERSION_BODY + MODEL + body）
@@ -46,7 +47,7 @@ const ZH_POSTS = join(ROOT, 'content/zh/posts');
 const LANGS = ['ja', 'en'];
 
 const MODEL = process.env.TRANSLATE_MODEL || '@cf/qwen/qwen3-30b-a3b-fp8';
-const PROMPT_VERSION_BODY = 'v5';   // 正文提示词（占位符保护 + 分段翻译；改动使旧译文 hash 失配，全量重译一次）
+const PROMPT_VERSION_BODY = 'v6';   // 正文提示词（占位符保护 + 贪心分段；改动使旧译文 hash 失配，全量重译一次）
 const PROMPT_VERSION_FIELDS = 'v4'; // 字段提示词（/no_think + json_schema）
 const MAX_TOKENS_FIELDS = 2000;
 const MAX_TOKENS_BODY = 6000;
@@ -525,38 +526,42 @@ function structuralIssues(src, dst) {
 const TOKEN_REMINDER =
   '\n\n（重要：上一版输出弄丢了编号标记。«0» 这类标记必须原样保留、位置不变、每个恰好出现一次；不要翻译、改写、增删或合并它们。）';
 
-// 按空行把正文切成块：段落/标题各自成块，表格与列表因行间无空行天然整块。
-// 每块独立 protect → 独立调用 → 独立还原，token 编号每块从 0 开始。
-// 2026-11-05 压力测试实测：qwen3 在 64+ 编号 token 的长序列上稳定丢失小语法
-// token（** / [^2] / | / ### ），把序列压到每块 ~20 以内后保真率可用。
-// 超过 MAX_TOKENS_PER_BLOCK 的大块（长表格/长列表）再按行切，行间用 \n 拼回，
-// 保证 Markdown 结构不变（表格行/列表项本就是独立行）。
-const MAX_TOKENS_PER_BLOCK = 20;
+// 分段策略（2026-11-05 两轮 CI 实测后定案）：
+//   - qwen3 在 64+ 编号 token 的长序列上稳定丢失小语法 token → 必须分段
+//   - 但按空行碎成 1-token 小块会 (a) 模型重复输出 «0» (b) 调用数暴涨撞 429
+//   - 收敛：按行切最小单元后贪心合并，每块 token 数落在 [MIN, MAX] 区间；
+//     空行作为独立可拼接单元保留，保证恒等往返
+const MAX_TOKENS_PER_BLOCK = 16;
+const BLOCK_GAP_MS = 150; // 块间节流，防 AI Gateway 429
 
 function splitBlocks(src) {
-  const paragraphs = [];
-  let cur = [];
-  let fence = false;
-  for (const line of src.split('\n')) {
-    if (/^\s*```/.test(line)) fence = !fence;
-    if (!fence && /^\s*$/.test(line)) {
-      if (cur.length) paragraphs.push({ text: cur.join('\n'), sep: '\n\n' });
-      cur = [];
-      continue;
-    }
-    cur.push(line);
-  }
-  if (cur.length) paragraphs.push({ text: cur.join('\n'), sep: '' });
-  // 大块按行二次切分：每行独立调用，行间分隔符为 \n
+  // 最小单元是「行」；空行不是断块信号，而是参与贪心合并的填充（用 \n 拼接），
+  // 这样相邻段落可并进同一块，调用数从 ~34 降到 ~10。
+  const lines = src.split('\n');
+  const units = lines.map((line, i) => ({ text: line, sep: i < lines.length - 1 ? '\n' : '' }));
   const blocks = [];
-  for (const p of paragraphs) {
-    if (protectBody(p.text).tokens.length <= MAX_TOKENS_PER_BLOCK) { blocks.push(p); continue; }
-    const lines = p.text.split('\n');
-    lines.forEach((line, i) => {
-      // 行间用 \n；该段最后一行的分隔符沿用原段落 sep（通常是 \n\n），
-      // 否则空行结构在拼接时丢失
-      blocks.push({ text: line, sep: i < lines.length - 1 ? '\n' : p.sep });
-    });
+  let cur = null;
+  const flush = () => { if (cur) blocks.push({ text: cur.text, sep: cur.sep }); cur = null; };
+  for (const u of units) {
+    const n = u.text.trim() ? protectBody(u.text).tokens.length : 0;
+    if (!cur) { cur = { text: u.text, sep: u.sep, n }; continue; }
+    if (cur.n + n > MAX_TOKENS_PER_BLOCK) { flush(); cur = { text: u.text, sep: u.sep, n }; continue; }
+    cur.text += '\n' + u.text;
+    cur.sep = u.sep;
+    cur.n += n;
+  }
+  flush();
+  // 收尾：极小尾块（1-2 token）合并到前一块，避免单 «0» 块被模型重复输出
+  if (blocks.length >= 2) {
+    const last = blocks.at(-1);
+    const prev = blocks.at(-2);
+    const nLast = protectBody(last.text).tokens.length;
+    const nPrev = protectBody(prev.text).tokens.length;
+    if (nLast <= 2 && nPrev + nLast <= MAX_TOKENS_PER_BLOCK + 2) {
+      prev.text += '\n' + last.text;
+      prev.sep = last.sep;
+      blocks.pop();
+    }
   }
   return blocks;
 }
@@ -566,9 +571,11 @@ async function translateBody(lang, srcBody) {
   let neurons = 0;
   const out = [];
   for (const b of blocks) {
+    if (!b.text) { out.push(b.sep); continue; } // 空行单元无需调模型
     const r = await translateOneBlock(lang, b.text);
     out.push(r.body + b.sep);
     neurons += r.neurons ?? 0;
+    if (BLOCK_GAP_MS) await sleep(BLOCK_GAP_MS); // 节流防 429
   }
   const body = out.join('');
   const issues = structuralIssues(srcBody, body); // 全局保险丝
