@@ -2,15 +2,19 @@
        The theme gates this partial on the `comments` param (single.html);
        rendering additionally requires giscus credentials in hugo.toml
        [params.giscus], so an unconfigured site renders nothing here.
-       Fill repo/repoId/category/categoryId (from giscus.app) to enable.
-       PaperMod's theme toggle is forwarded to the giscus iframe via
-       postMessage so embedded comments follow the site theme. */ -}}
+       Color scheme follows PaperMod: the inline script below pins the
+       script tag's data-theme to the site's current html[data-theme]
+       before client.js executes (client.js reads its config off
+       currentScript at execution time; "preferred_color_scheme" would
+       track the OS preference instead of the site's toggled pref-theme).
+       Toggles are forwarded via postMessage, and the lazy-loaded iframe
+       re-syncs on its load event. */ -}}
 {{- $g := site.Params.giscus }}
 {{- with $g.repo }}
 {{- with $g.repoId }}
 {{- with $g.categoryId }}
 <div class="giscus-wrapper" style="margin-top: 2rem;">
-  <script src="https://giscus.app/client.js"
+  <script src="https://giscus.app/client.js" id="giscus-script"
     data-repo="{{ $g.repo }}"
     data-repo-id="{{ $g.repoId }}"
     data-category="{{ $g.category }}"
@@ -25,20 +29,38 @@
     data-loading="lazy"
     crossorigin="anonymous"
     async></script>
+  <script>
+    (function () {
+      function currentTheme() {
+        // PaperMod 的 head 内联脚本已把 html[data-theme] 定死为 dark/light
+        // （pref-theme 持久化 + prefers-color-scheme 回退），取站内当前值
+        return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      }
+      function postTheme() {
+        var frame = document.querySelector('iframe.giscus-frame');
+        if (!frame) return;
+        frame.contentWindow.postMessage({
+          giscus: { setConfig: { theme: currentTheme() } }
+        }, 'https://giscus.app');
+      }
+      // 初值：client.js 是 async，其执行任务晚于紧随其后的内联脚本
+      // （解析器任务不会中途让出事件循环），改写标签属性赶在其
+      // currentScript 读取之前生效
+      var script = document.getElementById('giscus-script');
+      if (script) script.dataset.theme = currentTheme();
+      // 站内明暗切换：html[data-theme] 变化 → 转发给 giscus iframe
+      new MutationObserver(postTheme).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      });
+      // data-loading="lazy"：iframe 滚入视口才创建，期间的主题切换
+      // postMessage 会落空——捕获阶段监听 load（load 不冒泡），
+      // iframe 加载完成（giscus 消息监听已就位）后再同步一次
+      document.addEventListener('load', function (e) {
+        var t = e.target;
+        if (t && t.classList && t.classList.contains('giscus-frame')) postTheme();
+      }, true);
+    })();
+  </script>
 </div>
-<script>
-  (function () {
-    function syncGiscusTheme() {
-      var frame = document.querySelector('iframe.giscus-frame');
-      if (!frame) return;
-      frame.contentWindow.postMessage({
-        giscus: { setConfig: { theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light' } }
-      }, 'https://giscus.app');
-    }
-    new MutationObserver(syncGiscusTheme).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme']
-    });
-  })();
-</script>
 {{- end }}{{ end }}{{ end }}
