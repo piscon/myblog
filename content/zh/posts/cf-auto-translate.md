@@ -2,6 +2,7 @@
 lang = 'zh'
 title = '用 Cloudflare Workers AI 给博客搭自动翻译流水线'
 date = '2026-11-05'
+lastmod = '2026-11-05'
 draft = false
 description = '写完中文 push 上去，日文英文版几分钟内自动生成上线：本文完整介绍这条翻译流水线的架构——Workers AI 免费额度、AI Gateway 观测与缓存、双 hash 增量、结构 QA 门、SEO 摘要自动补写，以及在 CMS 里接管人工译文的开关。'
 categories = ['技术']
