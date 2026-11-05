@@ -46,7 +46,9 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 
-// --ast 实验开关：remark 偏移量切片层（延迟 import；缺依赖时回退正则层并警告）
+// --ast 实验开关：remark 偏移量切片层（延迟 import；缺依赖时回退正则层并警告）。
+// AST_MODE 须先于本块声明（TDZ）；argv 与 env 双通道，CI 用 env。
+const AST_MODE = process.argv.includes('--ast') || process.env.TRANSLATE_AST === '1';
 let astImpl = null;
 if (AST_MODE) {
   try {
@@ -79,7 +81,6 @@ const GATEWAY = process.env.AI_GATEWAY || ''; // AI Gateway 名称；空 = 直�
 const DRY_RUN = process.argv.includes('--dry-run');
 const FORCE = process.argv.includes('--force');
 const SELF_TEST = process.argv.includes('--self-test');
-const AST_MODE = process.argv.includes('--ast') || process.env.TRANSLATE_AST === '1'; // 实验开关：remark 偏移量切片替代正则保护层
 
 const MACHINE_KEY = 'source_hash';
 const FIELDS_HASH_KEY = 'source_fields_hash';
