@@ -1,0 +1,58 @@
+{{- define "main" }}
+
+<header class="page-header">
+    <h1>{{- (printf "%s&nbsp;" .Title ) | htmlUnescape -}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+        {{ .Description }}
+    </div>
+    {{- end }}
+    {{- if not (.Param "hideMeta") }}
+    <div class="post-meta">
+        {{- partial "translation_list.html" . -}}
+    </div>
+    {{- end }}
+</header>
+
+<div id="searchbox" class="searchbox">
+    <input id="searchInput" disabled placeholder="{{ .Params.placeholder | default (printf "%s ↵" .Title) }}"
+        aria-label="search" type="search" autocomplete="off" maxlength="64">
+    <ul id="searchResults" class="searchResults" aria-label="search results"></ul>
+</div>
+
+{{- /* Taxonomy discovery hub: categories and tags aggregated here so the top
+       menu can stay minimal (loyayz pattern). Hidden per page via params. */ -}}
+{{- if not (.Param "hideTaxonomies") -}}
+{{- with site.Taxonomies.categories }}
+<h2 class="taxonomy-heading">{{ ($.Param "categoriesTitle") | default "🧩 分类" }}</h2>
+<ul class="terms-tags">
+    {{- range $name, $value := . }}
+    {{- with site.GetPage (printf "/categories/%s" $name) }}
+    <li>
+        <a href="{{ .Permalink }}">{{ .Name }} <sup><strong><sup>{{ $value.Count }}</sup></strong></sup> </a>
+    </li>
+    {{- end }}
+    {{- end }}
+</ul>
+{{- end }}
+{{- with site.Taxonomies.tags }}
+<h2 class="taxonomy-heading">{{ ($.Param "tagsTitle") | default "🏷️ 标签" }}</h2>
+<ul class="terms-tags">
+    {{- range $name, $value := . }}
+    {{- with site.GetPage (printf "/tags/%s" $name) }}
+    <li>
+        <a href="{{ .Permalink }}">{{ .Name }} <sup><strong><sup>{{ $value.Count }}</sup></strong></sup> </a>
+    </li>
+    {{- end }}
+    {{- end }}
+</ul>
+{{- end }}
+{{- end }}
+
+{{- end }}{{/* end main */}}

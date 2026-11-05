@@ -150,16 +150,6 @@ isPlainText = true
       pageRef = '/posts'
       weight = 10
     [[languages.zh.menu.main]]
-      identifier = "categories"
-      name = '分类'
-      pageRef = '/categories'
-      weight = 20
-    [[languages.zh.menu.main]]
-      identifier = "tags"
-      name = '标签'
-      pageRef = '/tags'
-      weight = 30
-    [[languages.zh.menu.main]]
       identifier = "archives"
       name = '归档'
       pageRef = '/archives'
@@ -208,16 +198,6 @@ isPlainText = true
       pageRef = '/posts'
       weight = 10
     [[languages.ja.menu.main]]
-      identifier = "categories"
-      name = 'カテゴリ'
-      pageRef = '/categories'
-      weight = 20
-    [[languages.ja.menu.main]]
-      identifier = "tags"
-      name = 'タグ'
-      pageRef = '/tags'
-      weight = 30
-    [[languages.ja.menu.main]]
       identifier = "archives"
       name = 'アーカイブ'
       pageRef = '/archives'
@@ -265,16 +245,6 @@ isPlainText = true
       name = 'Posts'
       pageRef = '/posts'
       weight = 10
-    [[languages.en.menu.main]]
-      identifier = "categories"
-      name = 'Categories'
-      pageRef = '/categories'
-      weight = 20
-    [[languages.en.menu.main]]
-      identifier = "tags"
-      name = 'Tags'
-      pageRef = '/tags'
-      weight = 30
     [[languages.en.menu.main]]
       identifier = "archives"
       name = 'Archives'
