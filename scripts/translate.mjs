@@ -404,20 +404,23 @@ const TOK_RE = /«(\d+)»/g;
 // 返回 [{ t: 'text'|'tok', v }]，tok 的 v 是要保护的字面串。
 // «n» 字面量与孤立 «/» 也必须保护：否则用户正文里出现 «1» 会被 TOK_RE
 // 误认成占位符 → 越界 → 该篇重试后永久翻译失败（2026-11-05 边界修复）。
+// 脚注引用/定义（[^1]、[^1]:）与任务列表复选框（[x]、[ ]）同属机器语法，
+// 由 2026-11-05 压力测试文章暴露后补齐（模型不得看见或改写它们）。
 function inlineAtoms(line) {
   const atoms = [];
   // 管道符一律保护（表格列分隔 / 分隔行）；围栏内字符不会走到这里
-  const re = /(«\d+»|«|»)|(!?\[[^\]]*\]\()([^)\s]+)(\))|(`[^`\n]+`)|(\*\*|~~)|(\*|_|\||-+)/g;
+  const re = /(«\d+»|«|»)|(\[\^\d+\]:?|\[[ xX]\])|(!?\[[^\]]*\]\()([^)\s]+)(\))|(`[^`\n]+`)|(\*\*|~~)|(\*|_|\||-+)/g;
   let last = 0;
   for (const m of line.matchAll(re)) {
     if (m.index > last) atoms.push({ t: 'text', v: line.slice(last, m.index) });
-    if (m[2] !== undefined) {
+    if (m[3] !== undefined) {
       // 链接/图片：仅保护 [文字]( 与 )(URL 部分)；文字留在可译区
-      atoms.push({ t: 'tok', v: m[2] });
       atoms.push({ t: 'tok', v: m[3] });
       atoms.push({ t: 'tok', v: m[4] });
+      atoms.push({ t: 'tok', v: m[5] });
     } else {
-      atoms.push({ t: 'tok', v: m[0] }); // «n» 字面量、孤立 «/»、行内代码、粗斜体、管道符
+      // «n» 字面量/孤立 «/»、脚注、任务列表复选框、行内代码、粗斜体、管道符
+      atoms.push({ t: 'tok', v: m[0] });
     }
     last = m.index + m[0].length;
   }
@@ -559,7 +562,11 @@ function selfTest() {
     //    还原后结构计数必须与原文守恒（保险丝在正常路径下恒过）
     const fake = text.replace(/[^\n«»0-9]+/g, (s) => '訳'.repeat(Math.max(1, Math.ceil(s.length / 2))).slice(0, s.length));
     const rebuilt = restoreBody(text, fake, tokens);
-    check(!rebuilt.match(TOK_RE), `${name}：还原后残留占位符`);
+    // 还原后允许残留 «n» 字面量，但它们必须是原文自身所有（如代码块里的示例），
+    // 不能是保护 pass 新造的越界 id——否则说明 token 没被还原。
+    const srcLiterals = (src.match(TOK_RE) || []).sort();
+    const outLiterals = (rebuilt.match(TOK_RE) || []).sort();
+    check(JSON.stringify(srcLiterals) === JSON.stringify(outLiterals), `${name}：还原后 «n» 字面量与原文不一致`);
     const issues = structuralIssues(src, rebuilt);
     check(issues.length === 0, `${name}：模拟译文触发结构门 ${issues.join('，')}`);
     console.log(`✓ ${name}：${tokens.length} 个占位符，恒等往返/模拟译文/结构门全通`);
