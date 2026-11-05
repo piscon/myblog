@@ -402,20 +402,22 @@ const TOK_RE = /«(\d+)»/g;
 
 // 把一行文本按「行内原子」切分：URL/图片目标、行内代码、链接文字边界、粗斜体开关。
 // 返回 [{ t: 'text'|'tok', v }]，tok 的 v 是要保护的字面串。
+// «n» 字面量与孤立 «/» 也必须保护：否则用户正文里出现 «1» 会被 TOK_RE
+// 误认成占位符 → 越界 → 该篇重试后永久翻译失败（2026-11-05 边界修复）。
 function inlineAtoms(line) {
   const atoms = [];
   // 管道符一律保护（表格列分隔 / 分隔行）；围栏内字符不会走到这里
-  const re = /(!?\[[^\]]*\]\()([^)\s]+)(\))|(`[^`\n]+`)|(\*\*|~~)|(\*|_|\||-+)/g;
+  const re = /(«\d+»|«|»)|(!?\[[^\]]*\]\()([^)\s]+)(\))|(`[^`\n]+`)|(\*\*|~~)|(\*|_|\||-+)/g;
   let last = 0;
   for (const m of line.matchAll(re)) {
     if (m.index > last) atoms.push({ t: 'text', v: line.slice(last, m.index) });
-    if (m[1] !== undefined) {
+    if (m[2] !== undefined) {
       // 链接/图片：仅保护 [文字]( 与 )(URL 部分)；文字留在可译区
-      atoms.push({ t: 'tok', v: m[1] });
       atoms.push({ t: 'tok', v: m[2] });
       atoms.push({ t: 'tok', v: m[3] });
+      atoms.push({ t: 'tok', v: m[4] });
     } else {
-      atoms.push({ t: 'tok', v: m[0] });
+      atoms.push({ t: 'tok', v: m[0] }); // «n» 字面量、孤立 «/»、行内代码、粗斜体、管道符
     }
     last = m.index + m[0].length;
   }
@@ -595,6 +597,23 @@ function selfTest() {
   let normalOk = true;
   try { restoreBody(ap.text, normal, ap.tokens); } catch { normalOk = false; }
   check(normalOk, '旧事故等价：正常译文路径应放行');
+
+  // 边界：正文含 «n» 字面量（法文引号/书名号/任意手写）时，必须被原子化保护，
+  // 否则 TOK_RE 会把它误认成占位符导致该篇永久翻译失败。
+  const literalSrc = '遇到 «1» 和 «7» 这样的字面量，还有孤立的 « 与 » 都要原样保留。';
+  const lp = protectBody(literalSrc);
+  const ids = [...lp.text.matchAll(TOK_RE)].map((m) => Number(m[1]));
+  check(ids.every((id) => id < lp.tokens.length), '字面量 «n» 被误认成占位符（越界 id）');
+  const lFake = lp.text.replace(/[^\n«»\d ]+/g, 'x'); // 保留空格，模拟真实译文的空白结构
+  let literalOk = true;
+  try { restoreBody(lp.text, lFake, lp.tokens); } catch { literalOk = false; }
+  check(literalOk, '含 «n» 字面量语料应可正常还原（不被完整性门误拦）');
+  check(restoreBody(lp.text, lp.text, lp.tokens) === literalSrc, '含 «n» 字面量语料恒等往返');
+  for (const [label, bad] of [['删除字面量 token', lFake.replace(lp.text.match(TOK_RE)[0], '')], ['字面量语料越界', lFake + TOK(999)]]) {
+    let threw = false;
+    try { restoreBody(lp.text, bad, lp.tokens); } catch { threw = true; }
+    check(threw, `${label} 应被完整性门拦下`);
+  }
 
   console.log(fails ? `\n自测失败 ${fails} 项` : '\n自测全部通过');
   if (fails) process.exit(1);
