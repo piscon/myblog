@@ -216,19 +216,23 @@ async function runModel(bodyObj) {
     const host = GATEWAY
       ? `https://gateway.ai.cloudflare.com/v1/${account}/${GATEWAY}/workers-ai/${MODEL}`
       : `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${MODEL}`;
-    // Gateway 认证（新建 gateway 强制开启）要求专用 AI Gateway token，
-    // 普通 API token 会被 401；未设置时回退 API token 并给出明确提示
-    const bearer = GATEWAY
-      ? (process.env.AI_GATEWAY_TOKEN || process.env.CLOUDFLARE_API_TOKEN)
-      : process.env.CLOUDFLARE_API_TOKEN;
-    if (GATEWAY && !process.env.AI_GATEWAY_TOKEN) {
-      console.warn('  ⚠ AI_GATEWAY 已设置但缺 AI_GATEWAY_TOKEN：gateway 强制认证，普通 API token 会 401；请在 dashboard 创建 gateway token 并配为 Secret');
+    // Gateway 认证（新建 gateway 强制开启）：官方约定 provider-native 端点上
+    // gateway token 放 cf-aig-authorization 头，Authorization 保留上游供应商凭据
+    // （转发给 Workers AI 计费到本账户）。缺 AI_GATEWAY_TOKEN 时 gateway 会 401。
+    const headers = {
+      Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    };
+    if (GATEWAY && process.env.AI_GATEWAY_TOKEN) {
+      headers['cf-aig-authorization'] = `Bearer ${process.env.AI_GATEWAY_TOKEN}`;
+    } else if (GATEWAY) {
+      console.warn('  ⚠ AI_GATEWAY 已设置但缺 AI_GATEWAY_TOKEN（gateway 强制认证），请求将被 401 拒绝');
     }
     let res;
     try {
       res = await fetch(host, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${bearer}`, 'Content-Type': 'application/json' },
+        headers,
         body: payload,
         signal: AbortSignal.timeout(REST_TIMEOUT_MS),
       });
