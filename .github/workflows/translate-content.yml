@@ -12,6 +12,11 @@ on:
     paths:
       - 'content/zh/**/*.md'
   workflow_dispatch:
+    inputs:
+      wait_for_reset:
+        description: '等 Workers AI 免费日配额重置（00:00 UTC）后再翻译；上游 429 时用'
+        type: boolean
+        default: false
   schedule:
     # 周日 03:17 JST 全量对账：hash 扫描，干净时 0 次 API 调用；
     # 兜底修复漏网/抖动（openclaw/docs 模式）
@@ -29,6 +34,17 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip-translate]')"
     steps:
+      - name: Wait for daily neuron quota reset (00:00 UTC +5min)
+        if: inputs.wait_for_reset == true
+        run: |
+          now=$(date -u +%s)
+          target=$(date -u -d "tomorrow 00:00" +%s)
+          wait=$((target - now + 300))
+          if [ "$wait" -gt 0 ]; then
+            echo "上游 429：等免费 neurons 日配额重置，sleep ${wait}s（约 $((wait/3600))h）"
+            sleep "$wait"
+          fi
+
       - name: Checkout
         uses: actions/checkout@v7
         with:
