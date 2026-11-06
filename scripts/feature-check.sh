@@ -231,6 +231,16 @@ check "文章导航(文案+移动端限行)" "test -f i18n/zh-CN.toml && test -f
 # 耦合点：minifier 会把 font-family 值去引号+小写（"Punct SC"→punct sc），
 # 但 src local() 的实参保引号保大小写——token 各按各自形态取
 check "字体栈(Inter拉丁+标点层)" "grep -q 'punct sc,inter variable' '$OUT'/assets/css/stylesheet.*.css && grep -q 'punct jp,inter variable' '$OUT'/assets/css/stylesheet.*.css && grep -q 'segoe ui variable,segoe ui' '$OUT'/assets/css/stylesheet.*.css && grep -q '/fonts/v1/inter/files/inter-latin-wght-normal.woff2' '$OUT'/assets/css/stylesheet.*.css && grep -q 'local(.PingFang SC.)' '$OUT'/assets/css/stylesheet.*.css && grep -q 'local(.Hiragino Kaku Gothic ProN.)' '$OUT'/assets/css/stylesheet.*.css && grep -q 'font-variant-numeric:tabular-nums' '$OUT'/assets/css/stylesheet.*.css && ls '$OUT'/fonts/v1/inter/files/*.woff2 >/dev/null && grep -q '/fonts' netlify.toml"
+# 触屏 hover 门控(防锁存，2026-11-06)：触屏浏览器把 :hover 粘在点按元素上直到下一点
+# （分享按钮金态粘住是首例）——站点层 hover 反馈统一 @media(hover:hover) 门控
+# （分页/搜索结果行/词条胶囊/摘要折叠钮/文内链接；焦点态 :focus-within 不门控，
+# 键盘保留）；主题 .toc a:hover 下划线在触屏用同特异性晚源序中和。minifier 把
+# `@media (hover:hover)` 的空格剔成 `@media(hover:hover)`，token 按该形态取
+check "触屏hover门控(防锁存)" "grep -q '@media(hover:hover){.pagination a:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '.searchResults li:focus-within{border-color:var(--accent)}' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.searchResults li:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.terms-tags a:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:none){.toc a:hover{text-decoration:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-header .post-description .desc-toggle:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-content a:not(.anchor):hover' '$OUT'/assets/css/stylesheet.*.css && grep -q 'touchmove' '$OUT'/js/site.*.js"
+# 灯箱滚动锁+视口单位(2026-11-06)：iOS 忽略根节点 overflow:hidden 的触摸滚动，
+# site.js 在 overlay 上 non-passive preventDefault 挡住背景滚动；img 92vh 按
+# iOS 最大视口算会把图压进工具栏底下，@supports(height:1dvh) 升级 92dvh
+check "灯箱(滚动锁+dvh)" "grep -q 'passive:!1' '$OUT'/js/site.*.js && grep -q 'max-height:92vh' '$OUT'/assets/css/stylesheet.*.css && grep -q '@supports(height:1dvh){.lightbox img{max-height:92dvh}}' '$OUT'/assets/css/stylesheet.*.css"
 
 FAILED=0
 {

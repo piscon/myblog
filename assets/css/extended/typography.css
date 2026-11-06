@@ -180,8 +180,12 @@ html.js .post-header .post-meta {
   height: 14px;
 }
 
-.post-header .post-description .desc-toggle:hover {
-  color: var(--accent);
+/* pointer-only (hover latch family — the toggle stays on the page after
+   firing, so a latched gold chevron reads as a stuck state) */
+@media (hover: hover) {
+  .post-header .post-description .desc-toggle:hover {
+    color: var(--accent);
+  }
 }
 
 .post-header .post-description .desc-toggle:focus-visible {
@@ -354,8 +358,12 @@ html[lang^="ja"] .post-content {
   transition: text-decoration-color 0.2s ease;
 }
 
-.post-content a:not(.anchor):hover {
-  text-decoration-color: var(--accent);
+/* pointer-only: footnote back-refs and anchors keep you on the page, so
+   a latched gold decoration would sit right on the jumped-to link */
+@media (hover: hover) {
+  .post-content a:not(.anchor):hover {
+    text-decoration-color: var(--accent);
+  }
 }
 
 /* ---- Code ------------------------------------------------------------- */

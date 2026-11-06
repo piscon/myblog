@@ -259,7 +259,25 @@ html[lang^="en"] body {
   border-radius: var(--radius);
 }
 
+/* iOS vh tracks the LARGEST viewport (toolbar collapsed), so a 92vh
+   image sticks out under the toolbar whenever the toolbar is visible;
+   dvh tracks the live viewport — same 92 cap, nothing clipped. */
+@supports (height: 1dvh) {
+  .lightbox img {
+    max-height: 92dvh;
+  }
+}
+
 /* TOC scrollspy active state (site.js) */
+/* The theme's .toc a:hover underlines — on touch, the latch keeps the
+   underline stuck on the jumped-to entry after every in-page TOC tap
+   (pointer-only neutralization; equal specificity, later source wins) */
+@media (hover: none) {
+  .toc a:hover {
+    text-decoration: none;
+  }
+}
+
 .toc li.active > a {
   color: var(--primary);
   font-weight: 600;
@@ -350,9 +368,14 @@ sup[id^="fnref:"] {
   color: var(--secondary);
 }
 
-.pagination a:hover {
-  background: var(--border);
-  color: var(--primary);
+/* Hover feedback is pointer-only: touch browsers latch :hover onto the
+   tapped element until the next tap elsewhere (the share row was the
+   first sighting of this family — gold state stuck on after firing) */
+@media (hover: hover) {
+  .pagination a:hover {
+    background: var(--border);
+    color: var(--primary);
+  }
 }
 
 /* Search page (search.html): the last theme-default page — bring it onto
@@ -430,9 +453,16 @@ sup[id^="fnref:"] {
   padding: 12px 16px;
 }
 
-.searchResults li:hover,
+/* :focus-within stays ungated (keyboard needs it); only the hover half is
+   pointer-only — tapping a result row must not leave a latched gold edge */
 .searchResults li:focus-within {
   border-color: var(--accent);
+}
+
+@media (hover: hover) {
+  .searchResults li:hover {
+    border-color: var(--accent);
+  }
 }
 
 .searchResults li svg {
@@ -482,8 +512,10 @@ sup[id^="fnref:"] {
   transition: border-color 0.2s ease;
 }
 
-.terms-tags a:hover {
-  border-color: var(--accent);
+@media (hover: hover) {
+  .terms-tags a:hover {
+    border-color: var(--accent);
+  }
 }
 
 /* Article tag pills: same chip language as the term pills, same φ⁻¹·u row

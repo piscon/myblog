@@ -1,7 +1,8 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
    Fourteen self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
-   2. Lightbox — clicks on images inside .post-content
+   2. Lightbox — clicks on images inside .post-content; touch panning is
+      blocked on the overlay (iOS ignores root overflow:hidden)
    3. TOC scrollspy — highlights the .toc entry of the heading in view
    4. Ctrl/Cmd+K — focus the search input on the search page, otherwise
       jump to the current language's search page (the injected header
@@ -128,6 +129,14 @@
         document.documentElement.style.overflow = '';
         document.removeEventListener('keydown', onKey);
       };
+      /* iOS ignores overflow:hidden on the root for touch panning — one
+         finger on the overlay would scroll the page behind it. Block the
+         default pan on the overlay itself (non-passive); the listener dies
+         with the node on close, and pinch-zoom is a separate gesture that
+         still reaches the browser. */
+      overlay.addEventListener('touchmove', function (ev) {
+        ev.preventDefault();
+      }, { passive: false });
       overlay.addEventListener('click', close);
       document.addEventListener('keydown', onKey);
       document.body.appendChild(overlay);
