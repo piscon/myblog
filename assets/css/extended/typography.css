@@ -266,10 +266,19 @@ html[lang^="en"] .post-content {
   text-wrap: pretty;
 }
 
-/* CJK punctuation may hang into the margin (Safari progressive; clreq §F) */
+/* CJK punctuation may hang into the margin (Safari progressive; clreq §F).
+   `first` only — never `allow-end`: WebKit counts line-END hangs into the
+   document's scrollable overflow area, so articles grew a sideways
+   pannable sliver (measured: zz-tech-long at 390px viewport, document
+   scrollWidth 394 with zero out-of-viewport elements — the hang itself;
+   toggling the value live flipped scrollWidth 394↔390). iOS then
+   rubber-bands horizontally on every vertical swipe. Width/content
+   dependent, so no per-page fix exists — dropping the trailing-hang
+   nicety kills the wobble at every width; the leading hang (clreq §F's
+   primary case) stays. */
 html[lang^="zh"] .post-content,
 html[lang^="ja"] .post-content {
-  hanging-punctuation: first allow-end;
+  hanging-punctuation: first;
 }
 
 /* ---- Heading ladder --------------------------------------------------- */
