@@ -532,14 +532,67 @@ sup[id^="fnref:"] {
   padding: 12px;
 }
 
-/* Right action cluster (feature 8): #menu moves in first, then the
-   search icon, then the hamburger — one flush-right group opposite the
-   logo (flex space-between). The 12px gap + the icons' 12px padding
-   keep menu→search on the page's 24px (--gap) rhythm. */
+/* Logo identity (feature 12): desktop keeps the brand text; phones
+   swap it for the home glyph. The JS-wrapped span makes the text
+   selectable by CSS (a bare text node isn't), and .logo-home only
+   exists after site.js ran — the class itself is the no-JS gate, so
+   no html.js prefix is needed here. Both rules share specificity
+   (0,1,1): the mobile block MUST stay after the base hide. */
+.logo-home svg {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .logo-home .logo-text {
+    display: none;
+  }
+
+  .logo-home svg {
+    display: block;
+  }
+}
+
+/* Icon↔icon rhythm: every adjacent header icon pair keeps ONE glyph
+   gap of 24px — the menu items' own column-gap — because every icon
+   already carries 12px padding and the wrappers must add nothing on
+   top of a padded pair. The theme's defaults made three different gaps
+   (logo gap 0.55rem → 20.8px, .logo-switches gap 0.4rem → 30.4px). The
+   pipe balances 12px to both sides (its right side otherwise rides on
+   the lang links' 0.4rem alone). ≥769px the search icon pulls flush to
+   the content edge (negative margin cancels its own padding), matching
+   the flush-left home glyph; on phones the hamburger owns that edge,
+   so the pull switches off and the pair hugs tight at 24px. */
+.logo {
+  column-gap: 12px;
+}
+
+.logo-switches {
+  gap: 0;
+}
+
+.nav-sep {
+  padding-right: 0.35rem;
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 12px; /* menu text ↔ search glyph: 12 + 12 = 24 */
+}
+
+@media screen and (min-width: 769px) {
+  .search-toggle {
+    margin-right: -12px;
+  }
+}
+
+/* Right action cluster (feature 8): #menu moves in first, then the
+   search icon, then the hamburger — one flush-right group opposite the
+   logo (flex space-between). */
+@media screen and (max-width: 768px) {
+  .nav-actions {
+    gap: 0; /* search↔hamburger: 12 + 12 = 24, the pair hugs the edge */
+  }
 }
 
 /* Header search icon (site.js feature 11): search left the nav menu for

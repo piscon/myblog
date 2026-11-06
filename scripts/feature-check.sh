@@ -90,8 +90,20 @@ check "搜索图标(头部独立入口)"  "grep -q 'rel=\"search\"' '$PAGE' && g
 # Feather home（js 加 .logo-home 类留断言钩子；title/aria-label/accesskey=h 保留），主题
 # moon/sun 的 17px 属性由 CSS 压到统一 20px（选择器列表是唯一 token：五槽一体，拆散即
 # 失去统一约束）；theme-toggle padding 0 .4rem → 12px（44px 触控目标，bundle 后加载同
-# 特异性源序胜出——断言必须钉住站点层这条，防止回退到主题值）
-check "头部图标统一(20px+home)"  "grep -q 'logo-home' '$OUT'/js/site.*.js && grep -q '#theme-toggle svg,.lang-toggle svg' '$OUT'/assets/css/stylesheet.*.css && grep -q '.theme-toggle{padding:12px' '$OUT'/assets/css/stylesheet.*.css"
+# 特异性源序胜出——断言必须钉住站点层这条，防止回退到主题值）。同日晚补**图标间距节奏**：
+# 主题默认三值不一（.logo 0.55rem→🏠↔🌓 20.8px、.logo-switches 0.4rem→🌓↔🌐 30.4px）——
+# 统一为相邻图标对恒 24px glyph 间距（=菜单项 column-gap；图标自带 12px padding，wrapper
+# 要么 12px（桌面菜单文字↔搜索）要么 0（手机 🔍↔☰）；| 两侧各 12px 配平靠 .nav-sep
+# padding-right；≥769px 搜索 margin-right -12px 贴内容右缘对称贴左的 🏠）——spacing token
+# 六条入断言防回退
+check "头部图标统一(20px+home)"  "grep -q 'logo-home' '$OUT'/js/site.*.js && grep -q 'logo-text' '$OUT'/js/site.*.js && grep -q '#theme-toggle svg,.lang-toggle svg' '$OUT'/assets/css/stylesheet.*.css && grep -q '.theme-toggle{padding:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo{column-gap:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-switches{gap:0' '$OUT'/assets/css/stylesheet.*.css && grep -q '.nav-sep{padding-right:.35rem' '$OUT'/assets/css/stylesheet.*.css && grep -q '.nav-actions{display:flex;align-items:center;gap:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media screen and (min-width:769px){.search-toggle{margin-right:-12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.nav-actions{gap:0' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-home svg{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-home .logo-text{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-home svg{display:block' '$OUT'/assets/css/stylesheet.*.css"
+# 搜索页不自动聚焦(2026-11-06)：主题 fastsearch 在 window load 的 initSearch 里 enable+focus
+# 输入框——手机弹软键盘把分类中枢挤出首屏，而访客主要来的是看分类。fastsearch 是主题资产
+# 不可改；init 的 focus 只能靠顺序区分（输入框 disabled 到 load 为止、不可点，故必然是元素
+# 上第一次 .focus() 调用；reset() 的 Escape 重聚焦、点击都在其后）——site.js 影子化 .focus
+# 只吞第一次、其余转发原生；focusNative 属性（minifier 不改属性名）是 Ctrl+K（feature 4）绕
+# 过影子的通道，也是本断言的唯一稳定 token（局部变量名会被改名）
+check "搜索页不自动聚焦(分类优先)"  "grep -q '.focusNative=' '$OUT'/js/site.*.js && grep -q 'focusNative||' '$OUT'/js/site.*.js"
 # 语言切换器：主题裸输出仅「其他语言」全名（zh 首页/文章页静态可验）；site.js 注入全量常驻
 # 列表+当前语言标记。FOUC 门控（全视口）：注入完成前（无 .current-lang 条目）以
 # .js+.lang-menu:not(:has(.current-lang)) 先行 visibility:hidden——首帧到注入之间不再闪现

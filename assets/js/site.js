@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Twelve self-gating features — each activates only when its DOM exists:
+   Thirteen self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -57,12 +57,18 @@
       contract that used to ride on the menu item. No JS → no icon
       (homepage profile button and direct URL still reach the search
       page).
-   12. Logo → home icon — the brand text yields to a Feather home
-      glyph so every header icon shares one 20px form (ui.css unifies
-      the sizes; the theme's 17px moon/sun attributes included). The
-      anchor keeps its title tooltip and accesskey=h; the title text
-      becomes the accessible name the stripped text node used to
-      provide. No JS → the theme's text logo stays.
+   12. Logo identity per breakpoint — desktop keeps the brand text,
+      phones swap it for a Feather home glyph (one 20px icon family
+      across the header). The text is wrapped into a span so CSS can
+      switch text↔icon at the breakpoint; the .logo-home class only
+      exists after this script ran, doubling as the no-JS gate. The
+      anchor keeps its title tooltip and accesskey=h. No JS → the
+      theme's text logo stays at every width.
+   13. Search page, no autofocus — the theme's fastsearch enables+
+      focus()es the input on window load (soft keyboard on phones,
+      categories pushed below the fold); the shadowed .focus swallows
+      exactly that first call, later ones (Escape reset, clicks) stay
+      native, and the Ctrl+K shortcut uses the saved focusNative.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
    #menu / .header-nav / .logo / .logo-switches / #theme-toggle /
    #searchInput / .lang-menu / .nav-sep / .share-buttons /
@@ -173,7 +179,9 @@
       e.preventDefault();
       var input = document.getElementById('searchInput');
       if (input) {
-        input.focus();
+        /* focusNative: feature 13 shadows .focus to swallow the theme's
+           init autofocus — the shortcut must bypass that shadow */
+        (input.focusNative || input.focus).call(input);
         input.select();
         return;
       }
@@ -516,23 +524,57 @@
     navActions.insertBefore(searchToggle, navActions.querySelector('.menu-toggle'));
   }
 
-  /* 12. Logo → home icon: the brand text yields to a Feather home
-     glyph so every header icon shares one 20px form (ui.css unifies
-     the sizes; the theme's 17px moon/sun attributes included). The
-     anchor keeps its title tooltip and accesskey=h; the title text
-     becomes the accessible name the stripped text node used to
-     provide. No JS → the theme's text logo stays. */
+  /* 12. Logo identity per breakpoint: desktop keeps the brand text,
+     phones swap it for a Feather home glyph (every header icon then
+     shares one 20px form — ui.css unifies the sizes; the theme's 17px
+     moon/sun attributes included). The text is wrapped into a span so
+     CSS can switch text↔icon at the breakpoint (a bare text node
+     can't be styled); the .logo-home class only exists after this
+     script ran, doubling as the no-JS gate. The anchor keeps its title
+     tooltip and accesskey=h; the title text becomes the accessible
+     name on phones, where the text is hidden. No JS → the theme's
+     text logo stays at every width. */
   var logoLink = document.querySelector('.logo > a');
   if (logoLink) {
     logoLink.classList.add('logo-home');
     if (!logoLink.getAttribute('aria-label')) {
       logoLink.setAttribute('aria-label', logoLink.title);
     }
-    logoLink.innerHTML =
+    var logoText = document.createElement('span');
+    logoText.className = 'logo-text';
+    while (logoLink.firstChild) logoText.appendChild(logoLink.firstChild);
+    logoLink.appendChild(logoText);
+    logoText.insertAdjacentHTML('beforebegin',
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
       ' width="20" height="20" fill="none" stroke="currentColor"' +
       ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
       ' aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2' +
-      ' 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+      ' 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>');
+  }
+
+  /* 13. Search page, no autofocus: visitors mostly land on /search/ for
+     the taxonomy hub, but the theme's fastsearch enables + focus()es
+     the input on window load — popping the soft keyboard on phones and
+     shoving the categories below the fold. fastsearch is a theme asset
+     (untouchable), and its init focus can only be told apart from user
+     flows by ORDER: it is always the FIRST .focus() call on the input
+     (the input is disabled — unclickable — until load; reset()'s
+     Escape-refocus and clicks can only come later), so the shadowed
+     method swallows exactly one call and forwards the rest to the
+     saved native. The Ctrl+K shortcut (feature 4) goes through
+     focusNative and never consumes the init slot; click, Tab and the
+     Alt+/ accesskey focus natively, bypassing the shadow entirely. */
+  var searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    var nativeFocus = searchInput.focus.bind(searchInput);
+    var initFocusPending = true;
+    searchInput.focus = function () {
+      if (initFocusPending) {
+        initFocusPending = false;
+        return;
+      }
+      nativeFocus();
+    };
+    searchInput.focusNative = nativeFocus;
   }
 })();
