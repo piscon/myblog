@@ -1,4 +1,5 @@
 +++
+lastmod = '2026-11-06'
 title = '留言板'
 description = '给二重奏留句话——问候、建议或随便聊聊'
 hideMeta = true

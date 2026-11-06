@@ -1,4 +1,5 @@
 +++
+lastmod = '2026-11-06'
 title = 'Guestbook'
 description = 'Say hi to Deux — greetings, suggestions, or just a hello'
 hideMeta = true

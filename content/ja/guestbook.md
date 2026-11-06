@@ -1,4 +1,5 @@
 +++
+lastmod = '2026-11-06'
 title = 'ゲストブック'
 description = '二重奏に一言どうぞ——挨拶、ご提案、雑談なんでも'
 hideMeta = true
