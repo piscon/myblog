@@ -13,7 +13,13 @@ enableRobotsTXT = true
 enableGitInfo = true
 
 [outputs]
-home = ["HTML", "RSS", "JSON", "llms"]
+home = ["HTML", "RSS", "JSON", "llms", "opensearch"]
+
+# OpenSearch 描述文档（浏览器地址栏注册站内搜索）；?q= 由 site.js feature 14 回填
+# （fastsearch 本身不读 URL）。per-language：三语言 home 各出一份 /{lang}/opensearch.xml
+[outputFormats.opensearch]
+  baseName = "opensearch"
+  mediaType = "application/xml"
 
 [outputFormats.llms]
 baseName = "llms"
@@ -96,10 +102,13 @@ isPlainText = true
     hiddenInSingle = false
 
   [params.assets]
+    # favicon 三层：.ico 兜底（部分抓取器/老浏览器）→ 16/32 PNG（gen-favicon.cjs
+    # 从 favicon.svg 栅格化，透明底）→ apple-touch 180px PNG（iOS 不支持透明，
+    # 压平到品牌暗底）；safari 走 SVG。单一事实源仍是 branding/ 一份 svg
     favicon = "/branding/favicon.ico"
-    favicon16x16 = "/branding/favicon.ico"
-    favicon32x32 = "/branding/favicon.ico"
-    apple_touch_icon = "/branding/favicon.ico"
+    favicon16x16 = "/branding/favicon-16x16.png"
+    favicon32x32 = "/branding/favicon-32x32.png"
+    apple_touch_icon = "/branding/apple-touch-icon.png"
     safari_pinned_tab = "/branding/favicon.svg"
     # 浏览器 UI 兜底色（深底基线，与 dark 模式 --theme 背景一致）；
     # light/dark 按 prefers-color-scheme 的双 meta 由 extend_head 补发
@@ -184,7 +193,7 @@ isPlainText = true
       Text = '在 GitHub 上改进本文'
     # 页脚第二段（markdownify）：About/RSS/许可链接——文案带语言前缀，故按语言各写一份
     [languages.zh.params.footer]
-      text = '[关于](/zh/about/) · [RSS 全文](/zh/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)'
+      text = '[关于](/zh/about/) · [留言板](/zh/guestbook/) · [RSS 全文](/zh/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)'
 
   [languages.ja]
     locale = "ja-JP"
@@ -232,7 +241,7 @@ isPlainText = true
     [languages.ja.params.editPost]
       Text = 'GitHub で改善提案'
     [languages.ja.params.footer]
-      text = '[このサイトについて](/ja/about/) · [RSS](/ja/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja)'
+      text = '[このサイトについて](/ja/about/) · [ゲストブック](/ja/guestbook/) · [RSS](/ja/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja)'
 
   [languages.en]
     locale = "en-US"
@@ -280,7 +289,7 @@ isPlainText = true
     [languages.en.params.editPost]
       Text = 'Edit on GitHub'
     [languages.en.params.footer]
-      text = '[About](/en/about/) · [RSS](/en/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)'
+      text = '[About](/en/about/) · [Guestbook](/en/guestbook/) · [RSS](/en/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)'
 
 # 把 static/images 追加挂载进 assets 文件系统：封面图单轨存放（CMS 上传/
 # 正文引用都在 static/images），cover.html 的 resources 查找却能命中并做

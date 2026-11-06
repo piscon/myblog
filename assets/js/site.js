@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Thirteen self-gating features — each activates only when its DOM exists:
+   Fourteen self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -69,11 +69,17 @@
       categories pushed below the fold); the shadowed .focus swallows
       exactly that first call, later ones (Escape reset, clicks) stay
       native, and the Ctrl+K shortcut uses the saved focusNative.
+   14. Search page ?q= prefill — OpenSearch lands on the search page
+      with the query in the URL; fastsearch reads neither the URL nor a
+      disabled input, so the value is set up front and input events are
+      re-dispatched on a short poll until results render (its
+      performSearch drops events while the index fetches).
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
    #menu / .header-nav / .logo / .logo-switches / #theme-toggle /
-   #searchInput / .lang-menu / .nav-sep / .share-buttons /
-   .post-footer / .post-related / .post-header .post-description;
-   regression-guarded by feature-check assertions. */
+   #searchInput / .searchResults / .lang-menu / .nav-sep /
+   .share-buttons / .post-footer / .post-related /
+   .post-header .post-description; regression-guarded by feature-check
+   assertions. */
 (function () {
   'use strict';
 
@@ -500,8 +506,10 @@
      above). accesskey=/ preserves the Alt+/ shortcut the theme used to
      attach to the menu item, and the tooltip carries the same hint.
      ui.css sizes it like every header icon (20px Feather glyph, 12px
-     padding = a 44px tap target). */
-  var searchLink = document.querySelector('link[rel="search"]');
+     padding = a 44px tap target). The :not([type]) skips the OpenSearch
+     link — extend_head emits a second link[rel=search] carrying the
+     OpenSearch MIME type, and this icon wants the plain permalink. */
+  var searchLink = document.querySelector('link[rel="search"]:not([type])');
   var navActions = document.querySelector('.nav-actions');
   if (searchLink && navActions) {
     var searchToggle = document.createElement('a');
@@ -576,5 +584,27 @@
       nativeFocus();
     };
     searchInput.focusNative = nativeFocus;
+  }
+
+  /* 14. Search page ?q= prefill: OpenSearch (and any ?q= link) lands on
+     the search page with the query in the URL, but fastsearch reads
+     neither the URL nor a disabled input. Set the value up front (it
+     persists on the disabled element) and re-dispatch input events on a
+     short poll until the results actually render — performSearch drops
+     every event while the Fuse index is still fetching, so the first
+     dispatches are lost by design and the poll retries through that
+     window (max 5s, stopped as soon as a result row exists). */
+  var searchInputQ = document.getElementById('searchInput');
+  var queryParam = new URLSearchParams(location.search).get('q');
+  if (searchInputQ && queryParam) {
+    searchInputQ.value = queryParam;
+    var qTries = 0;
+    var qPoll = setInterval(function () {
+      qTries += 1;
+      searchInputQ.dispatchEvent(new Event('input', { bubbles: true }));
+      if (document.querySelector('#searchResults li') || qTries > 20) {
+        clearInterval(qPoll);
+      }
+    }, 250);
   }
 })();

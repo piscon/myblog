@@ -45,6 +45,14 @@
 <link rel="search" href="{{ .RelPermalink }}">
 {{- end -}}
 
+{{- /* Browser search registration (OpenSearch). Emitted AFTER the plain
+       rel=search link above and carries the OpenSearch MIME type — the
+       feature 11 selector matches link[rel=search]:not([type]), so the
+       two same-rel links can never be confused. */ -}}
+{{- with site.Home.OutputFormats.Get "opensearch" -}}
+<link rel="search" type="application/opensearchdescription+xml" href="{{ .Permalink }}" title="{{ site.Title }}">
+{{- end -}}
+
 {{- /* hreflang x-default → the default-language version of the same page
        (theme only emits per-language alternates). Only on translated pages,
        where an hreflang cluster actually applies. */ -}}

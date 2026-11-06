@@ -2,7 +2,7 @@
 /* 重新生成 static/branding/og-default.jpg（1200x630 Open Graph 分享图）。
  * 依赖 sharp（自带 SVG 栅格化，用系统 fontconfig 的 CJK 字体）。用法：
  *   mkdir -p /tmp/ogtool && cd /tmp/ogtool && npm init -y && npm i sharp
- *   NODE_PATH=/tmp/ogtool/node_modules node scripts/gen-og-image.js
+ *   NODE_PATH=/tmp/ogtool/node_modules node scripts/gen-og-image.cjs
  * 本仓库不进 node_modules（静态博客仓库保持零依赖）。
  */
 const sharp = require('sharp');

@@ -108,7 +108,18 @@ check "搜索页不自动聚焦(分类优先)"  "grep -q '.focusNative=' '$OUT'/
 # profileMode 社交图标（[[params.socialIcons]]：github 真实/email/x 占位——about.md 内文
 # 有同款占位注释，拿到真实地址后一并替换）+ 各语言 footer.text 承载 About/RSS/许可链接
 # （markdownify 渲染；相对 href 与 head 的绝对 RSS link 形态可区分，token 唯一）
-check "身份层(about+社交+许可)"  "test -f '$OUT/zh/about/index.html' && test -f '$OUT/ja/about/index.html' && test -f '$OUT/en/about/index.html' && grep -q '/zh/about/' '$OUT/zh/index.html' && grep -q '/ja/about/' '$OUT/ja/index.html' && grep -q 'github.com/piscon' '$OUT/zh/index.html' && grep -q 'mailto:hello@deux.top' '$OUT/zh/index.html' && grep -q 'href=\"/zh/index.xml\"' '$OUT/zh/index.html' && grep -q 'CC BY-NC-SA' '$OUT/zh/index.html'"
+check "身份层(about+社交+许可)"  "test -f '$OUT/zh/about/index.html' && test -f '$OUT/ja/about/index.html' && test -f '$OUT/en/about/index.html' && grep -q '/zh/about/' '$OUT/zh/index.html' && grep -q '/ja/about/' '$OUT/ja/index.html' && grep -q 'github.com/piscon' '$OUT/zh/index.html' && grep -q 'mailto:hello@deux.top' '$OUT/zh/index.html' && grep -q 'href=\"/zh/index.xml\"' '$OUT/zh/index.html' && grep -q 'CC BY-NC-SA' '$OUT/zh/index.html' && test -f static/branding/apple-touch-icon.png && grep -q 'apple-touch-icon.png' '$PAGE' && grep -q 'favicon-32x32.png' '$PAGE'"
+# OpenSearch(2026-11-06)：浏览器地址栏注册站内搜索——home 自定义输出格式出 /{lang}/opensearch.xml
+# （ShortName/描述/搜索页 permalink 自动跟随语言），head 发 link rel=search
+# type=application/opensearchdescription+xml；URL 模板的 ?q= 由 site.js feature 14 消费
+# （fastsearch 不读 URL 且 fuse 未就绪时丢事件——回填走 250ms×20 轮询，结果行出现即停）。
+# 与 feature 11 的数据源 link 同 rel=search：靠 :not([type]) 区分（断言钉 js 里的
+# URLSearchParams，minifier 不改全局名与字符串字面量）
+check "OpenSearch(浏览器站内搜索)"  "test -f '$OUT/zh/opensearch.xml' && test -f '$OUT/ja/opensearch.xml' && test -f '$OUT/en/opensearch.xml' && grep -q 'ShortName>二重奏' '$OUT/zh/opensearch.xml' && grep -q 'ShortName>Deux' '$OUT/en/opensearch.xml' && grep -q 'searchTerms' '$OUT/zh/opensearch.xml' && grep -q 'opensearchdescription+xml' '$PAGE' && grep -q 'URLSearchParams' '$OUT'/js/site.*.js"
+# 留言板(2026-11-06)：三语 guestbook.md（hideMeta+showtoc=false——留言页不要日期 meta 与空 TOC；
+# 正文引导语即内容，giscus 评论区就是留言板本体，Announcements 类目首评自动建 Discussion），
+# 入口在各语言 footer.text（无菜单项，头部保持极简）
+check "留言板(giscus)"           "test -f '$OUT/zh/guestbook/index.html' && test -f '$OUT/ja/guestbook/index.html' && test -f '$OUT/en/guestbook/index.html' && grep -q '/zh/guestbook/' '$OUT/zh/index.html' && grep -q '/ja/guestbook/' '$OUT/ja/index.html' && grep -q 'id=\"giscus-script\"' '$OUT/zh/guestbook/index.html' && ! grep -q '<details id=\"toc\"' '$OUT/zh/guestbook/index.html'"
 # 语言切换器：主题裸输出仅「其他语言」全名（zh 首页/文章页静态可验）；site.js 注入全量常驻
 # 列表+当前语言标记。FOUC 门控（全视口）：注入完成前（无 .current-lang 条目）以
 # .js+.lang-menu:not(:has(.current-lang)) 先行 visibility:hidden——首帧到注入之间不再闪现

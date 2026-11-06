@@ -1,0 +1,12 @@
+{{- /* OpenSearch 描述文档：浏览器地址栏「Tab 键搜索」注册站内搜索。挂在 home 的
+       自定义输出格式上（hugo.toml outputFormats.opensearch），per-language 各出一份，
+       site.Title/description/搜索页 permalink 自动跟随当前语言。URL 模板里的 ?q=
+       由 site.js feature 14 消费——fastsearch 本身不读 URL。 */ -}}
+<?xml version="1.0" encoding="utf-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>{{ site.Title }}</ShortName>
+  <Description>{{ site.Params.description | default site.Title }}</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Url type="text/html" method="get" template="{{ (site.GetPage "search").Permalink }}?q={searchTerms}"/>
+  <SearchForm>{{ (site.GetPage "search").Permalink }}</SearchForm>
+</OpenSearchDescription>
