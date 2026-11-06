@@ -511,13 +511,43 @@ sup[id^="fnref:"] {
   color: var(--secondary);
 }
 
+/* Unified header icon form (site.js features 8/11/12): every header
+   icon is one Feather glyph at 20px, regardless of who injected it —
+   the logo's home, the theme's moon/sun (the theme hardcodes 17px
+   width/height attributes; CSS wins over attributes), and the injected
+   globe/search/hamburger. One form, one source, one 44px padded hit
+   area. */
+.logo > a svg,
+#theme-toggle svg,
+.lang-toggle svg,
+.menu-toggle svg,
+.search-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* the theme toggle pads 0 0.4rem — one 44px touch target like the rest
+   (bundle loads after the theme core, same specificity, source wins) */
+.theme-toggle {
+  padding: 12px;
+}
+
+/* Right action cluster (feature 8): #menu moves in first, then the
+   search icon, then the hamburger — one flush-right group opposite the
+   logo (flex space-between). The 12px gap + the icons' 12px padding
+   keep menu→search on the page's 24px (--gap) rhythm. */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* Header search icon (site.js feature 11): search left the nav menu for
-   a standalone link-icon inside .logo-switches, before .nav-sep — the
-   row reads theme · search | languages. Same recipe as .lang-toggle
-   (20px glyph + 12px padding = 44px tap target) but visible at EVERY
-   viewport: on phones it stays in the header row, outside the hamburger
-   panel. No-JS → no icon (homepage profile button still reaches the
-   search page). */
+   a standalone link-icon in the right cluster, between #menu and the
+   hamburger — the OS header pattern (high-frequency entry by the edge,
+   low-frequency toggles stay by the logo). Visible at EVERY viewport:
+   on phones it stays outside the hamburger panel. No-JS → no icon
+   (homepage profile button still reaches the search page). */
 .search-toggle {
   display: inline-flex;
   align-items: center;
@@ -530,24 +560,21 @@ sup[id^="fnref:"] {
   cursor: pointer;
 }
 
-.search-toggle svg {
-  width: 20px;
-  height: 20px;
-}
-
 /* Mobile hamburger (site.js feature 8): ≤768px the inline menu row
    collapses into a dropdown panel dropped under the header. site.js
-   injects .menu-toggle as the LAST child of .header-nav, so on the
-   single header row it lands top-right (space-between puts it opposite
-   the logo). Self-gating twice: no JS → extend_head's first-paint script
-   never sets html.js → the theme's inline wrapped menu stays; JS on →
-   .js hides #menu from the FIRST PAINT (a :has(>.menu-toggle) hide here
-   only matched once site.js injected the button, flashing the wrapped
-   menu on every page transition), and .menu-open re-shows it as the
-   panel (entry surface + hairline, the site pill language; full-width
-   rows give ~44px tap targets). The hide rule and the panel rule share
-   specificity (1,2,0) — the panel rule MUST stay after the hide rule so
-   source order decides. */
+   builds a .nav-actions cluster as the LAST child of .header-nav and
+   moves #menu into it, so on the single header row the cluster (search
+   + ☰) lands top-right (space-between puts it opposite the logo).
+   Self-gating twice: no JS → extend_head's first-paint script never
+   sets html.js → the theme's inline wrapped menu stays; JS on → .js
+   hides #menu from the FIRST PAINT in both DOM states (before the wrap
+   it sits directly under .header-nav, after it under .nav-actions — a
+   :has(>.menu-toggle) hide here only matched once site.js injected the
+   button, flashing the wrapped menu on every page transition), and
+   .menu-open re-shows it as the panel (entry surface + hairline, the
+   site pill language; full-width rows give ~44px tap targets). The
+   panel rules out-rank the hide rule on specificity (1,3,0 > 1,2,0),
+   source order no longer matters — but they stay after it anyway. */
 .menu-toggle {
   display: none;
 }
@@ -557,11 +584,12 @@ sup[id^="fnref:"] {
     position: relative; /* panel anchor */
   }
 
-  .js .header-nav > #menu {
+  .js .header-nav > #menu,
+  .js .nav-actions > #menu {
     display: none;
   }
 
-  .header-nav.menu-open > #menu {
+  .header-nav.menu-open .nav-actions > #menu {
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -578,7 +606,7 @@ sup[id^="fnref:"] {
     border-radius: var(--radius);
   }
 
-  .header-nav.menu-open > #menu a {
+  .header-nav.menu-open .nav-actions > #menu a {
     padding: 12px 14px;
     /* the nav's line-height: var(--header-height) leaks in here and
        inflates each row to ~84px — back to normal text leading */
@@ -598,11 +626,6 @@ sup[id^="fnref:"] {
     border: 0;
     color: var(--primary);
     cursor: pointer;
-  }
-
-  .menu-toggle svg {
-    width: 20px;
-    height: 20px;
   }
 }
 
@@ -724,11 +747,6 @@ sup[id^="fnref:"] {
     border: 0;
     color: var(--primary);
     cursor: pointer;
-  }
-
-  .lang-toggle svg {
-    width: 20px;
-    height: 20px;
   }
 
   .lang-menu.lang-open {

@@ -82,10 +82,16 @@ check "搜索页输入框存在"        "grep -q 'searchInput' '$OUT/zh/search/i
 # 搜索图标(头部独立入口，2026-11-06)：搜索脱离导航菜单——hugo.toml 三语言菜单 search 项
 # 删除（主题仅对指向 search 布局页的菜单项附 accesskey=/ 与 "(Alt + /)" tooltip，该串从
 # 静态首页消失即菜单项已除；注入图标的 title 是运行时 JS 生成，不污染静态 HTML）；头部
-# 改为 site.js 注入 .search-toggle（insertBefore .nav-sep：theme·search|语言，手机端同行
-# 常驻、不进汉堡面板），语言正确的 URL 数据源是 extend_head 每页发的 link[rel=search]
+# 改为 site.js 注入 .search-toggle（右侧高频位：.nav-actions 组内、☰ 之前——OS 头部惯例，
+# 手机端不进汉堡面板），语言正确的 URL 数据源是 extend_head 每页发的 link[rel=search]
 # （head 作数据源，同语言切换器 hreflang 模式）；Ctrl+K 回退同步改 .search-toggle
 check "搜索图标(头部独立入口)"  "grep -q 'rel=\"search\"' '$PAGE' && grep -q 'search-toggle' '$OUT'/js/site.*.js && grep -q '.search-toggle{display:inline-flex' '$OUT'/assets/css/stylesheet.*.css && ! grep -q '(Alt + /)' '$OUT/zh/index.html'"
+# 头部图标统一(20px Feather+home logo，2026-11-06)：所有头部图标一个形态——logo 文本换
+# Feather home（js 加 .logo-home 类留断言钩子；title/aria-label/accesskey=h 保留），主题
+# moon/sun 的 17px 属性由 CSS 压到统一 20px（选择器列表是唯一 token：五槽一体，拆散即
+# 失去统一约束）；theme-toggle padding 0 .4rem → 12px（44px 触控目标，bundle 后加载同
+# 特异性源序胜出——断言必须钉住站点层这条，防止回退到主题值）
+check "头部图标统一(20px+home)"  "grep -q 'logo-home' '$OUT'/js/site.*.js && grep -q '#theme-toggle svg,.lang-toggle svg' '$OUT'/assets/css/stylesheet.*.css && grep -q '.theme-toggle{padding:12px' '$OUT'/assets/css/stylesheet.*.css"
 # 语言切换器：主题裸输出仅「其他语言」全名（zh 首页/文章页静态可验）；site.js 注入全量常驻
 # 列表+当前语言标记。FOUC 门控（全视口）：注入完成前（无 .current-lang 条目）以
 # .js+.lang-menu:not(:has(.current-lang)) 先行 visibility:hidden——首帧到注入之间不再闪现
@@ -163,13 +169,16 @@ check "封面 sizes 分流(列表/单页)" "grep -q '176px, 28vw' '$OUT/zh/posts
 # 手机点按粘滞 :hover 事故：原生分享不跳转，金色选中态挂到点空白才释放）。耦合点=footer
 # 三子元素类名（皆主题 DOM）；minifier 剔空白但保留选择器与值，grid-area/@media token 稳定
 check "分享并入标签行(bundle)"   "grep -q 'grid-area:share' '$OUT'/assets/css/stylesheet.*.css && grep -q 'grid-area:nav' '$OUT'/assets/css/stylesheet.*.css && grep -q 'post-footer>.share-buttons svg{width:18px' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-single>.post-footer>.share-buttons a:hover{color:var(--accent)}' '$OUT'/assets/css/stylesheet.*.css"
-# 手机端汉堡菜单（2026-11-06）：site.js 注入 .menu-toggle（.header-nav 末位→space-between 行右上角），
-# ui.css ≤768px 经 html.js 门控收纳 #menu、.menu-open 展开为下拉面板——JS 禁用时无 .js 类，
-# 主题折行菜单原样回退；.js 由 extend_head 首帧前内联脚本打上（:has(>.menu-toggle) 版本要等
-# site.js 注入按钮才成立，每次页面跳转都闪一帧折行菜单——FOUC 事故后改定，耦合点含该脚本）。
-# 耦合点=主题 .header-nav/#menu 类名；两条 minified CSS token、首帧脚本与
-# aria-expanded 属性名（minifier 不改写属性名）守 bundle
-check "汉堡菜单(手机)"           "grep -q '.js .header-nav>#menu{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.menu-open>#menu{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q 'documentElement.classList.add(.js.)' '$PAGE' && grep -q 'menu-toggle' '$OUT'/js/site.*.js && grep -q 'aria-expanded' '$OUT'/js/site.*.js"
+# 手机端汉堡菜单（2026-11-06；同日右侧组改造）：site.js 建 .nav-actions 右侧组（.header-nav
+# 末位→space-between 行右缘）并把 #menu 移入组内，☰ 收尾落最右缘、🔍 紧邻其左；ui.css
+# ≤768px 经 html.js 门控收纳 #menu（**双态选择器**：包裹前 .header-nav>#menu、包裹后
+# .nav-actions>#menu——首帧到 site.js 执行之间是前态，漏掉前态会闪折行菜单）、.menu-open
+# 展开为下拉面板（面板选择器 (1,3,0) 天然压过隐藏 (1,2,0)，不再依赖源序）——JS 禁用时无
+# .js 类，主题折行菜单原样回退；.js 由 extend_head 首帧前内联脚本打上（:has(>.menu-toggle)
+# 版本要等 site.js 注入按钮才成立，每次页面跳转都闪一帧折行菜单——FOUC 事故后改定，耦合点
+# 含该脚本）。耦合点=主题 .header-nav/#menu 类名 + 自建 .nav-actions；minified CSS token、
+# 首帧脚本与 aria-expanded 属性名（minifier 不改写属性名）守 bundle
+check "汉堡菜单(手机)"           "grep -q '.js .header-nav>#menu,.js .nav-actions>#menu{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.menu-open .nav-actions>#menu{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q 'documentElement.classList.add(.js.)' '$PAGE' && grep -q 'menu-toggle' '$OUT'/js/site.*.js && grep -q 'nav-actions' '$OUT'/js/site.*.js && grep -q 'aria-expanded' '$OUT'/js/site.*.js"
 # 手机端语言globe（2026-11-06）：≤768px 内联切换行（原 ZH/JA/EN 短码，双标签 span 已删）收纳为
 # site.js 注入的 .lang-toggle（Feather globe，aria-controls=#lang-menu，.logo-switches 末位），
 # 点开为汉堡面板同几何的通栏下拉（.lang-open，全名行、当前语言加粗不可点）。隐藏规则

@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Eleven self-gating features — each activates only when its DOM exists:
+   Twelve self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
@@ -20,10 +20,19 @@
       X/Telegram link flow (both unreachable from mainland phones): the
       theme's intent links are hidden under the same gate and the sheet
       entry is injected first. Desktop keeps the icon links.
-   8. Mobile hamburger — injects a top-right toggle that collapses the
-      inline menu row into a dropdown panel on phones (≤768px, the actual
-      show/hide lives in ui.css; the theme has no hamburger of its own).
-      No JS → no button → the theme's inline wrapped menu stays.
+   8. Right action cluster + mobile hamburger — a .nav-actions wrapper
+      appended last in .header-nav becomes the row's flush-right edge
+      (flex space-between) and receives the moved #menu first, then the
+      search icon (feature 11 slots it before the toggle) and the
+      hamburger itself: ☰ keeps the absolute right edge on phones,
+      search hugs it as the high-frequency neighbor, menu items join
+      the cluster on desktop. ui.css (≤768px) collapses #menu via the
+      html.js gate (set by extend_head's first-paint inline script — a
+      :has(>.menu-toggle) hide only matched after this script ran,
+      flashing the theme's wrapped menu on every page transition; the
+      hide rule covers BOTH DOM states, pre-wrap and wrapped) and
+      .menu-open opens the panel. Outside clicks and Escape close it.
+      No JS → no wrapper, the theme's inline wrapped menu stays.
    9. Related-after-footer — moves .post-related after .post-footer so
       DOM/tab order matches the visual flex order (ui.css order:5 places
       it last but its DOM slot — the extend_post_content hook — is before
@@ -39,19 +48,26 @@
       language, same map as the hamburger. No JS → no toggle, the
       description stays the stacked block under the title.
    11. Header search icon — search left the nav menu (hugo.toml) and
-      lives on as a standalone icon beside the language switcher,
-      visible at every viewport (phones keep it outside the hamburger
-      panel). The language-correct URL comes from the head link[rel=
-      search] that extend_head emits; injected before .nav-sep so the
-      row reads theme · search | languages. accesskey=/ keeps the
-      theme's Alt+/ contract that used to ride on the menu item.
-      No JS → no icon (homepage profile button and direct URL still
-      reach the search page).
+      lives on as a standalone icon in feature 8's right cluster,
+      between #menu and the hamburger (the OS header pattern: search is
+      the rightmost high-frequency entry, ☰ the absolute edge; the
+      low-frequency theme/lang toggles stay by the logo on the left).
+      The language-correct URL comes from the head link[rel=search]
+      that extend_head emits. accesskey=/ keeps the theme's Alt+/
+      contract that used to ride on the menu item. No JS → no icon
+      (homepage profile button and direct URL still reach the search
+      page).
+   12. Logo → home icon — the brand text yields to a Feather home
+      glyph so every header icon shares one 20px form (ui.css unifies
+      the sizes; the theme's 17px moon/sun attributes included). The
+      anchor keeps its title tooltip and accesskey=h; the title text
+      becomes the accessible name the stripped text node used to
+      provide. No JS → the theme's text logo stays.
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
-   #menu / .header-nav / .logo-switches / #searchInput / .lang-menu /
-   .nav-sep / .share-buttons / .post-footer / .post-related /
-   .post-header .post-description; regression-guarded by feature-check
-   assertions. */
+   #menu / .header-nav / .logo / .logo-switches / #theme-toggle /
+   #searchInput / .lang-menu / .nav-sep / .share-buttons /
+   .post-footer / .post-related / .post-header .post-description;
+   regression-guarded by feature-check assertions. */
 (function () {
   'use strict';
 
@@ -344,17 +360,26 @@
     shareButtons.insertBefore(shareLi, shareButtons.firstChild);
   }
 
-  /* 8. Mobile hamburger: the toggle is appended LAST in .header-nav so
-     the space-between row lands it top-right, opposite the logo; ui.css
-     (≤768px) does the actual collapsing via the html.js gate (set by
-     extend_head's first-paint inline script — a :has(>.menu-toggle) hide
-     only matched after this script ran, flashing the theme's wrapped menu
-     on every page transition) and the .menu-open panel. Outside clicks
-     and Escape close it; navigating away resets it naturally. aria-label
-     follows the page language. */
+  /* 8. Right action cluster + mobile hamburger: .nav-actions goes last
+     in the space-between .header-nav row (flush-right edge) and takes,
+     in order, the moved #menu (desktop: 文章 归档), the search icon
+     (feature 11 inserts it before the toggle) and the hamburger — ☰
+     keeps the absolute right edge on phones, search hugs it, menu
+     items ride the same cluster on desktop. ui.css (≤768px) does the
+     collapsing via the html.js gate (set by extend_head's first-paint
+     inline script — a :has(>.menu-toggle) hide only matched after this
+     script ran, flashing the theme's wrapped menu on every page
+     transition; the hide rule covers both DOM states, pre-wrap and
+     wrapped) and the .menu-open panel. Outside clicks and Escape close
+     it; navigating away resets it naturally. aria-label follows the
+     page language. */
   var nav = document.querySelector('.header-nav');
   var menuList = document.getElementById('menu');
   if (nav && menuList) {
+    var actions = document.createElement('div');
+    actions.className = 'nav-actions';
+    actions.appendChild(menuList);
+    nav.appendChild(actions);
     var toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'menu-toggle';
@@ -400,7 +425,7 @@
         setOpen(false);
       }
     });
-    nav.appendChild(toggle);
+    actions.appendChild(toggle);
   }
 
   /* 9. Related posts after the footer: the visual order (ui.css) shows
@@ -458,17 +483,19 @@
   }
 
   /* 11. Header search icon: search left the nav menu and lives on as a
-     standalone icon inside .logo-switches, before .nav-sep — the row
-     reads theme · search | languages (desktop) / theme · search · globe
-     (phones, where the separator hides). The link[rel=search] from
-     extend_head is the language-correct permalink; no link → no icon
-     (self-gating, same as every feature above). accesskey=/ preserves
-     the Alt+/ shortcut the theme used to attach to the menu item, and
-     the tooltip carries the same hint. ui.css sizes it like the globe
-     toggle (20px + 12px padding = a 44px tap target). */
+     standalone icon inside feature 8's .nav-actions cluster, slotted
+     between #menu and the hamburger — the OS header pattern (search is
+     the rightmost high-frequency entry, ☰ the absolute edge; the
+     low-frequency theme/lang toggles stay by the logo on the left).
+     The link[rel=search] from extend_head is the language-correct
+     permalink; no link → no icon (self-gating, same as every feature
+     above). accesskey=/ preserves the Alt+/ shortcut the theme used to
+     attach to the menu item, and the tooltip carries the same hint.
+     ui.css sizes it like every header icon (20px Feather glyph, 12px
+     padding = a 44px tap target). */
   var searchLink = document.querySelector('link[rel="search"]');
-  var logoSwitches = document.querySelector('.logo-switches');
-  if (searchLink && logoSwitches) {
+  var navActions = document.querySelector('.nav-actions');
+  if (searchLink && navActions) {
     var searchToggle = document.createElement('a');
     searchToggle.className = 'search-toggle';
     searchToggle.href = searchLink.href;
@@ -486,6 +513,26 @@
       ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
       ' aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21"' +
       ' y1="21" x2="16.65" y2="16.65"/></svg>';
-    logoSwitches.insertBefore(searchToggle, logoSwitches.querySelector('.nav-sep'));
+    navActions.insertBefore(searchToggle, navActions.querySelector('.menu-toggle'));
+  }
+
+  /* 12. Logo → home icon: the brand text yields to a Feather home
+     glyph so every header icon shares one 20px form (ui.css unifies
+     the sizes; the theme's 17px moon/sun attributes included). The
+     anchor keeps its title tooltip and accesskey=h; the title text
+     becomes the accessible name the stripped text node used to
+     provide. No JS → the theme's text logo stays. */
+  var logoLink = document.querySelector('.logo > a');
+  if (logoLink) {
+    logoLink.classList.add('logo-home');
+    if (!logoLink.getAttribute('aria-label')) {
+      logoLink.setAttribute('aria-label', logoLink.title);
+    }
+    logoLink.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
+      ' width="20" height="20" fill="none" stroke="currentColor"' +
+      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+      ' aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2' +
+      ' 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
   }
 })();
