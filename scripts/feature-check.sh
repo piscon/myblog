@@ -109,6 +109,12 @@ check "间距单位(--u双断点)" "grep -q -- '--u:20px' '$OUT'/assets/css/styl
 # 字阶补全（2026-11-06）：归档年份 1.272em（主题继承 16px 与条目同阶，仅靠 margin 撑）+
 # 首页 profileMode h1 显式流式 clamp（主题零样式，原落 UA 默认 36px）
 check "字阶补全(归档年份+首页h1)" "grep -q 'archive-year-header{font-size:1.272em' '$OUT'/assets/css/stylesheet.*.css && grep -q '.profile h1{font-size:clamp(1.35em' '$OUT'/assets/css/stylesheet.*.css"
+# 标题梯子全流式（2026-11-06）：h1-h5 与 title 共享 1.2vw 斜率压缩（intercept≈峰值×0.534、
+# floor≈峰值×0.656 且 ≥1em）——修「流式标题×固定梯子」窄视口层级倒挂（手机 title 24.3px
+# 曾低于正文 h2 29.1px，<~777px 全手机命中；<~1088px 低于正文 h1）
+# 注意 minifier 会重排声明序（margin 排到 font-size 前）并剥前导零（1em,.602em），断言只认
+# 各自唯一的 clamp 内值，不认完整选择器前缀
+check "标题梯子流式(bundle)" "grep -q 'clamp(1.197em' '$OUT'/assets/css/stylesheet.*.css && grep -q 'clamp(1em,.602em' '$OUT'/assets/css/stylesheet.*.css"
 # 摘要 eyebrow 标签：完整选择器含 .post-header 前缀（archives/search 复用裸 .post-description，不得命中）+ ja token「概要」（bundle 内唯一）
 check "摘要标签(CSS作用域+三语言)" "grep -q '.post-header .post-description::before' '$OUT'/assets/css/stylesheet.*.css && grep -q '概要' '$OUT'/assets/css/stylesheet.*.css"
 # 摘要折叠行（2026-11-06）：html.js 门控 grid——eyebrow+chevron 靠左、meta 同排 justify-self 靠右；

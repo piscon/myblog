@@ -6,14 +6,23 @@
    Fixed anchors (do not touch):
    - Body is the theme's 18px; column stays 720px → 720/18 = 40 CJK glyphs
      per line, exactly the WCAG CJK cap. Widening the column would break it.
-   - Ladder: every heading step is ×φ^¼ ≈ 1.127 (φ = 1.618), body = φ^0:
-     title φ^1.5 = 2.058em (37px) · h1 φ^1.25 = 1.825em (32.9px) ·
-     h2 φ^1 = 1.618em (29.1px) · h3 φ^0.75 = 1.437em (25.9px) ·
-     h4 φ^0.5 = 1.272em (22.9px) · h5 φ^0.25 = 1.127em (20.3px) ·
-     h6 φ^0 = 1em (18px).  Theme shipped h4 = 16px BELOW the 18px body
-     (inverted hierarchy) and a 40px fixed title that wraps badly on CJK
-     phones — both fixed here. Theme rules are equal-specificity ties that
-     we win by load order (extended bundle concatenates after core).
+   - Ladder: every heading step is ×φ^¼ ≈ 1.127 (φ = 1.618), body = φ^0.
+     PEAKS (wide desktop): title φ^1.5 = 2.058em (37px) · h1 φ^1.25 =
+     1.825em (32.9px) · h2 φ^1 = 1.618em (29.1px) · h3 φ^0.75 = 1.437em
+     (25.9px) · h4 φ^0.5 = 1.272em (22.9px) · h5 φ^0.25 = 1.127em
+     (20.3px) · h6 φ^0 = 1em (18px).  Theme shipped h4 = 16px BELOW the
+     18px body (inverted hierarchy) and a 40px fixed title that wraps
+     badly on CJK phones — both fixed here. Theme rules are equal-
+     specificity ties that we win by load order (extended bundle
+     concatenates after core).
+   - The ladder is FLUID below its peaks (2026-11-06): every rung rides
+     the title's 1.2vw slope — intercept ≈ peak×0.534, floor ≈ peak×0.656,
+     never below 1em. A fluid title over a FIXED ladder inverts the page
+     hierarchy on narrow viewports: the phone title (24.3px) sat UNDER its
+     own h2 (29.1px) below ~777px — every phone — and under body h1 below
+     ~1088px. h3-h6 floors clip at 1em, so small rungs land on body size
+     on phones; weight and margins carry the hierarchy there (standard
+     fluid behavior: negative space compresses, the size floor doesn't).
    - Leading: Latin from the GRT formula, 18px @ 720px → 1.572 → 1.6;
      CJK full-width squares carry no ascender/descender rhythm, screen
      convention (clreq/jlreq practice) is 1.7–1.9 → 1.75.
@@ -279,14 +288,17 @@ html[lang^="ja"] .post-content {
   text-wrap: pretty;
 }
 
+/* Fluid rungs: peaks stay the φ ladder; each rung compresses on the
+   title's curve (shared 1.2vw slope) so the page hierarchy title > h1 >
+   h2 > … holds at EVERY viewport, not just at the peak. */
 .post-content h1 {
   margin: 1.618em auto 0.618em;
-  font-size: 1.825em;
+  font-size: clamp(1.197em, 0.976em + 1.2vw, 1.825em);
 }
 
 .post-content h2 {
   margin: 1.618em auto 0.618em;
-  font-size: 1.618em;
+  font-size: clamp(1.061em, 0.865em + 1.2vw, 1.618em);
 }
 
 /* h3-h6 share the theme's grouped margin rule shape */
@@ -298,15 +310,15 @@ html[lang^="ja"] .post-content {
 }
 
 .post-content h3 {
-  font-size: 1.437em;
+  font-size: clamp(1em, 0.768em + 1.2vw, 1.437em);
 }
 
 .post-content h4 {
-  font-size: 1.272em;
+  font-size: clamp(1em, 0.68em + 1.2vw, 1.272em);
 }
 
 .post-content h5 {
-  font-size: 1.127em;
+  font-size: clamp(1em, 0.602em + 1.2vw, 1.127em);
 }
 
 .post-content h6 {
