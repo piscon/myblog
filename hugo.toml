@@ -124,6 +124,19 @@ isPlainText = true
     appendFilePath = true
     disabled = true
 
+# 社交图标（2026-11-06 身份层）：首页 profileMode 下方渲染（social_icons partial 只读
+# 全局 site.Params.socialIcons，页脚不渲染该 partial）。github 为真实账号；email 与 X
+# 是占位模拟值——拿到真实地址后替换（about.md 三语内文有同样的占位注释）
+[[params.socialIcons]]
+  name = "github"
+  url = "https://github.com/piscon"
+[[params.socialIcons]]
+  name = "email"
+  url = "mailto:hello@deux.top"
+[[params.socialIcons]]
+  name = "x"
+  url = "https://x.com/deux_top"
+
 [languages]
   [languages.zh]
     locale = "zh-CN"
@@ -148,7 +161,8 @@ isPlainText = true
     [[languages.zh.params.profileMode.buttons]]
       name = "归档"
       url = "/zh/archives/"
-    # 社交图标占位死链已删（曾指向平台首页）；拿到真实主页后在 profileMode.socialIcons 加回
+    # 社交图标已补回（2026-11-06 身份层）：全局 [[params.socialIcons]]（见 params 段），
+    # 首页 profile 下方渲染；email 与 X 为占位——拿到真实地址后替换
     # 搜索已脱离菜单（2026-11-06）：头部语言切换器旁的独立图标（site.js 注入
     # .search-toggle，URL 数据源是 extend_head 发的 link rel=search）
     [[languages.zh.menu.main]]
@@ -161,8 +175,16 @@ isPlainText = true
       name = '归档'
       pageRef = '/archives'
       weight = 40
+    [[languages.zh.menu.main]]
+      identifier = "about"
+      name = '关于'
+      pageRef = '/about'
+      weight = 90
     [languages.zh.params.editPost]
       Text = '在 GitHub 上改进本文'
+    # 页脚第二段（markdownify）：About/RSS/许可链接——文案带语言前缀，故按语言各写一份
+    [languages.zh.params.footer]
+      text = '[关于](/zh/about/) · [RSS 全文](/zh/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)'
 
   [languages.ja]
     locale = "ja-JP"
@@ -202,8 +224,15 @@ isPlainText = true
       name = 'アーカイブ'
       pageRef = '/archives'
       weight = 40
+    [[languages.ja.menu.main]]
+      identifier = "about"
+      name = 'About'
+      pageRef = '/about'
+      weight = 90
     [languages.ja.params.editPost]
       Text = 'GitHub で改善提案'
+    [languages.ja.params.footer]
+      text = '[このサイトについて](/ja/about/) · [RSS](/ja/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja)'
 
   [languages.en]
     locale = "en-US"
@@ -243,8 +272,15 @@ isPlainText = true
       name = 'Archives'
       pageRef = '/archives'
       weight = 40
+    [[languages.en.menu.main]]
+      identifier = "about"
+      name = 'About'
+      pageRef = '/about'
+      weight = 90
     [languages.en.params.editPost]
       Text = 'Edit on GitHub'
+    [languages.en.params.footer]
+      text = '[About](/en/about/) · [RSS](/en/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)'
 
 # 把 static/images 追加挂载进 assets 文件系统：封面图单轨存放（CMS 上传/
 # 正文引用都在 static/images），cover.html 的 resources 查找却能命中并做

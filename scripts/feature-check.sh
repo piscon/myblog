@@ -104,6 +104,11 @@ check "头部图标统一(20px+home)"  "grep -q 'logo-home' '$OUT'/js/site.*.js 
 # 只吞第一次、其余转发原生；focusNative 属性（minifier 不改属性名）是 Ctrl+K（feature 4）绕
 # 过影子的通道，也是本断言的唯一稳定 token（局部变量名会被改名）
 check "搜索页不自动聚焦(分类优先)"  "grep -q '.focusNative=' '$OUT'/js/site.*.js && grep -q 'focusNative||' '$OUT'/js/site.*.js"
+# 身份层(2026-11-06)：About 页三语（Git 路径，CMS 不可见）+ 头部菜单关于项 + 首页
+# profileMode 社交图标（[[params.socialIcons]]：github 真实/email/x 占位——about.md 内文
+# 有同款占位注释，拿到真实地址后一并替换）+ 各语言 footer.text 承载 About/RSS/许可链接
+# （markdownify 渲染；相对 href 与 head 的绝对 RSS link 形态可区分，token 唯一）
+check "身份层(about+社交+许可)"  "test -f '$OUT/zh/about/index.html' && test -f '$OUT/ja/about/index.html' && test -f '$OUT/en/about/index.html' && grep -q '/zh/about/' '$OUT/zh/index.html' && grep -q '/ja/about/' '$OUT/ja/index.html' && grep -q 'github.com/piscon' '$OUT/zh/index.html' && grep -q 'mailto:hello@deux.top' '$OUT/zh/index.html' && grep -q 'href=\"/zh/index.xml\"' '$OUT/zh/index.html' && grep -q 'CC BY-NC-SA' '$OUT/zh/index.html'"
 # 语言切换器：主题裸输出仅「其他语言」全名（zh 首页/文章页静态可验）；site.js 注入全量常驻
 # 列表+当前语言标记。FOUC 门控（全视口）：注入完成前（无 .current-lang 条目）以
 # .js+.lang-menu:not(:has(.current-lang)) 先行 visibility:hidden——首帧到注入之间不再闪现
