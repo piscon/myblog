@@ -3,3 +3,4 @@
 /.cloudflare
 /.zcode/plans/
 node_modules/
+/.hugo_build.lock

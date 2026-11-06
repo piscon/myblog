@@ -10,6 +10,8 @@
 #
 # 视频不进 git（Netlify 配额约定）：video 媒体源与 video_file 字段已移出 CMS；
 # 模板仍消费 video_file/video_url（Git 路径维护），merge: true 保住已有文章的键。
+# files 附件媒体源已删（2026-11-06）：static/files 目录不存在、无任何字段消费，
+# 纯死配置——将来要附件功能时从 git 历史恢复这一块即可。
 
 media:
   - name: images
@@ -23,12 +25,6 @@ media:
     input: static/audio
     output: /audio
     categories: [audio]
-    rename: safe
-  - name: files
-    label: 附件
-    input: static/files
-    output: /files
-    categories: [document]
     rename: safe
 
 content:
