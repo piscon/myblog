@@ -1,4 +1,5 @@
 +++
+lastmod = '2026-11-06'
 title = 'About'
 description = 'About Deux and this blog — what gets written here, and how to reach me'
 +++

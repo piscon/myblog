@@ -1,4 +1,5 @@
 +++
+lastmod = '2026-11-06'
 title = 'About'
 description = '二重奏とこのブログについて'
 +++
