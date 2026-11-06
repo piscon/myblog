@@ -134,21 +134,15 @@
   border-radius: 0;
 }
 
-/* Casper's meta row is plain text with 2px dot separators and NO icons —
-   the site's Feather meta icons and nbsp-padded `·` strings keep serving
-   the article page, archive rows and term rows, and are dropped here.
-   The sep span goes font-size:0 (silencing the `·` text; the pair-hide
-   display:none above still removes it whole) and the dot rides ::before.
-   Each item keeps a leading &nbsp; after its (now hidden) icon, so the
-   first item pulls back one nbsp to stay flush with the card edge. */
-
-.post-entry:not(.tag-entry) .meta-item svg {
-  display: none;
-}
-
-.post-entry:not(.tag-entry) .meta-item:first-child {
-  margin-left: -0.25em;
-}
+/* Casper's meta row keeps its plain-text brevity (13px, date + reading
+   time, no categories) but the site's Feather icons stay ON the cards —
+   2026-11-07 user call: the icon-assisted line reads better than Casper's
+   bare text, a deliberate single deviation from the verbatim pass. Icons
+   keep serving article/archive/term rows as before, and the leading-nbsp
+   compensation (-0.25em) from the icon-hidden experiment is gone with it.
+   The sep span still goes font-size:0 (silencing the `·` text; the
+   pair-hide display:none above still removes it whole) and the dot rides
+   ::before. */
 
 .post-entry:not(.tag-entry) .meta-sep {
   font-size: 0;
