@@ -17,7 +17,6 @@ description = '关于二重奏与这个博客——写什么、为什么写、�
 
 ## 联系方式
 
-<!-- 占位联系方式（2026-11-06）：email 与 X 是模拟值，拿到真实地址后替换并删除本注释；GitHub 为真实账号 -->
 - GitHub：[@piscon](https://github.com/piscon)（本站源码也在[这里](https://github.com/piscon/myblog)）
 - Email：<hello@deux.top>
 - X（Twitter）：[@deux_top](https://x.com/deux_top)

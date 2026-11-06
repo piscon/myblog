@@ -160,6 +160,50 @@ content:
     filename: *post-filename
     view: *post-view
 
+  # 关于页三语：type file 挂单页文件（fields 同样锚点共享）。正文保持普通 Markdown
+  # （Tiptap 不保证 HTML 注释/shortcode 保真——占位联系方式提醒写在 body 字段 description，
+  # 不写 HTML 注释）。operations 全关：单页文件不可新建/改名/删除，防误删整页 404。
+  - name: zh-about
+    label: 关于页（中文）
+    type: file
+    path: content/zh/about.md
+    format: toml-frontmatter
+    fields: &about-fields
+      - name: title
+        label: 标题
+        type: string
+        required: true
+      - name: description
+        label: 摘要（SEO）
+        type: string
+      - name: body
+        label: 正文
+        type: rich-text
+        required: true
+        description: 联系方式一节里 email 与 X 为占位模拟值（GitHub 真实），拿到真实地址后在此替换
+        options:
+          media: images
+    operations: &about-ops
+      create: false
+      rename: false
+      delete: false
+
+  - name: ja-about
+    label: 关于页（日本語）
+    type: file
+    path: content/ja/about.md
+    format: toml-frontmatter
+    fields: *about-fields
+    operations: *about-ops
+
+  - name: en-about
+    label: 关于页（English）
+    type: file
+    path: content/en/about.md
+    format: toml-frontmatter
+    fields: *about-fields
+    operations: *about-ops
+
 components:
   cover:
     label: 通用封面

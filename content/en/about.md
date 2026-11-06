@@ -17,7 +17,6 @@ That subtitle is the whole story behind the name: putting rational engineering a
 
 ## Contact
 
-<!-- 占位联系方式（2026-11-06）：email 与 X 为模拟值，拿到真实地址后替换并删除本注释；GitHub 为真实账号 -->
 - GitHub: [@piscon](https://github.com/piscon) (this site's source is [here](https://github.com/piscon/myblog))
 - Email: <hello@deux.top>
 - X (Twitter): [@deux_top](https://x.com/deux_top)
