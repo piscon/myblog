@@ -37,6 +37,14 @@
 {{- end -}}
 {{- end -}}
 
+{{- /* Search entry URL for the header search icon (site.js feature 11).
+       Search left the nav menu, and the language-correct permalink is a
+       Hugo-side fact — emit it once here, let the injected icon read it
+       (same head-as-data-source pattern as the switcher's hreflang links). */ -}}
+{{- with site.GetPage "search" -}}
+<link rel="search" href="{{ .RelPermalink }}">
+{{- end -}}
+
 {{- /* hreflang x-default → the default-language version of the same page
        (theme only emits per-language alternates). Only on translated pages,
        where an hreflang cluster actually applies. */ -}}

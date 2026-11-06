@@ -79,6 +79,13 @@ check "相关文章焦点归位(焦点序)" "grep -q 'insertAdjacentElement' '$O
 check "相关文章推荐渲染"        "grep -q 'post-related' '$PAGE' && grep -q '你好，世界' '$PAGE'"
 check "站点 JS 加载"            "grep -q '/js/site\.' '$PAGE'"
 check "搜索页输入框存在"        "grep -q 'searchInput' '$OUT/zh/search/index.html' && grep -q '/search/' '$OUT/zh/index.html'"
+# 搜索图标(头部独立入口，2026-11-06)：搜索脱离导航菜单——hugo.toml 三语言菜单 search 项
+# 删除（主题仅对指向 search 布局页的菜单项附 accesskey=/ 与 "(Alt + /)" tooltip，该串从
+# 静态首页消失即菜单项已除；注入图标的 title 是运行时 JS 生成，不污染静态 HTML）；头部
+# 改为 site.js 注入 .search-toggle（insertBefore .nav-sep：theme·search|语言，手机端同行
+# 常驻、不进汉堡面板），语言正确的 URL 数据源是 extend_head 每页发的 link[rel=search]
+# （head 作数据源，同语言切换器 hreflang 模式）；Ctrl+K 回退同步改 .search-toggle
+check "搜索图标(头部独立入口)"  "grep -q 'rel=\"search\"' '$PAGE' && grep -q 'search-toggle' '$OUT'/js/site.*.js && grep -q '.search-toggle{display:inline-flex' '$OUT'/assets/css/stylesheet.*.css && ! grep -q '(Alt + /)' '$OUT/zh/index.html'"
 # 语言切换器：主题裸输出仅「其他语言」全名（zh 首页/文章页静态可验）；site.js 注入全量常驻
 # 列表+当前语言标记。FOUC 门控（全视口）：注入完成前（无 .current-lang 条目）以
 # .js+.lang-menu:not(:has(.current-lang)) 先行 visibility:hidden——首帧到注入之间不再闪现

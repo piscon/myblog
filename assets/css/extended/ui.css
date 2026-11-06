@@ -511,17 +511,28 @@ sup[id^="fnref:"] {
   color: var(--secondary);
 }
 
-/* Header search item: icon+text alignment (icon tracks font size,
-   flex centers it vertically) */
-#menu a[href*="/search/"] span {
+/* Header search icon (site.js feature 11): search left the nav menu for
+   a standalone link-icon inside .logo-switches, before .nav-sep — the
+   row reads theme · search | languages. Same recipe as .lang-toggle
+   (20px glyph + 12px padding = 44px tap target) but visible at EVERY
+   viewport: on phones it stays in the header row, outside the hamburger
+   panel. No-JS → no icon (homepage profile button still reaches the
+   search page). */
+.search-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  line-height: 1;
+  padding: 12px;
+  background: none;
+  border: 0;
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
 }
 
-#menu a[href*="/search/"] svg {
-  width: 1em;
-  height: 1em;
+.search-toggle svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* Mobile hamburger (site.js feature 8): ≤768px the inline menu row

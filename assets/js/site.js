@@ -1,11 +1,11 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Ten self-gating features — each activates only when its DOM exists:
+   Eleven self-gating features — each activates only when its DOM exists:
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content
    3. TOC scrollspy — highlights the .toc entry of the heading in view
    4. Ctrl/Cmd+K — focus the search input on the search page, otherwise
-      jump to the current language's search page (menu link is the
-      language-correct source of truth)
+      jump to the current language's search page (the injected header
+      icon's link is the language-correct source of truth)
    5. Language switcher — PaperMod only renders the OTHER languages, so
       the list members swap on every switch; prepend the current language
       (from <html lang>) at its weight position, marked non-clickable,
@@ -38,10 +38,20 @@
       and the body restores the size). aria-label follows the page
       language, same map as the hamburger. No JS → no toggle, the
       description stays the stacked block under the title.
+   11. Header search icon — search left the nav menu (hugo.toml) and
+      lives on as a standalone icon beside the language switcher,
+      visible at every viewport (phones keep it outside the hamburger
+      panel). The language-correct URL comes from the head link[rel=
+      search] that extend_head emits; injected before .nav-sep so the
+      row reads theme · search | languages. accesskey=/ keeps the
+      theme's Alt+/ contract that used to ride on the menu item.
+      No JS → no icon (homepage profile button and direct URL still
+      reach the search page).
    Theme DOM coupling: PaperMod's .post-single / .post-content / .toc /
    #menu / .header-nav / .logo-switches / #searchInput / .lang-menu /
-   .share-buttons / .post-footer / .post-related / .post-header
-   .post-description; regression-guarded by feature-check assertions. */
+   .nav-sep / .share-buttons / .post-footer / .post-related /
+   .post-header .post-description; regression-guarded by feature-check
+   assertions. */
 (function () {
   'use strict';
 
@@ -151,7 +161,8 @@
         input.select();
         return;
       }
-      var link = document.querySelector('#menu a[href*="/search/"]');
+      var link = document.querySelector('.search-toggle') ||
+                 document.querySelector('a[href*="/search/"]');
       if (link) location.href = link.href;
     }
   });
@@ -444,5 +455,37 @@
       descToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     desc.appendChild(descToggle);
+  }
+
+  /* 11. Header search icon: search left the nav menu and lives on as a
+     standalone icon inside .logo-switches, before .nav-sep — the row
+     reads theme · search | languages (desktop) / theme · search · globe
+     (phones, where the separator hides). The link[rel=search] from
+     extend_head is the language-correct permalink; no link → no icon
+     (self-gating, same as every feature above). accesskey=/ preserves
+     the Alt+/ shortcut the theme used to attach to the menu item, and
+     the tooltip carries the same hint. ui.css sizes it like the globe
+     toggle (20px + 12px padding = a 44px tap target). */
+  var searchLink = document.querySelector('link[rel="search"]');
+  var logoSwitches = document.querySelector('.logo-switches');
+  if (searchLink && logoSwitches) {
+    var searchToggle = document.createElement('a');
+    searchToggle.className = 'search-toggle';
+    searchToggle.href = searchLink.href;
+    searchToggle.setAttribute('accesskey', '/');
+    var searchLabel = {
+      zh: '搜索',
+      ja: '検索',
+      en: 'Search'
+    }[(document.documentElement.getAttribute('lang') || 'zh').slice(0, 2)] || 'Search';
+    searchToggle.title = searchLabel + ' (Alt + /)';
+    searchToggle.setAttribute('aria-label', searchLabel);
+    searchToggle.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
+      ' width="20" height="20" fill="none" stroke="currentColor"' +
+      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+      ' aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21"' +
+      ' y1="21" x2="16.65" y2="16.65"/></svg>';
+    logoSwitches.insertBefore(searchToggle, logoSwitches.querySelector('.nav-sep'));
   }
 })();

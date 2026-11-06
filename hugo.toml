@@ -149,6 +149,8 @@ isPlainText = true
       name = "归档"
       url = "/zh/archives/"
     # 社交图标占位死链已删（曾指向平台首页）；拿到真实主页后在 profileMode.socialIcons 加回
+    # 搜索已脱离菜单（2026-11-06）：头部语言切换器旁的独立图标（site.js 注入
+    # .search-toggle，URL 数据源是 extend_head 发的 link rel=search）
     [[languages.zh.menu.main]]
       identifier = "posts"
       name = '文章'
@@ -159,13 +161,6 @@ isPlainText = true
       name = '归档'
       pageRef = '/archives'
       weight = 40
-    [[languages.zh.menu.main]]
-      identifier = "search"
-      name = '搜索'
-      pageRef = '/search'
-      weight = 70
-      pre = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-
     [languages.zh.params.editPost]
       Text = '在 GitHub 上改进本文'
 
@@ -207,13 +202,6 @@ isPlainText = true
       name = 'アーカイブ'
       pageRef = '/archives'
       weight = 40
-    [[languages.ja.menu.main]]
-      identifier = "search"
-      name = '検索'
-      pageRef = '/search'
-      weight = 70
-      pre = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-
     [languages.ja.params.editPost]
       Text = 'GitHub で改善提案'
 
@@ -255,13 +243,6 @@ isPlainText = true
       name = 'Archives'
       pageRef = '/archives'
       weight = 40
-    [[languages.en.menu.main]]
-      identifier = "search"
-      name = 'Search'
-      pageRef = '/search'
-      weight = 70
-      pre = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-
     [languages.en.params.editPost]
       Text = 'Edit on GitHub'
 
