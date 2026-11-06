@@ -163,8 +163,9 @@ check "摘要标签(CSS作用域+三语言)" "grep -q '.post-header .post-descri
 # 被 CSS 选中 → grid font-size:0 先帧静音 + .desc-body 显式恢复字号。CSS token 守 minified
 # 选择器（空白剔除、结构保留，同汉堡断言形态），JS token 守 bundle（minifier 不改写字符串字面量）
 check "摘要折叠行(grid+JS包裹)" "grep -q 'html.js .post-header' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-open' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/js/site.*.js && grep -q 'desc-open' '$OUT'/js/site.*.js"
-# 列表缩略图行依赖主题 DOM 序（cover 先于 header，grid 自动落列）+ :has 门控选择器（须含 .tag-entry 排除）
-check "列表缩略图行(CSS门控+DOM序)" "grep -q 'post-entry:not(.tag-entry):has(.entry-cover)' '$OUT'/assets/css/stylesheet.*.css && grep -q '<article class=\"post-entry\">' '$OUT/zh/posts/index.html' && grep -q 'entry-cover' '$OUT/zh/posts/index.html' && [ \"\$(grep -om1 'entry-cover\|entry-header' '$OUT/zh/posts/index.html')\" = 'entry-cover' ]"
+# 列表堆叠卡（2026-11-07 Casper 对标改造）：image-top 堆叠卡依赖主题 DOM 序（cover 先于 header）
+# + :not(.tag-entry) 门控选择器（term 页走主题紧凑行）；负断言 --thumb 根除行式机制残留
+check "列表堆叠卡(CSS门控+DOM序)" "grep -q 'post-entry:not(.tag-entry)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q -- '--thumb' '$OUT'/assets/css/stylesheet.*.css && grep -q '<article class=\"post-entry\">' '$OUT/zh/posts/index.html' && grep -q 'entry-cover' '$OUT/zh/posts/index.html' && [ \"\$(grep -om1 'entry-cover\|entry-header' '$OUT/zh/posts/index.html')\" = 'entry-cover' ]"
 # giscus 配色跟随站内主题：初值改写脚本标签属性（依赖 client.js 的 currentScript 语义）+
 # 切换经 html[data-theme] postMessage 转发——主题 head 脚本给 <html> 设 data-theme 是前提
 check "giscus 主题跟随(耦合点)"  "grep -q 'id=\"giscus-script\"' '$PAGE' && grep -q 'iframe.giscus-frame' '$PAGE' && grep -q 'dataset.theme' themes/PaperMod/layouts/_partials/head.html"
@@ -189,8 +190,9 @@ check "聚合标题图标(emoji已除)"  "grep -q 'taxonomy-heading' '$OUT/zh/se
 # 依赖主题 .share-buttons 容器存在；JS token 守 bundle、容器守主题 DOM
 # （桌面/无 navigator.share 环境按钮不出现且 intent 链接保留，属预期）
 check "原生分享按钮(手机)"       "grep -q 'navigator.share' '$OUT'/js/site.*.js && grep -q 'style.display' '$OUT'/js/site.*.js && grep -q 'share-buttons' '$PAGE'"
-# cover.html 站点覆盖（tier-3）：sizes 按上下文分流——列表卡 176px/28vw，单页 720px/100vw（first.md 有 cover 且 slug 稳定）
-check "封面 sizes 分流(列表/单页)" "grep -q '176px, 28vw' '$OUT/zh/posts/index.html' && grep -q '720px, 100vw' '$OUT/zh/posts/first/index.html'"
+# cover.html 站点覆盖（tier-3）：sizes 统一 720px/100vw（2026-11-07 堆叠卡改造后列表封面同
+# 为全宽槽位；first.md 有 cover 且 slug 稳定）
+check "封面 sizes(统一720)" "grep -q '720px, 100vw' '$OUT/zh/posts/index.html' && grep -q '720px, 100vw' '$OUT/zh/posts/first/index.html'"
 # 分享并入标签行（2026-11-06）：ui.css 把 post-footer 改 grid——第一行 tags 左/share 右、
 # 第二行 paginav 通栏；分享去盒装、图标 18px 次级色（CSS 压过主题 svg 的 30px 属性宽高，
 # 也压过 site.js 注入的原生分享 svg 26px）。hover 金色门控 @media(hover:hover)（2026-11-06

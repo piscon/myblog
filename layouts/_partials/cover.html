@@ -1,8 +1,11 @@
 {{- /* SITE OVERRIDE of themes/PaperMod/layouts/_partials/cover.html
-       (2026-11-06). Byte-identical upstream copy EXCEPT two things:
-       1. the img sizes attribute is context-split: single-page covers keep
-          "(min-width: 768px) 720px, 100vw", list-card thumbnails declare
-          their real slot "(min-width: 768px) 176px, 28vw";
+       (2026-11-06; sizes unified 2026-11-07). Byte-identical upstream copy
+       EXCEPT two things:
+       1. the img sizes attribute is the single string
+          "(min-width: 768px) 720px, 100vw" for every context — since the
+          list pivoted to Ghost-Casper stacked cards, the list cover is a
+          full-width slot too (the old split "176px, 28vw" list value died
+          with the thumbnail rows);
        2. the resource lookup strips a trailing "?v=N" cache-buster before
           globbing, and cover images now live in assets/images/ (DUPLETED
           from static/images/, which stays for body-markdown URLs) —
@@ -11,8 +14,7 @@
           srcset, full original bytes on phones.
        WEEKLY PR: if upstream touches this file, re-diff against it and
        re-apply only the sizes line and the lookup block. Guarded by
-       feature-check (list page carries "176px, 28vw", covered single
-       pages keep "720px, 100vw"). */ -}}
+       feature-check (list and single pages both carry "720px, 100vw"). */ -}}
 {{- with .cxt}} {{/* Apply proper context from dict */}}
 {{- if (and .Params.cover.image (not $.isHidden)) }}
 <figure class="entry-cover">
@@ -56,7 +58,7 @@
                         {{- end }}
                         {{- printf "%s %dw" ($cover.Permalink) ($cover.Width) }}'
                 src="{{ $cover.Permalink }}"
-                sizes="{{ if $.IsSingle }}(min-width: 768px) 720px, 100vw{{ else }}(min-width: 768px) 176px, 28vw{{ end }}"
+                sizes="(min-width: 768px) 720px, 100vw"
                 width="{{ $cover.Width }}" height="{{ $cover.Height }}"
                 alt="{{ $alt }}">
         {{- else }}{{/* Unprocessable image or responsive images disabled */}}

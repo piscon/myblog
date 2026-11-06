@@ -20,9 +20,17 @@
 }
 
 .post-entry {
-  /* Card gutter = φ⁻¹·u (12.4px), the same single coefficient the list
-     cards use internally — compact rows read as a list, not floating tiles */
+  /* Term rows (tag-entry) keep the compact φ⁻¹·u gutter; the stacked list
+     cards override to Casper's feed gap below (2026-11-07 verbatim) */
   margin-bottom: calc(var(--u) * 0.618);
+}
+
+/* Stacked-card separation follows Casper's feed gap verbatim (4.8vmin;
+   40px at ≤768px via cover.css). The u system exited the card interior —
+   card values are Casper px; --u still governs search/term rows and page
+   gutters. Cards have no chrome — rhythm is the only separator. */
+.post-entry:not(.tag-entry) {
+  margin-bottom: 4.8vmin;
 }
 
 /* iOS Safari auto-zooms the viewport when an input with computed font-size
@@ -732,11 +740,10 @@ sup[id^="fnref:"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* Card meta joins the 14px (φ^-0.5) rung the other two meta containers
-   already ride (article .post-meta, .archive-meta — and the pagination/
-   term pills). The theme's 13px sat BETWEEN rungs; at 14px the card's
-   worst-case text stack grows ~1.5px (144.2 → ~145.7) against the 176px
-   budget — safe. Mobile stays 12px (cover.css). */
+/* Meta rung 14px (φ^-0.5) for archives (+term rows); stacked list cards
+   override to Casper's 13px in cover.css (2026-11-07 verbatim revision).
+   The theme's 13px sat BETWEEN rungs — it now only serves the theme
+   fallback surfaces. */
 .entry-footer {
   font-size: 14px;
 }

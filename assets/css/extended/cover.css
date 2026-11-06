@@ -15,96 +15,70 @@
   border-radius: var(--radius);
 }
 
-/* --- List view: uniform flush-square thumbnail rows --------------------------
-   /posts/ cards: ONE card skeleton for every list entry — a grid row of
-   min-height var(--thumb) with the text block centered as a whole — and the
-   cover (when present) is a full-bleed square overlay hugging the card's
-   left edge, with the text inset to the second column. Entries WITHOUT a
-   cover (cf-auto-translate) render the same 176px row, text-only, so the
-   list stays height-uniform instead of mixing two component shapes.
+/* --- List view: Ghost-Casper stacked cards, VERBATIM (2026-11-07, second
+   revision of the day) --------------------------------------------------------
+   The first cut kept Casper's FORM but mapped its numbers onto the site's
+   golden ladder (25.9px title, φ·u gaps). User overturned that: every value
+   below is Casper's screen.css verbatim (Casper sets html 62.5% there, so
+   1rem = 10px — translated to px here):
+
+     ratio        padding-bottom 55%       -> aspect-ratio: 1.818
+     image gap    32px                     -> 32px
+     title        2.6rem/800/1.2/-0.01em   -> 26px/800/1.2/-0.01em, no clamp
+     excerpt      1.6rem/1.5/clamp 3/mt 12 -> 16px/1.5/clamp 3/mt 12px
+     meta         1.3rem/mt 12px           -> 13px/mt 12px
+     feed gap     4.8vmin (40px <=767px)   -> 4.8vmin (40px <=768px)
+
+   Cards keep NO chrome (theme entry background/border/padding/radius and
+   the hover/focus-within lift are stripped); separation is pure vertical
+   rhythm. Coverless entries render as text-only cards of natural height
+   (Ghost behavior). Hover = Casper's title fade at its own 0.9, gated to
+   pointers per the site's hover convention (keyboard keeps :focus-within).
+
+   The u/φ rhythm system EXITED the card interior with this revision — card
+   values are Casper px; --u still governs search rows, term rows and page
+   gutters. Term rows (.tag-entry) are back to PURE theme styling: the
+   shared title-rung rule was deleted, so term titles render the theme's
+   own 24px/1.3/700 (a one-time 22.9 -> 24px drift, accepted for clean
+   ownership). Categories left the card meta (Casper cards carry date +
+   reading time only); taxonomy entry points are the search hub and the
+   article meta row — revert = delete the two meta-cats rules below.
+
+   Mobile (<=768px) is Casper verbatim too: no title downsize, no excerpt
+   clamp change, 40px card gap. ACCEPTED COST, user-signed: CJK titles at
+   26px in the ~347px column wrap at ~13 chars/line and never truncate.
 
    .tag-entry is excluded EVERYWHERE: term pages keep the theme's compact
-   rows. Their figures exist in the DOM but display:none (theme rule), and
-   :has(.entry-cover) alone would still match them — reserving a dead
-   --thumb column and row height on /tags/ (observed). Single pages keep the
-   full-width 1.91:1 cover above; this section is scoped to .post-entry.
+   rows (figures display:none via the theme rule). Single pages keep the
+   full-width 1.91:1 cover above — untouched.
 
-   Geometry (theme-coupling guarded by feature-check #29):
-   - DOM order is cover → header → content → footer. The figure is pulled
-     OUT of the grid flow (position:absolute; the card is theme-relative)
-     onto the reserved first column, so it cannot inflate the row tracks and
-     the text stack centers as ONE block via align-content. (Per-item
-     align-self:center was tried and reverted: each item then centers inside
-     its own stretched track and the lines spread over the full card.)
-   - Strict 1:1: --thumb drives BOTH the column width and the card's
-     min-height, so at rest height == width exactly. If text ever exceeds
-     the square, the card grows and the figure follows (top/bottom anchored):
-     still flush, no longer exactly square. Mobile rows are normally taller
-     than the ~100-120px thumb, so phones get the flush rectangle.
-   - Why 176px: rung 14 of the site's own type ladder (18 × φ^¼¹⁴ = 176.4),
-     sized by an OPTICAL rule, not taste: the worst-case text stack (2-line
-     ladder title + 2-line summary + meta) is a FIXED 144.2px (explicit
-     line-heights + clamps), and its vertical breathing must match the
-     horizontal text inset (--u = 20px) — title half-leading (~3.4px) +
-     breathing (16.1px) ≈ 19.5px to the glyphs ≈ the 20px side padding.
-     156px broke that rule (ja titles are routinely two lines → ~6px to the
-     glyphs: cramped); 200px overshot (airy, list reads slow). Row +
-     φ⁻¹·u spacing = 188.8px → ~4.8 entries per 900px viewport.
-     Overflow (a wrapped meta line) degrades gracefully to flush cropping,
-     not a broken square. */
+   Theme coupling guarded by feature-check #45 (列表堆叠卡): DOM order
+   cover -> header -> content -> footer is native list.html order and
+   image-top needs the cover first, which already holds. */
+
 .post-entry:not(.tag-entry) {
-  --thumb: clamp(96px, 28vw, 176px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  column-gap: var(--u); /* card-internal separation rides u, not the page
-                           gutter --gap (24px would widen the thumb→text gap
-                           beyond the designed 20px rhythm) */
-  align-content: center;
-  padding: 0 var(--u); /* horizontal only; centering owns the vertical.
-                          --u (20px) not --gap (24px): the optical budget
-                          above matches breathing to THIS text inset */
-  min-height: var(--thumb);
-}
-
-/* Cover variant: reserve the thumbnail column, card padding moves onto the
-   figure (full bleed) and the text children */
-.post-entry:not(.tag-entry):has(.entry-cover) {
-  grid-template-columns: var(--thumb) minmax(0, 1fr);
+  background: none;
+  border: none;
+  border-radius: 0;
   padding: 0;
 }
 
-.post-entry:not(.tag-entry):has(.entry-cover) .entry-cover {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--thumb);
-  aspect-ratio: auto; /* base 1.91:1 would over-constrain the abspos box and
-                         drop bottom:0, collapsing the thumb to ~width/1.91 */
-  margin-bottom: 0;
-  border-radius: var(--radius) 0 0 var(--radius);
+.post-entry:not(.tag-entry):hover,
+.post-entry:not(.tag-entry):focus-within {
+  transform: none;
 }
 
-.post-entry:not(.tag-entry):has(.entry-cover) .entry-cover img {
-  position: absolute;
-  inset: 0;
-  border-radius: 0;
+/* Cover variant: full-bleed block above the text — Casper's image link is
+   just a block with a fixed ratio (its ::after padding-bottom 55%); the
+   base .entry-cover rules (overflow, img fit, radius) carry over. */
+.post-entry:not(.tag-entry) .entry-cover {
+  aspect-ratio: 1.818;
+  margin-bottom: 32px;
 }
 
-/* Text children of the cover variant: inset to column 2 with the horizontal
-   padding the full-bleed figure removed (--u, same 20px inset as the
-   no-cover variant — the optical budget is shared) */
-.post-entry:not(.tag-entry):has(.entry-cover) > .entry-header,
-.post-entry:not(.tag-entry):has(.entry-cover) > .entry-content,
-.post-entry:not(.tag-entry):has(.entry-cover) > .entry-footer {
-  grid-column: 2;
-  padding: 0 var(--u);
-}
-
-/* One rhythm for EVERY list card, both variants (grid does not collapse
-   margins: the theme's 8px header margin-bottom + 8px content margin-top
-   would compound to 16px — zeroed and replaced by an explicit two-level
-   rhythm: 8px inside the title+summary group, φ⁻¹·u (12.4px) between
-   summary and meta. In the no-cover block-flow fallback 0 + 8px still
-   collapses to 8px, so all three card kinds render the same gaps. */
+/* Header margin zeroed for every card (grid-era leftover, also what term
+   rows had); Casper's vertical rhythm below is scoped to stacked cards so
+   term rows keep the shared 8px/φ⁻¹·u margins untouched. */
 .post-entry > .entry-header {
   margin-bottom: 0;
 }
@@ -113,76 +87,105 @@
   margin: 8px 0 calc(var(--u) * 0.618);
 }
 
-/* Uniform rows: long titles wrap to at most two lines in list cards.
-   Size sits ON the site's golden ladder (φ^0.5 × 18px = 22.9px) instead of
-   the theme's off-scale 24px, matching typography.css. */
-.post-entry .entry-header h2 {
+/* Term rows keep the shared clamp at the site's excerpt rung; stacked
+   cards override font/margins to Casper's values below. */
+.post-entry > .entry-content {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   overflow: hidden;
-  font-size: 1.272em;
+  font-size: 0.887em;
 }
 
-/* Phone pattern (≤768px, the theme's zmedia breakpoint): the ~210px text
-   column (375px device) cannot carry title + summary + meta — everything
-   hit the 2-line clamps and the screen filled with ellipses. News-app
-   phone convention applies instead: excerpt drops, title sits at the body
-   rung (18px = φ^0) with a 2-line clamp (≈21 CJK chars; longer titles
-   truncate with an ellipsis), meta follows directly at 12px single-row
-   (author + reading time hidden). Rows lock to the thumb height
-   (110-176px); term rows (block flow, theme compact form) are untouched. */
+/* Casper card rhythm, verbatim: title 26px/800/1.2/-0.01em (PaperMod never
+   declares a heading weight — UA bold 700 — and bumps the list
+   line-height to 1.3, both overridden), excerpt 16px/1.5 with 12px above,
+   meta 13px with 12px above. No title line-clamp: Casper wraps freely. */
+.post-entry:not(.tag-entry) .entry-header h2 {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.post-entry:not(.tag-entry) > .entry-content {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.post-entry:not(.tag-entry) > .entry-footer {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+/* Casper cards carry date + reading time only — categories are a site
+   addition and leave the card (entry points: search hub, article meta).
+   meta-sep spans are SIBLINGS of their item, so hiding the item needs the
+   :has pair or a dangling `·` remains. Revert = delete this rule. */
+.post-entry:not(.tag-entry) .meta-cats,
+.post-entry:not(.tag-entry) .meta-sep:has(+ .meta-cats) {
+  display: none;
+}
+
+/* Casper card images are square-cornered — the base radius above is the
+   single-page cover's; cards zero it. */
+.post-entry:not(.tag-entry) .entry-cover img {
+  border-radius: 0;
+}
+
+/* Casper's meta row is plain text with 2px dot separators and NO icons —
+   the site's Feather meta icons and nbsp-padded `·` strings keep serving
+   the article page, archive rows and term rows, and are dropped here.
+   The sep span goes font-size:0 (silencing the `·` text; the pair-hide
+   display:none above still removes it whole) and the dot rides ::before.
+   Each item keeps a leading &nbsp; after its (now hidden) icon, so the
+   first item pulls back one nbsp to stay flush with the card edge. */
+
+.post-entry:not(.tag-entry) .meta-item svg {
+  display: none;
+}
+
+.post-entry:not(.tag-entry) .meta-item:first-child {
+  margin-left: -0.25em;
+}
+
+.post-entry:not(.tag-entry) .meta-sep {
+  font-size: 0;
+}
+
+.post-entry:not(.tag-entry) .meta-sep::before {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--secondary);
+  vertical-align: middle;
+  margin: 0 6px;
+}
+
+/* Casper's only hover feedback is a title fade — gated to pointer devices
+   (touch browsers latch :hover; same contract as the share buttons). */
+@media screen and (hover: hover) {
+  .post-entry:not(.tag-entry):hover .entry-header h2 {
+    opacity: 0.9;
+  }
+}
+
+/* Phone (<=768px) is Casper verbatim: single column at a 40px gap, same
+   26px unclamped title, same 3-line excerpt. No phone-specific card rules
+   beyond the gap. */
 @media screen and (max-width: 768px) {
   .post-entry:not(.tag-entry) {
-    /* Lock the row to the thumb: uniform heights AND a strict square on
-       phones too. Worst text stack is ~107px (3-line title + one-line
-       meta), so the floor is 110px — 28vw alone dips to 96px at small
-       viewports and text would stretch the row. 110px also keeps the meta
-       line single-row at 375px (the most common phone width). */
-    --thumb: clamp(110px, 28vw, 176px);
-    height: var(--thumb);
-    overflow: hidden;
-  }
-
-  .post-entry:not(.tag-entry) > .entry-content {
-    display: none;
-  }
-
-  .post-entry:not(.tag-entry) > .entry-footer {
-    margin-top: 8px;
-  }
-
-  /* Meta = date · categories. The author is site-constant (zero signal per
-     card) and the reading time is noise at this size; with both gone and
-     one font step down (12px) the line fits one row down to ~350px
-     viewports — no mid-word wraps. Separator spans are SIBLINGS of their
-     item (each item embeds its own leading sep), so hiding an item needs
-     the :has adjacency pair or a dangling `·` remains. Single-page meta is
-     scoped out (.post-entry only). */
-  .post-entry .meta-author,
-  .post-entry .meta-read,
-  .post-entry .meta-sep:has(+ .meta-author),
-  .post-entry .meta-sep:has(+ .meta-read) {
-    display: none;
-  }
-
-  .post-entry .entry-footer {
-    font-size: 12px;
-  }
-
-  /* Title at the ladder's body rung (φ^0 = 18px): two rungs under the
-     desktop list title — phone cards are ~110px tall and 20.3px read as a
-     shout. 2-line clamp at 18px ≈ 21 CJK chars; longer titles truncate
-     with the ellipsis like every news app. */
-  .post-entry .entry-header h2 {
-    font-size: 1em;
-    -webkit-line-clamp: 2;
+    margin-bottom: 40px;
   }
 }
 
-/* Sub-350px viewports (pre-2015 devices, <1% share): date · category still
-   exceeds the ~138px text column — date only, single line guaranteed. The
-   search hub remains the taxonomy entry point. */
+/* Sub-350px viewports: cards no longer carry categories at all, so this
+   now effectively serves term rows only — date · category still exceeds a
+   compact row's width below 350px; date only. The search hub remains the
+   taxonomy entry point. */
 @media screen and (max-width: 349px) {
   .post-entry .meta-cats,
   .post-entry .meta-sep:has(+ .meta-cats) {
