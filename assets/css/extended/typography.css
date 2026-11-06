@@ -431,6 +431,41 @@ html[lang^="ja"] .post-content {
   margin: 1.272em 0;
 }
 
+/* ---- In-article image forms: Ghost-Casper three-tier breakout (2026-11-07)
+   Normal images live in the 720px column. `#wide` breaks out to Casper's
+   container width (1200px — its --container-width default) and `#full` to
+   the viewport minus the SITE gutter (--gap; Casper bleeds to its own
+   4vmin gap, but our full tier must meet the page edges the header and
+   footer already use). No float/text-wrap tier exists in Casper and none
+   is added — the mainstream platforms dropped it (mobile kills it, CJK
+   side columns read at ~10 chars).
+
+   Marking is URL-fragment based — `![说明](/images/foo.jpg#wide)` / `#full`
+   — the same channel the theme already uses for `#center`, and the only
+   one Pages CMS (Tiptap) round-trips safely: the hook preserves the
+   fragment, the fragment never reaches the server, and raw HTML figures
+   are not an option (goldmark unsafe stays off). Both tiers collapse into
+   the column automatically below ~1248px viewports (min() and --gap's
+   mobile mirror do the work — Casper's tracks do the same).
+
+   Widths stay ≤ 100vw − 2·gap, inside the visual viewport even with a
+   classic scrollbar, so no overflow-x handling is needed. Source images
+   should be ≥1600px wide: there is no srcset on body images and the slots
+   will upscale smaller sources (Casper behaves the same). The lightbox
+   binds .post-content img and keeps working on breakouts unchanged. */
+
+.post-content img[src$="#wide"] {
+  display: block;
+  width: min(1200px, calc(100vw - 2 * var(--gap)));
+  margin-inline: calc(50% - min(1200px, calc(100vw - 2 * var(--gap))) / 2);
+}
+
+.post-content img[src$="#full"] {
+  display: block;
+  width: calc(100vw - 2 * var(--gap));
+  margin-inline: calc(50% - 50vw + var(--gap));
+}
+
 /* ---- Global states ----------------------------------------------------- */
 
 /* Gold wash on selected text — the one place the accent touches content */

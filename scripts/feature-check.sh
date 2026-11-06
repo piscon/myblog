@@ -243,6 +243,12 @@ check "触屏hover门控(防锁存)" "grep -q '@media(hover:hover){.pagination a
 # site.js 在 overlay 上 non-passive preventDefault 挡住背景滚动；img 92vh 按
 # iOS 最大视口算会把图压进工具栏底下，@supports(height:1dvh) 升级 92dvh
 check "灯箱(滚动锁+dvh)" "grep -q 'passive:!1' '$OUT'/js/site.*.js && grep -q 'max-height:92vh' '$OUT'/assets/css/stylesheet.*.css && grep -q '@supports(height:1dvh){.lightbox img{max-height:92dvh}}' '$OUT'/assets/css/stylesheet.*.css"
+# 文章图文三档破格（2026-11-07 Casper kg-width 系统）：URL hash 标记 #wide/#full
+# （#center 同款通道，Tiptap 安全）——bundle 守两档选择器 + full 的 50vw 公式；
+# 宽档几何 min(1200px, 100vw-2*gap) 须与注释同源
+# grep 用 -F 定长匹配：选择器含 []/$ 属正则元字符，GNU grep BRE 需转义、
+# ugrep 方言又不同，-F 双引擎通吃（此断言是属性选择器首例）
+check "文章图文三档破格(bundle)" "grep -Fq 'post-content img[src\$=\"#wide\"]' '$OUT'/assets/css/stylesheet.*.css && grep -Fq 'post-content img[src\$=\"#full\"]' '$OUT'/assets/css/stylesheet.*.css && grep -Fq 'calc(50% - 50vw + var(--gap))' '$OUT'/assets/css/stylesheet.*.css && grep -Fq 'min(1200px,calc(100vw - 2 * var(--gap)))' '$OUT'/assets/css/stylesheet.*.css"
 
 FAILED=0
 {
