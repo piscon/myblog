@@ -134,29 +134,13 @@
   border-radius: 0;
 }
 
-/* Casper's meta row keeps its plain-text brevity (13px, date + reading
-   time, no categories) but the site's Feather icons stay ON the cards —
-   2026-11-07 user call: the icon-assisted line reads better than Casper's
-   bare text, a deliberate single deviation from the verbatim pass. Icons
-   keep serving article/archive/term rows as before, and the leading-nbsp
-   compensation (-0.25em) from the icon-hidden experiment is gone with it.
-   The sep span still goes font-size:0 (silencing the `·` text; the
-   pair-hide display:none above still removes it whole) and the dot rides
-   ::before. */
-
+/* Separator spans stay as pure spacers — 2026-11-07 user call: no dot
+   between items, but no flush-butting either; the nbsp-padded span width
+   IS the gap. Feather icons stay on the cards (the one deliberate
+   deviation from the verbatim pass), and the display:none pair-hides
+   above/below still remove their seps whole, contract unchanged. */
 .post-entry:not(.tag-entry) .meta-sep {
-  font-size: 0;
-}
-
-.post-entry:not(.tag-entry) .meta-sep::before {
-  content: "";
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  background: var(--secondary);
-  vertical-align: middle;
-  margin: 0 6px;
+  visibility: hidden;
 }
 
 /* Casper's only hover feedback is a title fade — gated to pointer devices

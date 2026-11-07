@@ -466,6 +466,15 @@ html[lang^="ja"] .post-content {
   margin-inline: calc(50% - 50vw + var(--gap));
 }
 
+/* Article meta matches the cards (2026-11-07 user call): no separator
+   glyph between items, spacing only — the sep span is silenced, not
+   removed, so the nbsp-padded width keeps the gap and the display:none
+   pair-hides in the media queries below keep working untouched. */
+
+.post-meta .meta-sep {
+  visibility: hidden;
+}
+
 /* ---- Global states ----------------------------------------------------- */
 
 /* Gold wash on selected text — the one place the accent touches content */
