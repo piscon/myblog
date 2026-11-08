@@ -282,6 +282,9 @@ check "列表出口行(list-foot)"      "grep -q 'class=\"kicker\"' '$OUT/zh/pos
 check "搜索页刊头(kbd+meta)"       "grep -q 'class=\"kicker\"' '$OUT/zh/search/index.html' && grep -q 'Ctrl / ⌘ K' '$OUT/zh/search/index.html' && grep -q 'search-meta' '$OUT/zh/search/index.html' && grep -q 'aria-live=\"polite\"' '$OUT/zh/search/index.html' && grep -q '.search-field{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.search-meta{display:flex' '$OUT'/assets/css/stylesheet.*.css"
 # 搜索空态（feature 16）：JS 空态面板 + 建议词回填 input 事件 + CSS token
 check "搜索空态(回填建议)"         "grep -q 'empty-state' assets/js/site.js && grep -q \"input.dispatchEvent(new Event('input', { bubbles: true }))\" assets/js/site.js && grep -q '.empty-state .hint-links button' '$OUT'/assets/css/stylesheet.*.css"
+# 页脚单行（align-proto D，_partials/footer.html 覆盖）：©+CC 左 / 留言板+RSS 图标右，
+# Powered by 负断言；top-link 重塑 44px 发丝圆钮 token
+check "页脚单行(图标+无Powered)"   "grep -q 'foot-meta' '$OUT/zh/tags/index.html' && grep -q 'foot-icons' '$OUT/zh/tags/index.html' && grep -q 'aria-label=\"留言板\"' '$OUT/zh/tags/index.html' && grep -q 'aria-label=\"RSS 全文\"' '$OUT/zh/tags/index.html' && grep -q 'aria-label=\"ゲストブック\"' '$OUT/ja/tags/index.html' && grep -q 'deed.zh' '$OUT/zh/tags/index.html' && ! grep -q 'Powered by' '$OUT/zh/tags/index.html' && grep -q '.foot-meta{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.top-link{bottom:20px' '$OUT'/assets/css/stylesheet.*.css"
 
 FAILED=0
 {

@@ -191,10 +191,6 @@ isPlainText = true
       weight = 90
     [languages.zh.params.editPost]
       Text = '在 GitHub 上改进本文'
-    # 页脚第二段（markdownify）：About/RSS/许可链接——文案带语言前缀，故按语言各写一份
-    [languages.zh.params.footer]
-      text = '[关于](/zh/about/) · [留言板](/zh/guestbook/) · [RSS 全文](/zh/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)'
-
   [languages.ja]
     locale = "ja-JP"
     label = "日本語"
@@ -240,9 +236,6 @@ isPlainText = true
       weight = 90
     [languages.ja.params.editPost]
       Text = 'GitHub で改善提案'
-    [languages.ja.params.footer]
-      text = '[このサイトについて](/ja/about/) · [ゲストブック](/ja/guestbook/) · [RSS](/ja/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja)'
-
   [languages.en]
     locale = "en-US"
     label = "English"
@@ -288,9 +281,6 @@ isPlainText = true
       weight = 90
     [languages.en.params.editPost]
       Text = 'Edit on GitHub'
-    [languages.en.params.footer]
-      text = '[About](/en/about/) · [Guestbook](/en/guestbook/) · [RSS](/en/index.xml) · [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)'
-
 # 把 static/images 追加挂载进 assets 文件系统：封面图单轨存放（CMS 上传/
 # 正文引用都在 static/images），cover.html 的 resources 查找却能命中并做
 # srcset 缩放——Hugo resources 只索引 assets/，无此挂载时 srcset 静默失效。
