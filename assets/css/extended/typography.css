@@ -1,36 +1,13 @@
-/* Golden-ratio typography system (site layer, 2026-11-05).
-   Research anchors: Pearson's Golden Ratio Typography (grtcalculator.com/math),
-   Baymard line-length study (50–75 CPL), WCAG 2.2 §1.4.8 (≤80 glyphs,
-   ≤40 for CJK; leading ≥1.5), W3C clreq/jlreq screen conventions.
-
-   Fixed anchors (do not touch):
-   - Body is the theme's 18px; column stays 720px → 720/18 = 40 CJK glyphs
-     per line, exactly the WCAG CJK cap. Widening the column would break it.
-   - Ladder: every heading step is ×φ^¼ ≈ 1.127 (φ = 1.618), body = φ^0.
-     PEAKS (wide desktop): title φ^1.5 = 2.058em (37px) · h1 φ^1.25 =
-     1.825em (32.9px) · h2 φ^1 = 1.618em (29.1px) · h3 φ^0.75 = 1.437em
-     (25.9px) · h4 φ^0.5 = 1.272em (22.9px) · h5 φ^0.25 = 1.127em
-     (20.3px) · h6 φ^0 = 1em (18px).  Theme shipped h4 = 16px BELOW the
-     18px body (inverted hierarchy) and a 40px fixed title that wraps
-     badly on CJK phones — both fixed here. Theme rules are equal-
-     specificity ties that we win by load order (extended bundle
-     concatenates after core).
-   - The ladder is FLUID below its peaks (2026-11-06): every rung rides
-     the title's 1.2vw slope — intercept ≈ peak×0.534, floor ≈ peak×0.656,
-     never below 1em. A fluid title over a FIXED ladder inverts the page
-     hierarchy on narrow viewports: the phone title (24.3px) sat UNDER its
-     own h2 (29.1px) below ~777px — every phone — and under body h1 below
-     ~1088px. h3-h6 floors clip at 1em, so small rungs land on body size
-     on phones; weight and margins carry the hierarchy there (standard
-     fluid behavior: negative space compresses, the size floor doesn't).
-   - Leading: Latin from the GRT formula, 18px @ 720px → 1.572 → 1.6;
-     CJK full-width squares carry no ascender/descender rhythm, screen
-     convention (clreq/jlreq practice) is 1.7–1.9 → 1.75.
-   - Heading margins: top:bottom = φ:1 (1.618em : 0.618em of own size), so
-     section breaks scale with heading size and always exceed the √φ
-     paragraph gap (1.272em = 22.9px).
-   - One restrained gold accent, interactive/selection/focus states only;
-   text stays monochrome. Dark variant follows the theme-vars :root pattern.
+/* Article typography (site layer) — 2026-11-05 golden system REWRITTEN
+   2026-11-08 (full-align): the prototype's .article-body values win
+   wherever the two systems disagreed. What remains of the golden round:
+   the 18px body anchor, monochrome text with one gold interactive accent,
+   hanging-punctuation/pretty, theme-specificity mirrors. What the design
+   稿 replaced: the φ ladder and fluid clamps (now the prototype's fixed
+   serif rungs h2 28 / h3 22), the 720px measure (--measure 680px),
+   leading 1.75/1.6 (now 1.9), the φ paragraph beat (now --sp-5 both
+   sides), the lede treatment (22px ink first paragraph), blockquote/
+   table/code/hr/figure skins (all prototype skins now).
 
    Selectors mirror the theme's .md-content shapes (same specificity) —
    we win ties by bundle order, and scripts/feature-check.sh guards the
@@ -53,191 +30,62 @@
    压到/什么 likewise) while leaving line 1 at 60% column width; greedy
    full lines + orphan avoidance is the clreq-conformant behavior. pretty
    is progressive (Chromium 117+), older engines fall back to normal. */
+/* full-align (2026-11-08): the prototype's .article-title curve —
+   clamp(28px, 4.4vw, 52px) serif, 1.24 leading, 18em cap. The old golden
+   2.058em curve (37px peak) is retired: the design稿 wins wherever the
+   two disagreed. text-wrap: pretty, NOT balance — balance evens the lines
+   and with CJK that splits words at visibly wrong points; greedy full
+   lines + orphan avoidance is the clreq-conformant behavior. */
 .post-title {
-  /* 24px floor on phones (was 1.55em≈28px — a 24-char zh title wrapped to
-     3 lines and ate a third of the viewport), same 37px desktop peak. */
-  font-size: clamp(1.35em, 1.1em + 1.2vw, 2.058em);
-  line-height: 1.3;
+  font-size: clamp(28px, 4.4vw, 52px);
+  line-height: 1.24;
+  letter-spacing: -0.005em;
+  max-width: 18em;
   text-wrap: pretty;
 }
 
-/* Homepage hero title (profileMode): the theme styles nothing here, so it
-   silently sat on the UA default 2em=36px. Same fluid curve as .post-title
-   keeps every page-h1 surface on one line; the title is short so the
-   curve mostly serves future-proofing. */
-.profile h1 {
-  font-size: clamp(1.35em, 1.1em + 1.2vw, 2.058em);
-  line-height: 1.3;
-}
+/* Hub pages keep their own (smaller) fluid curve — ui.css .page-header h1.
+   The retired .profile h1 rule died with profileMode (editorial home). */
 
-/* SEO summary under the title: one quiet ladder step down (φ^-0.25 =
-   0.887em = 16px — 0.95em sat BETWEEN rungs until 2026-11-06), not a
-   second headline. Eyebrow label separates it from the author's own lede.
-   Neutral word on purpose (摘要/概要/Summary) — descriptions come from
-   both the AI pipeline and hand edits, so an "AI" badge would mislabel
-   half of them. Scoped to .post-header: archives/search reuse the bare
-   class and stay unlabeled. */
-.post-description {
-  color: var(--secondary);
-  font-size: 0.887em;
-  line-height: 1.6;
-}
-
-.post-header .post-description::before {
-  content: "摘要";
-  display: block;
-  margin-bottom: 0.4em;
-  font-size: 0.72em;
-  font-weight: 600;
-  letter-spacing: var(--eyebrow-track, 0.35em);
-}
-
-html[lang^="ja"] .post-header .post-description::before {
-  content: "概要";
-}
-
-html[lang^="en"] .post-header .post-description::before {
-  content: "Summary";
-  text-transform: uppercase;
-  --eyebrow-track: 0.2em;
-}
-
-/* Collapsed summary row (site.js feature 10, html.js-gated — same
-   first-paint contract as the hamburger/lang gates): the eyebrow becomes
-   a toggle on the LEFT of one grid row, the meta line sits
-   baseline-aligned on the RIGHT. Everything keys on html.js (set by
-   extend_head before first paint), so without JS the stacked fallback
-   above stays — description fully visible under the title, no chevron.
-   The raw description is a text node CSS cannot select, so the grid
-   mutes it with font-size:0 and site.js re-parents it into .desc-body —
-   a full-width third grid row under the label/meta line — which restores
-   the size with 0.887em (a .post-header child, so em inherits the body
-   18px and stays in lockstep with the fallback rule above — no px twin
-   to drift; the 13px eyebrow, INSIDE the muted element, had to go
-   explicit for the same reason). Losing site.js after first paint keeps
-   the text muted: accepted, same trade the hamburger gate makes. */
-html.js .post-header {
+/* ---- Article head (full-align: prototype .article-head) --------------
+   Rows re-ordered by grid to the prototype's reading order: kicker line
+   (the meta row, mono 12px uppercase, icons off — category · date ·
+   updated · read), then the serif title, then the deck (description,
+   always visible — the 2026-11-06 摘要折叠 fold system is retired with
+   its eyebrow/toggle/desc-body machinery and the html.js gate). */
+.post-header {
   display: grid;
-  grid-template-columns: 1fr auto;
-  column-gap: var(--sp-3); /* the card gutter (chrome.css --sp scale) */
-  align-items: baseline;
-  /* the theme's `margin: 24px auto` is a flex-item trap: .post-single is
-     a flex column, and auto inline margins make the item shrink-to-fit
-     and center. Invisible while the description filled the width, the
-     collapse feature shrank the widest row to the label+meta line — the
-     whole header (title included) jumped ~54px inward on phones / ~95px
-     on desktop the moment .desc-body expanded back to full width */
-  margin-inline: 0;
 }
 
-html.js .post-header .post-title {
-  grid-column: 1 / -1;
+.post-header .post-meta {
   grid-row: 1;
-}
-
-html.js .post-header .post-description {
-  grid-column: 1;
-  grid-row: 2;
-  font-size: 0; /* mute the text node until .desc-body re-parents it */
-  /* label+chevron are one unbreakable unit — a wide meta squeezing this
-     column to min-content must not wrap the chevron under the label
-     (observed at 375px with 更新于 present) */
-  white-space: nowrap;
-}
-
-html.js .post-header .post-description::before {
-  display: inline; /* share the line with the injected chevron */
-  margin-bottom: 0;
-  font-size: 13px;
-  /* the tracking and its negative right margin share one variable so the
-     chevron always sits tight against the last glyph — tracked text
-     leaves a phantom gap after it that read as the arrow floating free
-     of the 摘要 label (en tracks 0.2em via the lang rule above) */
-  letter-spacing: var(--eyebrow-track, 0.35em);
-  margin-right: calc(-1 * var(--eyebrow-track, 0.35em));
-}
-
-html.js .post-header .post-meta {
-  grid-column: 2;
-  grid-row: 2;
-  justify-self: end;
-}
-
-/* Chevron-only toggle; the visible label is still the ::before eyebrow */
-.post-header .post-description .desc-toggle {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 3px;
-  padding: 4px;
-  border: 0;
-  background: none;
-  color: var(--secondary);
-  cursor: pointer;
-}
-
-.post-header .post-description .desc-toggle svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* pointer-only (hover latch family — the toggle stays on the page after
-   firing, so a latched gold chevron reads as a stuck state) */
-@media (hover: hover) {
-  .post-header .post-description .desc-toggle:hover {
-    color: var(--accent);
-  }
-}
-
-.post-header .post-description .desc-toggle:focus-visible {
-  color: var(--accent);
-  outline: 1px solid var(--accent);
-}
-
-/* Expansion row: spans both columns, below the label/meta line. em (not
-   px): .desc-body is a .post-header child — it inherits the body 18px,
-   so 0.887em mirrors the fallback description exactly and can't drift */
-.post-header .desc-body {
   grid-column: 1 / -1;
+  justify-self: start;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.post-header .post-meta .meta-item svg {
+  display: none; /* the prototype's kicker line is text-only */
+}
+
+.post-header .post-title {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  margin: 20px 0 0;
+}
+
+.post-header .post-description {
   grid-row: 3;
-  display: none;
-  margin-top: 8px;
-  font-size: 0.887em;
-}
-
-.post-header.desc-open .desc-body {
-  display: block;
-}
-
-.post-header.desc-open .post-description .desc-toggle svg {
-  transform: rotate(180deg);
-}
-
-/* Phones (≤768px, zmedia): the row must hold label+meta side by side
-   from 320px, so the meta drops to the compact date·cats pair the list
-   cards already use (阅读时长 is the low-value item there too). 更新于
-   repeats the full date (~312px of meta at 12px) and measured renders
-   overflow it into a wrapped chevron from 390px down, so it drops below
-   420px — mid-size phones lose the freshness mark, large phones/tablets
-   keep it (420-40px padding -46px label -φ⁻¹·u gap ≈ 322px ≥ 312px).
-   Hiding an item must pair-hide its LEADING .meta-sep — a sibling node
-   that display:none leaves behind (dangling `·` — post_meta.html
-   contract). */
-@media screen and (max-width: 768px) {
-  .post-header .post-meta {
-    font-size: 12px;
-  }
-
-  .post-header .post-meta .meta-read,
-  .post-header .post-meta .meta-sep:has(+ .meta-read) {
-    display: none;
-  }
-}
-
-@media screen and (max-width: 420px) {
-  .post-header .post-meta .meta-updated,
-  .post-header .post-meta .meta-sep:has(+ .meta-updated) {
-    display: none;
-  }
+  grid-column: 1 / -1;
+  margin: 22px 0 0;
+  max-width: 36em;
+  font-size: 18px;
+  line-height: 1.85;
+  color: var(--ink-2);
 }
 
 /* Dates align vertically across the meta row (proportional figures wobble) */
@@ -248,21 +96,23 @@ html.js .post-header .post-meta {
 
 /* ---- Body leading ---------------------------------------------------- */
 
+/* full-align: prototype .article-body — 18px/1.9 prose in --ink-2, the
+   lede paragraph at 22px ink. The golden 1.75/1.6 split (CJK vs latin)
+   and the φ paragraph gap are retired with the ladder. */
 .post-content {
-  line-height: 1.75;
+  line-height: 1.9;
+  color: var(--ink-2);
 }
 
-/* Latin-only pages: GRT says 1.572 for 18px @ 720px; round to 1.6.
-   CJK pages keep 1.75 (see header comment). */
-html[lang^="en"] .post-content {
-  line-height: 1.6;
+.post-content > p {
+  margin: var(--sp-5) 0;
 }
 
-/* Paragraph gap = φ^½ em (22.9px @ 18px), from the previous 20px.
-   Selector mirrors the theme's :not(:last-child) shape — the theme rule
-   is specificity (0,2,1) and a bare .post-content p (0,1,1) would lose. */
-.post-content p:not(:last-child) {
-  margin-bottom: 1.272em;
+.post-content > p:first-of-type {
+  margin-top: 0;
+  font-size: 22px;
+  line-height: 1.9;
+  color: var(--primary);
 }
 
 /* Progressive (Chromium 117+): avoid single-word/单字 orphan last lines */
@@ -285,65 +135,56 @@ html[lang^="ja"] .post-content {
   hanging-punctuation: first;
 }
 
-/* ---- Heading ladder --------------------------------------------------- */
-
-/* Sizes per ladder above; 1.3 leading because zh headings routinely wrap
-   (theme's global 1.2 is tuned for single-line Latin). pretty (not
-   balance — see .post-title) keeps greedy full lines and avoids orphan
-   last lines in wrapped zh headings. */
+/* ---- Heading ladder (full-align: prototype .article-body) -------------
+   Fixed serif rungs — h2 28px, h3 22px, h4-h6 fall back to body weight.
+   The φ-ladder fluid clamps are retired with the golden system. */
 .post-content h1,
 .post-content h2,
 .post-content h3,
 .post-content h4,
 .post-content h5,
 .post-content h6 {
-  line-height: 1.3;
   text-wrap: pretty;
 }
 
-/* Fluid rungs: peaks stay the φ ladder; each rung compresses on the
-   title's curve (shared 1.2vw slope) so the page hierarchy title > h1 >
-   h2 > … holds at EVERY viewport, not just at the peak. */
-.post-content h1 {
-  margin: 1.618em auto 0.618em;
-  font-size: clamp(1.197em, 0.976em + 1.2vw, 1.825em);
-}
-
 .post-content h2 {
-  margin: 1.618em auto 0.618em;
-  font-size: clamp(1.061em, 0.865em + 1.2vw, 1.618em);
+  margin: 2.5em 0 0.85em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.45;
+  color: var(--primary);
+  letter-spacing: 0;
+  scroll-margin-top: 110px;
 }
 
-/* h3-h6 share the theme's grouped margin rule shape */
-.post-content h3,
+.post-content h3 {
+  margin: 2em 0 0.6em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.5;
+  color: var(--primary);
+}
+
 .post-content h4,
 .post-content h5,
 .post-content h6 {
   margin: 1.618em 0 0.618em;
-}
-
-.post-content h3 {
-  font-size: clamp(1em, 0.768em + 1.2vw, 1.437em);
-}
-
-.post-content h4 {
-  font-size: clamp(1em, 0.68em + 1.2vw, 1.272em);
-}
-
-.post-content h5 {
-  font-size: clamp(1em, 0.602em + 1.2vw, 1.127em);
-}
-
-.post-content h6 {
   font-size: 1em;
+  font-weight: 600;
+  color: var(--primary);
 }
 
-/* No extra air between the content start and its first heading: the 30px
-   content block margin already provides the section gap */
-.post-content > h1:first-child,
-.post-content > h2:first-child,
-.post-content > h3:first-child {
-  margin-top: 0;
+/* prototype: 1.4em indent, .5em rows, faint markers */
+.post-content ul,
+.post-content ol {
+  margin: var(--sp-5) 0;
+  padding-left: 1.4em;
+}
+
+.post-content li {
+  margin: 0.5em 0;
 }
 
 .post-content li::marker {
@@ -368,67 +209,103 @@ html[lang^="ja"] .post-content {
 
 /* ---- Code ------------------------------------------------------------- */
 
-/* 0.85em (15.3px): conventionally under the 18px body — mono glyphs read
-   larger than CJK at equal size; the theme's 0.78em (14px) dipped under
-   comfortable. Mobile raises one notch below (0.9em ≈ 16px rung). */
+/* prototype inline code: .78em mono on a paper-2 chip with a hairline */
 .post-content code {
-  font-size: 0.85em;
+  font-family: var(--fonts-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  font-size: 0.78em;
+  background: var(--entry);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--primary);
 }
 
 .post-content pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
   line-height: 1.6;
-}
-
-/* Phones: one step up — 0.85em of 18px ≈ 15.3px is tight at arm's length */
-@media screen and (max-width: 768px) {
-  .post-content code {
-    font-size: 0.9em;
-  }
 }
 
 /* ---- Quotes / rules / tables / media ----------------------------------- */
 
-/* Theme quotes carry a 0.3rem near-black border and body-colored text —
-   they shout. Muted text + gold rule reads as a citation, not an alarm */
+/* prototype citation: serif 22px, ink text, 2px gold left rule */
 .post-content blockquote {
-  margin: 1.272em 0;
-  padding: 0.25em 1.25em;
-  border-inline-start: 3px solid var(--accent);
-  color: var(--secondary);
+  margin: var(--sp-6) 0;
+  padding: 2px 0 2px 24px;
+  border-left: 2px solid var(--accent);
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.8;
+  color: var(--primary);
 }
 
-/* φ² block separation (2.618em = 47px), short centered hairline instead of
-   a full-width 2px slab */
+.post-content blockquote p {
+  margin: 0;
+}
+
+.post-content blockquote p + p {
+  margin-top: 0.8em;
+}
+
 .post-content hr {
-  margin: 2.618em auto;
-  width: 25%;
-  height: 1px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 56px auto;
+  width: 100%;
 }
 
-/* :not guard keeps highlight-table line numbers out of the skin */
-.post-content table th {
-  background: var(--code-bg);
+/* prototype table: 14px tabular hairlines — th carries an ink underline,
+   td a rule underline, the last row a rule-strong close; no slabs/zebra.
+   :not guards keep highlight-table line numbers out of the skin */
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--sp-6) 0;
+  font-size: 14px;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
 }
 
-.post-content table:not(.highlight table, .gist .highlight) th,
+.post-content table:not(.highlight table, .gist .highlight) th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--primary);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--primary);
+}
+
 .post-content table:not(.highlight table, .gist .highlight) td {
-  padding: 0.5rem 0.875rem;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
 }
 
-.post-content table:not(.highlight table, .gist .highlight) tbody tr:nth-child(2n) td {
-  background: color-mix(in srgb, var(--secondary) 5%, transparent);
+.post-content table:not(.highlight table, .gist .highlight) tr:last-child td {
+  border-bottom: 1px solid var(--tertiary);
 }
 
-/* Captions annotate; they don't compete with body text */
+.post-content table:not(.highlight table, .gist .highlight) th:first-child,
+.post-content table:not(.highlight table, .gist .highlight) td:first-child {
+  padding-left: 0;
+}
+
+/* prototype: mono 12px caption under the image; figures get the sp-7 beat */
+.post-content figure {
+  margin: var(--sp-7) 0;
+}
+
 .post-content figure > figcaption {
+  margin-top: 11px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
   color: var(--secondary);
-  font-size: 0.85em;
-  font-weight: 500;
-  line-height: 1.5;
 }
 
 .post-content img {
-  margin: 1.272em 0;
+  margin: var(--sp-5) 0;
 }
 
 /* ---- In-article image forms: Ghost-Casper three-tier breakout (2026-11-07)
@@ -466,14 +343,9 @@ html[lang^="ja"] .post-content {
   margin-inline: calc(50% - 50vw + var(--gap));
 }
 
-/* Article meta matches the cards (2026-11-07 user call): no separator
-   glyph between items, spacing only — the sep span is silenced, not
-   removed, so the nbsp-padded width keeps the gap and the display:none
-   pair-hides in the media queries below keep working untouched. */
+/* the kicker's · separators show again (prototype kicker: cat · date ·
+   updated · read); tabular figures keep the dates aligned */
 
-.post-meta .meta-sep {
-  visibility: hidden;
-}
 
 /* ---- Global states ----------------------------------------------------- */
 

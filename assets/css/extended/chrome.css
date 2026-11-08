@@ -28,6 +28,7 @@
      .main) now reads the same numbers the prototype uses */
   --gap: 40px;
   --max: 1180px;
+  --measure: 680px; /* article column (prototype --measure) */
 }
 
 @media screen and (max-width: 768px) {
@@ -47,6 +48,7 @@
   --theme: #f7f3ea;      /* paper */
   --entry: #f0eadd;      /* paper-2 */
   --primary: #1a1712;    /* ink */
+  --ink-2: #3b3529;      /* ink-2: body prose (a shade lighter than ink) */
   --secondary: #6b6455;  /* muted */
   --tertiary: #c8bda6;   /* rule-strong */
   --border: #dfd6c4;     /* rule */
@@ -57,6 +59,7 @@
   --theme: #16140f;
   --entry: #1e1b14;
   --primary: #ece6d8;
+  --ink-2: #d3c9b6;
   --secondary: #a49b87;
   --tertiary: #4a4333;
   --border: #342f25;
@@ -424,7 +427,7 @@ html[data-theme="dark"] .theme-btn .i-moon {
 }
 
 .main > .post-single {
-  max-width: var(--main-width);
+  max-width: var(--measure);
   margin-inline: auto;
 }
 
@@ -539,19 +542,6 @@ html[data-theme="dark"] .theme-btn .i-moon {
     border-color: var(--accent);
     color: var(--primary);
   }
-}
-
-/* ---- Pill surfaces -----------------------------------------------------
-   The theme paints tag chips / paginav / inline TOC with var(--code-bg);
-   in the paper palette that is a near-black slab on cream paper (code
-   blocks are deliberately dark — the prototype's --code-bg — but chips
-   are not). All pill surfaces take the entry surface + hairline instead;
-   borders/colors stay owned by the existing ui.css re-skins. */
-.post-tags a,
-.paginav,
-.paginav a,
-details.toc {
-  background: var(--entry);
 }
 
 /* the list-page wrapper is painted var(--code-bg) by the theme (light

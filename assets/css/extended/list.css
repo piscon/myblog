@@ -100,47 +100,62 @@
   }
 }
 
-/* ---- numeric pager (窗口式: first · current±1 · last, ellipsis gaps) ---- */
+/* ---- numeric pager (full-align: prototype .pager-bar) — mono 12px row,
+   window: first · current±1 · last with ellipsis gaps; the current page
+   is a gold 2px underline, not a pill ---- */
 .list-pager {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: var(--sp-7) 0 var(--sp-tail);
-}
-
-.pager-num {
-  font-size: 14px;
-  line-height: 34px;
-  min-width: 34px;
-  text-align: center;
-  padding: 0 10px;
-  background: var(--entry);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  gap: 2px 6px;
+  margin: var(--sp-5) 0 0;
+  padding: 0 0 var(--sp-tail);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
   color: var(--secondary);
   font-variant-numeric: tabular-nums;
 }
 
+.pager-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0 7px;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+
 @media (hover: hover) {
   .pager-num:hover {
-    border-color: var(--accent);
     color: var(--primary);
   }
 }
 
 .pager-num.is-current {
-  background: var(--entry);
-  border-color: var(--accent);
   color: var(--primary);
-  font-weight: 600;
+  border-bottom: 2px solid var(--accent);
   cursor: default;
 }
 
 .pager-gap {
   color: var(--secondary);
-  padding: 0 var(--sp-1);
+  padding: 0 4px;
+}
+
+/* ---- tablet (prototype 1080px block): narrower year rail, smaller label - */
+@media (max-width: 1080px) {
+  .year-group {
+    grid-template-columns: 112px 1fr;
+    gap: 28px;
+  }
+
+  .year-label {
+    font-size: 44px;
+  }
 }
 
 /* ---- page header count (total beside the hub title) --------------------- */

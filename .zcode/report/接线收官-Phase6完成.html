@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接线收官 · Phase 6 完成（六阶段全绿）</title>
+<style>
+:root{--paper:#f7f3ea;--ink:#1a1712;--sub:#6b6455;--rule:#dfd6c4;--gold:#8a5d15;--ok:#2e7d4f}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Songti SC","Noto Serif SC",serif;background:var(--paper);color:var(--ink);line-height:1.75;padding:40px 16px 80px}
+.wrap{max-width:1020px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--gold);font-weight:600}
+h1{font-size:clamp(24px,3vw,32px);margin:8px 0 4px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{border:1px solid var(--rule);border-radius:10px;padding:20px 22px}
+.panel h2{font-size:16px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--rule)}
+li{margin:.4em 0;font-size:14.5px}
+.ok{color:var(--ok);font-weight:700}
+code{background:#efeadf;border-radius:4px;padding:0 4px;font-size:.9em}
+ul{padding-left:1.2em}
+footer{margin-top:28px;color:var(--sub);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">二重奏 · 原型 → Hugo 接线</div>
+<h1>收官：六阶段全部完成</h1>
+<div class="meta">Phase 6 commit 9944d93 ｜ 分支 redesign/proto-wiring（本地 12 commits，未 push）｜ feature-check <strong>63 → 68 项全绿</strong></div>
+<div class="grid">
+
+<section class="panel">
+<h2>Phase 6 落位</h2>
+<ul>
+<li>5 条新断言进 <code>scripts/feature-check.sh</code>：编辑部首页(hero+近作+目录入口) / 404 出口页(三出口+最近) / TOC 右浮(右缘公式+左浮根除负断言) / 衬线 display 层(--font-display 三语栈) / 评论壳样式(间距 token)</li>
+<li>断言 token 全部按 minified 实测形态取（<code>&lt;div class=home&gt;</code> 无引号、calc 空格保留、font-display 保引号等——逐条探针验证）</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>全量回归</h2>
+<ul>
+<li><span class="ok">feature-check 68 项全绿</span> + 翻译自测全通（零 API，流水线零接触）</li>
+<li>6 视口（320/390/768/1024/1280/1440）× 6 视图（首页/列表/文章/搜索/归档/404）= 36 张终检截图，<code>.zcode/audit/phase6-shots/</code></li>
+<li>文章页 TOC 右浮、320px 文字目录折叠终检干净</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>上线材料</h2>
+<ul>
+<li><code>原型/上线清单.md</code>：合并步骤（push → PR → deploy preview → 合并 → curl 抽查）、可直接复制的 curl 抽查命令、上线后观察项（真机衬线观感 / --u 残留 grep / weekly re-diff）</li>
+<li><strong>AGENTS.md 待合并后更新</strong>：列表形态、TOC 侧别、调色板/衬线、--u→--sp-*、68 项断言清单（清单里已标注，避免文档漂移）</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>六阶段总账</h2>
+<ul>
+<li>Phase 0 基线（344fe99）→ 1 令牌/chrome（acd9145）→ 2 编辑首页（7eb629e）→ 3 列表系统（0ae0955）→ 4 TOC 右浮（0297a3e）→ 5 搜索/404/评论壳（0745787）→ 6 收尾（9944d93）</li>
+<li>三项签认全部落地：文字目录 / 衬线 display / TOC 移右</li>
+<li>全程未动 content/**、.pages.yml、submodule、head SEO 契约</li>
+<li>下一步是你的：push → deploy preview 抽查 → 合并</li>
+</ul>
+</section>
+
+</div>
+<footer>redesign/proto-wiring ｜ 施工方案：原型/接线施工方案.md ｜ 上线：原型/上线清单.md</footer>
+</div>
+</body>
+</html>

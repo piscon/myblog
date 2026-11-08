@@ -130,7 +130,7 @@ check "归档出口页(年份分组)"   "grep -q 'class=\"kicker\"' '$OUT/zh/arc
 check "归档页三语刊头"         "grep -q 'Archive · 归档' '$OUT/zh/archives/index.html' && grep -q 'Archive · アーカイブ' '$OUT/ja/archives/index.html' && grep -q 'Archive · Index' '$OUT/en/archives/index.html' && grep -q '按时间倒序' '$OUT/zh/archives/index.html'"
 # 容器统一（full-align R2）：原型 --gap 40/24 与 --max 1180 令牌接管，
 # .main 全页型 1180、文章列回 720 居中、about 摊开
-check "容器统一(wrap1180)"      "grep -q -- '--max:1180px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--gap:40px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.main{max-width:var(--max)' '$OUT'/assets/css/stylesheet.*.css && grep -q '.main>.post-single{max-width:var(--main-width)' '$OUT'/assets/css/stylesheet.*.css && grep -q '.post-single:has(>.about-side) .post-content{max-width:660px' '$OUT'/assets/css/stylesheet.*.css"
+check "容器统一(wrap1180)"      "grep -q -- '--max:1180px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--gap:40px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.main{max-width:var(--max)' '$OUT'/assets/css/stylesheet.*.css && grep -q '.main>.post-single{max-width:var(--measure)' '$OUT'/assets/css/stylesheet.*.css && grep -q '.post-single:has(>.about-side) .post-content{max-width:660px' '$OUT'/assets/css/stylesheet.*.css"
 check "YouTube nocookie iframe"  "grep -q 'youtube-nocookie.com/embed/dQw4w9WgXcQ' '$PAGE'"
 check "B站 iframe 播放器"         "grep -q 'player.bilibili.com/player.html?bvid=BV1xx411c7mD' '$PAGE'"
 check "分类进元信息行"            "grep -q 'href=.*categories/demo' '$PAGE'"
@@ -150,20 +150,20 @@ check "黄金字阶 CSS 进 bundle"    "grep -q 'hanging-punctuation' '$OUT'/ass
 check "间距体系(--sp-*)" "grep -q -- '--sp-3:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--sp-section:96px' '$OUT'/assets/css/stylesheet.*.css && ! grep -q -- '--u:' '$OUT'/assets/css/stylesheet.*.css"
 # 字阶补全（2026-11-06）：归档年份 1.272em（主题继承 16px 与条目同阶，仅靠 margin 撑）+
 # 首页 profileMode h1 显式流式 clamp（主题零样式，原落 UA 默认 36px）
-check "字阶补全(年份衬线+首页h1)" "grep -q 'font-size:60px;line-height:.95' '$OUT'/assets/css/stylesheet.*.css && grep -q '.profile h1{font-size:clamp(1.35em' '$OUT'/assets/css/stylesheet.*.css"
+check "字阶补全(年份衬线+文章标题)" "grep -q 'font-size:60px;line-height:.95' '$OUT'/assets/css/stylesheet.*.css && grep -q 'clamp(28px,4.4vw,52px)' '$OUT'/assets/css/stylesheet.*.css"
 # 标题梯子全流式（2026-11-06）：h1-h5 与 title 共享 1.2vw 斜率压缩（intercept≈峰值×0.534、
 # floor≈峰值×0.656 且 ≥1em）——修「流式标题×固定梯子」窄视口层级倒挂（手机 title 24.3px
 # 曾低于正文 h2 29.1px，<~777px 全手机命中；<~1088px 低于正文 h1）
 # 注意 minifier 会重排声明序（margin 排到 font-size 前）并剥前导零（1em,.602em），断言只认
 # 各自唯一的 clamp 内值，不认完整选择器前缀
-check "标题梯子流式(bundle)" "grep -q 'clamp(1.197em' '$OUT'/assets/css/stylesheet.*.css && grep -q 'clamp(1em,.602em' '$OUT'/assets/css/stylesheet.*.css"
+check "文章排版(原型article-body)" "grep -q 'first-of-type{margin-top:0' '$OUT'/assets/css/stylesheet.*.css && grep -q 'font-size:28px' '$OUT'/assets/css/stylesheet.*.css && grep -q 'line-height:1.9' '$OUT'/assets/css/stylesheet.*.css && grep -q 'border-left:2px solid var(--accent)' '$OUT'/assets/css/stylesheet.*.css"
 # 摘要 eyebrow 标签：完整选择器含 .post-header 前缀（archives/search 复用裸 .post-description，不得命中）+ ja token「概要」（bundle 内唯一）
-check "摘要标签(CSS作用域+三语言)" "grep -q '.post-header .post-description::before' '$OUT'/assets/css/stylesheet.*.css && grep -q '概要' '$OUT'/assets/css/stylesheet.*.css"
+check "文章刊头(kicker+deck)"   "grep -q '.post-header .post-meta{grid-row:1' '$OUT'/assets/css/stylesheet.*.css && grep -q '.post-header .post-title{grid-row:2' '$OUT'/assets/css/stylesheet.*.css && grep -q '.post-header .post-description{grid-row:3' '$OUT'/assets/css/stylesheet.*.css && grep -q '.post-header .post-meta .meta-item svg{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q 'max-width:36em' '$OUT'/assets/css/stylesheet.*.css"
 # 摘要折叠行（2026-11-06）：html.js 门控 grid——eyebrow+chevron 靠左、meta 同排 justify-self 靠右；
 # site.js 把描述文本再挂为 .desc-body（header 第 3 行通栏，.desc-open 切换展开）。文本节点不可
 # 被 CSS 选中 → grid font-size:0 先帧静音 + .desc-body 显式恢复字号。CSS token 守 minified
 # 选择器（空白剔除、结构保留，同汉堡断言形态），JS token 守 bundle（minifier 不改写字符串字面量）
-check "摘要折叠行(grid+JS包裹)" "grep -q 'html.js .post-header' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-open' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/js/site.*.js && grep -q 'desc-open' '$OUT'/js/site.*.js"
+check "TOC 内联(折叠条)"        "grep -Fq 'summary::after{content:\"+\"' '$OUT'/assets/css/stylesheet.*.css"
 # 列表文字目录（2026-11-08 Phase 3，签认①落地）：年份分组行式 DOM（.year-group/.post-row）
 # + 数字分页器（pagerSize=10，窗口式含首尾±1+省略号）；负断言根除卡片/封面 DOM（堆叠卡机制
 # 与其 CSS 一并退役，cover.css/ui.css 卡片段已删）
@@ -200,7 +200,7 @@ check "封面 sizes(统一720)" "grep -q '720px, 100vw' '$OUT/zh/index.html' && 
 # 也压过 site.js 注入的原生分享 svg 26px）。hover 金色门控 @media(hover:hover)（2026-11-06
 # 手机点按粘滞 :hover 事故：原生分享不跳转，金色选中态挂到点空白才释放）。耦合点=footer
 # 三子元素类名（皆主题 DOM）；minifier 剔空白但保留选择器与值，grid-area/@media token 稳定
-check "分享并入标签行(bundle)"   "grep -q 'grid-area:share' '$OUT'/assets/css/stylesheet.*.css && grep -q 'grid-area:nav' '$OUT'/assets/css/stylesheet.*.css && grep -q 'post-footer>.share-buttons svg{width:18px' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-single>.post-footer>.share-buttons a:hover{color:var(--accent)}' '$OUT'/assets/css/stylesheet.*.css"
+check "页脚三行(原型article-foot)" "grep -q 'grid-area:tags' '$OUT'/assets/css/stylesheet.*.css && grep -q 'grid-area:share' '$OUT'/assets/css/stylesheet.*.css && grep -q 'grid-area:nav' '$OUT'/assets/css/stylesheet.*.css && grep -q 'post-footer>.share-buttons svg{width:15px' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-single>.post-footer>.share-buttons a:hover{color:var(--accent)}' '$OUT'/assets/css/stylesheet.*.css && grep -q '.post-tags a{background:0 0' '$OUT'/assets/css/stylesheet.*.css"
 # 手机端汉堡菜单（2026-11-06；同日右侧组改造）：site.js 建 .nav-actions 右侧组（.header-nav
 # 末位→space-between 行右缘）并把 #menu 移入组内，☰ 收尾落最右缘、🔍 紧邻其左；ui.css
 # ≤768px 经 html.js 门控收纳 #menu（**双态选择器**：包裹前 .header-nav>#menu、包裹后
@@ -237,7 +237,7 @@ check "字体栈(Inter拉丁+标点层)" "grep -q 'punct sc,inter variable' '$OU
 # （分页/搜索结果行/词条胶囊/摘要折叠钮/文内链接；焦点态 :focus-within 不门控，
 # 键盘保留）；主题 .toc a:hover 下划线在触屏用同特异性晚源序中和。minifier 把
 # `@media (hover:hover)` 的空格剔成 `@media(hover:hover)`，token 按该形态取
-check "触屏hover门控(防锁存)" "grep -q '@media(hover:hover){.pagination a:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '.searchResults li:focus-within{border-color:var(--accent)}' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.searchResults li:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.terms-tags a:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:none){.toc a:hover{text-decoration:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-header .post-description .desc-toggle:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-content a:not(.anchor):hover' '$OUT'/assets/css/stylesheet.*.css && grep -q 'touchmove' '$OUT'/js/site.*.js"
+check "触屏hover门控(防锁存)" "grep -q '@media(hover:hover){.pagination a:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '.searchResults li:focus-within{border-color:var(--accent)}' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.searchResults li:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.terms-tags a:hover' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:none){.toc a:hover{text-decoration:none' '$OUT'/assets/css/stylesheet.*.css && grep -Fq '@media(hover:hover){.post-tags a:hover{color:var(--accent);border-bottom-color:var(--accent)' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media(hover:hover){.post-content a:not(.anchor):hover' '$OUT'/assets/css/stylesheet.*.css && grep -q 'touchmove' '$OUT'/js/site.*.js"
 # 灯箱滚动锁+视口单位(2026-11-06)：iOS 忽略根节点 overflow:hidden 的触摸滚动，
 # site.js 在 overlay 上 non-passive preventDefault 挡住背景滚动；img 92vh 按
 # iOS 最大视口算会把图压进工具栏底下，@supports(height:1dvh) 升级 92dvh
@@ -256,12 +256,12 @@ check "编辑部首页(hero+近作+目录入口)" "grep -q '<div class=\"home\">
 # 404 出口页（Phase 5 重写）：原型 notfound 结构（大码/三出口/最近 3 篇）三语文件齐
 check "404 出口页(三出口+最近)"     "grep -q 'notfound-code' '$OUT/zh/404.html' && grep -q 'notfound-actions' '$OUT/zh/404.html' && grep -q 'notfound-recent' '$OUT/zh/404.html' && test -f '$OUT/ja/404.html' && test -f '$OUT/en/404.html'"
 # TOC 右浮（Phase 4，签认③）：右缘定位公式 + 仅 translateY；左浮 translate(-100%,-50%) 负断言根除
-check "TOC 右浮(签认③)"            "grep -q 'left:calc(50% + (var(--main-width)/2) + var(--gap))' '$OUT'/assets/css/stylesheet.*.css && grep -q 'details.toc\[open\]{position:fixed;top:50%' '$OUT'/assets/css/stylesheet.*.css && ! grep -q 'translate(-100%,-50%)' '$OUT'/assets/css/stylesheet.*.css"
+check "TOC 原型浮层(fixed右32)"      "grep -Fq 'details.toc[open]{position:fixed;top:120px;right:32px;width:200px' '$OUT'/assets/css/stylesheet.*.css && grep -Fq 'details.toc[open] .inner li.active>a{color:var(--accent)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q 'translate(-100%,-50%)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q 'left:calc(50% + (var(--main-width)/2)' '$OUT'/assets/css/stylesheet.*.css"
 # 衬线 display 层（Phase 1，签认②）：chrome.css --font-display 三语栈进 bundle（minifier 保引号保大小写）
 # 内层双引号必须 \" 转义：裸 " 会把 $2 参数截断，eval 收到残缺命令报 unexpected EOF
 check "衬线 display 层(签认②)"     "grep -q -- '--font-display:\"Iowan Old Style\"' '$OUT'/assets/css/stylesheet.*.css && grep -q 'html\[lang^=ja\]' '$OUT'/assets/css/stylesheet.*.css && grep -q 'hero-title{margin:16px 0 0;font-family:var(--font-display)' '$OUT'/assets/css/stylesheet.*.css"
 # 评论壳样式（Phase 5）：giscus-wrapper 间距 token 化（feature-check 构建无 --minify，按原样引号形态匹配）
-check "评论壳样式(间距token)"       "grep -q 'giscus-wrapper\" style=\"margin-top: var(--sp-7);' '$OUT/zh/posts/first/index.html'"
+check "评论壳样式(间距token)"       "grep -q 'giscus-wrapper\" style=\"margin-top: 56px;' '$OUT/zh/posts/first/index.html'"
 
 # ---- redesign/align-proto 新增断言（2026-11-08，68→71） ----
 # 词条文字云（layouts/taxonomy.html 覆盖）：/tags/ 与 /categories/ 换原型文字云，
