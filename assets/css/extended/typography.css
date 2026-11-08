@@ -271,9 +271,11 @@ html[lang^="ja"] .post-content {
   width: 100%;
 }
 
-/* prototype table: 14px tabular hairlines — th carries an ink underline,
-   td a rule underline, the last row a rule-strong close; no slabs/zebra.
-   :not guards keep highlight-table line numbers out of the skin */
+/* Table (design稿 final form): 14px tabular hairlines — th 600 ink with
+   an ink underline, td a rule underline, last row closes rule-strong,
+   first column drops its left padding. No slab, no zebra. Narrow-screen
+   adaptation is the prototype's own: ≤560px block + horizontal scroll +
+   nowrap (ui.css), not a squeezed width:100% wrap. */
 .post-content table {
   width: 100%;
   border-collapse: collapse;
@@ -298,11 +300,6 @@ html[lang^="ja"] .post-content {
 
 .post-content table:not(.highlight table, .gist .highlight) tr:last-child td {
   border-bottom: 1px solid var(--tertiary);
-}
-
-.post-content table:not(.highlight table, .gist .highlight) th:first-child,
-.post-content table:not(.highlight table, .gist .highlight) td:first-child {
-  padding-left: 0;
 }
 
 /* prototype: mono 12px caption under the image; figures get the sp-7 beat */

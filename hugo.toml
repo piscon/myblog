@@ -279,3 +279,6 @@ isPlainText = true
   [[module.mounts]]
     source = "static/images"
     target = "assets/images"
+
+[markup.highlight]
+noClasses = false  # 亮暗双色: 类渲染让 chroma-dual.css 变量组接管(内联样式压过一切 CSS 必须关)

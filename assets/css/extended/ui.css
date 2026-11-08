@@ -33,8 +33,9 @@
 .post-content pre {
   margin: var(--sp-6) 0;
   padding: 20px 22px;
-  background: var(--code-bg);
+  background: var(--code-bg); /* spare: chroma-mod unsets pre.chroma !important */
   color: var(--code-ink);
+  border: 1px solid var(--border); /* the light slab needs its edge */
   border-radius: 2px;
   font-size: 14px;
   line-height: 1.75;
@@ -470,11 +471,16 @@ details.toc .inner a {
   }
 }
 
-/* Tables: horizontal scroll instead of layout blowout on narrow screens */
-.post-content table {
-  display: block;
-  max-width: 100%;
-  overflow-x: auto;
+/* Table adaptation (design稿): desktop keeps the real table display;
+   ≤560px flips to a scrollable block with nowrap cells — rows stay
+   one-line and the table pans instead of crushing columns */
+@media screen and (max-width: 560px) {
+  .post-content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
 
 /* List pagination pills: the theme paints them background:var(--primary)

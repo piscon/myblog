@@ -1,0 +1,73 @@
+/* chroma-dual.css — 亮暗双色语法高亮 (user call 2026-11-08).
+   The theme ships ONE fixed chroma palette (Catppuccin Macchiato — dark-
+   tuned literals). With the code slab now dual (chrome.css --code-bg),
+   those literals read broken on the light slab. This file re-points every
+   token GROUP at a variable: light values by default, Macchiato values
+   (the shipped palette, kept verbatim) under data-theme="dark". Same
+   specificity as the theme's rules (0,2,0) — extended bundle loads last,
+   so these win; the var() switch does the rest. */
+
+.chroma {
+  --cg-key: #9c3428;  /* keywords — brick */
+  --cg-str: #2f6d33;  /* strings — green */
+  --cg-com: #7a7263;  /* comments — warm gray */
+  --cg-num: #1c5d8f;  /* numbers — blue */
+  --cg-fun: #6d4ba0;  /* functions/decorators — purple */
+  --cg-tag: #2f6d33;  /* name tags — green */
+  --cg-err: #b42318;  /* errors — red */
+}
+
+:root[data-theme="dark"] .chroma {
+  --cg-key: #c6a0f6;
+  --cg-str: #a6da95;
+  --cg-com: #6e738d;
+  --cg-num: #f5a97f;
+  --cg-fun: #8aadf4;
+  --cg-tag: #c6a0f6;
+  --cg-err: #ed8796;
+}
+
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn, .chroma .kp,
+.chroma .kr, .chroma .kt, .chroma .ow {
+  color: var(--cg-key);
+}
+
+.chroma .s, .chroma .s1, .chroma .s2, .chroma .sa, .chroma .sb,
+.chroma .sc, .chroma .sd, .chroma .se, .chroma .sh, .chroma .si,
+.chroma .sx, .chroma .sr, .chroma .ss, .chroma .ld {
+  color: var(--cg-str);
+}
+
+.chroma .c, .chroma .c1, .chroma .ch, .chroma .cm, .chroma .cp,
+.chroma .cpf, .chroma .cs {
+  color: var(--cg-com);
+}
+
+.chroma .m, .chroma .mb, .chroma .mf, .chroma .mh, .chroma .mi,
+.chroma .il, .chroma .mx, .chroma .mo {
+  color: var(--cg-num);
+}
+
+.chroma .nf, .chroma .fm, .chroma .nd {
+  color: var(--cg-fun);
+}
+
+.chroma .nt {
+  color: var(--cg-tag);
+}
+
+.chroma .err {
+  color: var(--cg-err);
+}
+
+.chroma .lnt, .chroma .ln {
+  color: var(--cg-com);
+}
+
+/* Name group: the theme's literals are Macchiato-pale (washed out on the
+   light slab), so this group is scoped to LIGHT only — dark keeps the
+   shipped per-class literals verbatim. */
+html[data-theme="light"] .chroma :is(.n, .na, .nb, .bp, .nc, .no, .nv, .vc,
+.vg, .vi, .vm, .ni, .ne, .nl, .nn, .py, .nx) {
+  color: var(--primary);
+}

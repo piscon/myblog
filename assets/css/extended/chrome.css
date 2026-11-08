@@ -52,12 +52,17 @@
   --secondary: #6b6455;  /* muted */
   --tertiary: #c8bda6;   /* rule-strong */
   --border: #dfd6c4;     /* rule */
-  --code-bg: #221f18;
-  --code-ink: #ece6d8;   /* prototype code-ink: base text on the dark slab */
-  /* the theme paints pre>code its own slab with background:
-     var(--code-block-bg) !important (md-content.css) — transparency is the
-     only way under an !important; the slab lives on the pre (ui.css) */
-  --code-block-bg: transparent;
+  /* 亮暗双色 (user call 2026-11-08): light theme gets a light slab +
+     dark code ink; the prototype's always-dark slab is retired.
+     #ede4cf — one step deeper than paper so the slab actually reads
+     (--entry #f0eadd would vanish against #f7f3ea) */
+  --code-bg: #ede4cf;
+  --code-ink: #1a1712;
+  /* the slab lever: chroma-mod.css unsets the pre's own background
+     !important and md-content.css paints pre>code with
+     var(--code-block-bg) !important — pointing the variable at our dual
+     --code-bg makes the theme's own !important carry the slab */
+  --code-block-bg: var(--code-bg);
 }
 
 :root[data-theme="dark"] {
