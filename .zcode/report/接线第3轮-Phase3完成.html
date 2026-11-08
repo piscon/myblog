@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接线第 3 轮 · Phase 3 完成</title>
+<style>
+:root{--paper:#f7f3ea;--ink:#1a1712;--sub:#6b6455;--rule:#dfd6c4;--gold:#8a5d15;--ok:#2e7d4f}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Songti SC","Noto Serif SC",serif;background:var(--paper);color:var(--ink);line-height:1.75;padding:40px 16px 80px}
+.wrap{max-width:1020px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--gold);font-weight:600}
+h1{font-size:clamp(24px,3vw,32px);margin:8px 0 4px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{border:1px solid var(--rule);border-radius:10px;padding:20px 22px}
+.panel h2{font-size:16px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--rule)}
+li{margin:.4em 0;font-size:14.5px}
+.ok{color:var(--ok);font-weight:700}
+.warn{color:var(--gold);font-weight:700}
+code{background:#efeadf;border-radius:4px;padding:0 4px;font-size:.9em}
+ul{padding-left:1.2em}
+footer{margin-top:28px;color:var(--sub);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">二重奏 · 原型 → Hugo 接线</div>
+<h1>第 3 轮：Phase 3 列表系统完成（签认①落地）</h1>
+<div class="meta">commit 0ae0955 + a20c232 ｜ 分支 redesign/proto-wiring（本地）｜ feature-check 全绿</div>
+<div class="grid">
+
+<section class="panel">
+<h2>落地内容</h2>
+<ul>
+<li><code>_default/list.html</code> 覆盖（#2/≤6）：/posts/ 与 term 页统一为<strong>年份分组文字目录</strong>——60px 衬线年份标签 + 行式条目（01.02 日期 / 22px 衬线标题 / 分类 / 读时）；分类 term 页自动 no-cat 变体；RSS 按钮与计数行保留</li>
+<li>窗口式数字分页器（首尾 + 当前±1 + 省略号），<code>pagerSize 8→10</code></li>
+<li>taxonomy 索引页（/categories/ /tags/）保持主题 chips；archives 保留既有台账覆盖——两者断言零改动</li>
+<li><span class="warn">Casper 堆叠卡根除</span>：cover.css 只剩文章页 .entry-cover 基础规则，ui.css 卡片/entry-footer 规则删除，<code>post-entry</code> DOM 不再在任何列表渲染</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>实测与断言换轨</h2>
+<ul>
+<li>分页器机制用 <code>hugo -D</code> 构建实测：page/2 生成 + 页码按钮渲染；生产语料恰好 10 篇不出 pager 属预期（第 11 篇发布即点亮）</li>
+<li>断言坑：feature-check 用 -D 构建，草稿会撑出分页——「列表文字目录」断言改为守 DOM + CSS token，不依赖草稿</li>
+<li>「更新于门控」断言改 archive 侧；「封面 sizes」改守首页 hero + 文章页（列表已无封面）</li>
+<li>1440/390 截图复核：桌面三段年份分组、手机行折叠（日期独行、标题+读时）无溢出</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>当前状态</h2>
+<ul>
+<li><span class="ok">hugo --gc --minify 过闸 + feature-check 全绿</span>；全程未触碰 content/**</li>
+<li>覆盖模板累计：index.html、_default/list.html（存量：archives/list、404、search、4 个 partial）</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>下一步</h2>
+<ul>
+<li>Phase 4（1.5d）：文章页——TOC 浮层 左→右（纯 CSS，签认③）、间距对齐原型；保留三档破格 / srcset / giscus 跟随 / 相关文章焦点归位</li>
+</ul>
+</section>
+
+</div>
+<footer>redesign/proto-wiring · Phase 0-3 完成 ｜ 施工方案：原型/接线施工方案.md</footer>
+</div>
+</body>
+</html>
