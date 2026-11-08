@@ -21,7 +21,7 @@
   <p class="kicker">{{ i18n (cond $isCats "catsKicker" "tagsKicker") }}</p>
   <div class="title-row">
     <h1>{{ .Title }}</h1>
-    <span class="page-count">{{ if $pre }}{{ $pre }} {{ end }}{{ len .Data.Terms }} {{ i18n "postsUnit" }}</span>
+    <span class="page-count">{{ if $pre }}{{ $pre }} {{ end }}{{ len .Data.Terms }} {{ i18n (cond $isCats "termsUnitCat" "termsUnitTag") }}</span>
   </div>
   <p class="page-deck">{{ i18n (cond $isCats "taxCatsNote" "taxTagsNote") }}</p>
 </header>
