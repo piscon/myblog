@@ -268,6 +268,15 @@ check "衬线 display 层(签认②)"     "grep -q -- '--font-display:\"Iowan Ol
 # 评论壳样式（Phase 5）：giscus-wrapper 间距 token 化（feature-check 构建无 --minify，按原样引号形态匹配）
 check "评论壳样式(间距token)"       "grep -q 'giscus-wrapper\" style=\"margin-top: var(--sp-7);' '$OUT/zh/posts/first/index.html'"
 
+# ---- redesign/align-proto 新增断言（2026-11-08，68→71） ----
+# 词条文字云（layouts/taxonomy.html 覆盖）：/tags/ 与 /categories/ 换原型文字云，
+# 主题 chips 页退役（terms-tags 负断言；搜索页聚合的 terms-tags 不受影响）
+check "词条文字云(taxonomy覆盖)"   "grep -q 'term-index-cloud' '$OUT/zh/tags/index.html' && grep -q 'term-index-cloud' '$OUT/zh/categories/index.html' && ! grep -q 'terms-tags' '$OUT/zh/tags/index.html' && ! grep -q 'terms-tags' '$OUT/zh/categories/index.html' && grep -q '.term-index-cloud{display:flex' '$OUT'/assets/css/stylesheet.*.css"
+# term 页返回链+kicker（list.html term 分支）：回索引页 mono 返回链 + Tag/Category kicker
+check "term返回链+kicker"          "grep -q 'term-back' '$OUT/zh/categories/demo/index.html' && grep -q '全部分类' '$OUT/zh/categories/demo/index.html' && grep -q 'class=\"kicker\"' '$OUT/zh/categories/demo/index.html'"
+# 列表出口行(list-foot)+刊头：/posts/ kicker/deck + list-foot 双出口（排序注记 | RSS 全文）
+check "列表出口行(list-foot)"      "grep -q 'class=\"kicker\"' '$OUT/zh/posts/index.html' && grep -q 'page-deck' '$OUT/zh/posts/index.html' && grep -q 'list-foot' '$OUT/zh/posts/index.html' && grep -q 'RSS 全文' '$OUT/zh/posts/index.html' && grep -q '.list-foot{display:flex' '$OUT'/assets/css/stylesheet.*.css"
+
 FAILED=0
 {
   echo "| 断言 | 结果 |"

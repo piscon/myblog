@@ -1,0 +1,41 @@
+{{- /* SITE OVERRIDE of themes/PaperMod/layouts/taxonomy.html
+       (redesign/align-proto, 2026-11-08). The /tags/ and /categories/ hubs
+       take the prototype's text-cloud form: kicker + title row (count =
+       NUMBER OF TERMS — prototype renderTax() semantics, faithfully kept)
+       + deck note, then a borderless serif term cloud in count-desc order.
+       Supersedes the theme's terms-tags chips page (the "hubs keep theme
+       chips" decision from 2026-11-08 is overturned by this file).
+
+       Term pages (a single tag/category) are NOT this file — they live in
+       layouts/_default/list.html.
+
+       Weekly PR coupling: theme's taxonomy.html is shadowed wholesale —
+       re-diff it on PaperMod upgrades for markup drift and re-apply here.
+       Guarded by feature-check「词条文字云(taxonomy覆盖)」. */ -}}
+
+{{ define "main" }}
+{{- $isCats := eq .Data.Singular "category" -}}
+{{- $pre := i18n "countPre" -}}
+
+<header class="page-header">
+  <p class="kicker">{{ i18n (cond $isCats "catsKicker" "tagsKicker") }}</p>
+  <div class="title-row">
+    <h1>{{ .Title }}</h1>
+    <span class="page-count">{{ if $pre }}{{ $pre }} {{ end }}{{ len .Data.Terms }} {{ i18n "postsUnit" }}</span>
+  </div>
+  <p class="page-deck">{{ i18n (cond $isCats "taxCatsNote" "taxTagsNote") }}</p>
+</header>
+
+{{- /* count-desc cloud, prototype renderTax() shape: one anchor per term,
+       serif term + mono count span, no pill chrome. Mirrors the theme's
+       GetPage lookup so term permalinks stay correct. */ -}}
+{{- $type := .Type }}
+<div class="term-index-cloud">
+  {{- range .Data.Terms.ByCount }}
+  {{- $name := .Name }}{{- $count := .Count }}
+  {{- with site.GetPage (printf "/%s/%s" $type $name) }}
+  <a href="{{ .Permalink }}">{{ .LinkTitle }} <span>{{ $count }}</span></a>
+  {{- end }}
+  {{- end }}
+</div>
+{{ end }}

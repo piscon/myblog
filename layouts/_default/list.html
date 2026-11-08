@@ -17,31 +17,55 @@
 {{- $isTerm := eq .Kind "term" -}}
 {{- $isCatTerm := and $isTerm (eq .Data.Singular "category") -}}
 {{- $pages := .Paginator.Pages -}}
+{{- $pre := i18n "countPre" -}}
 
+{{- /* align-proto page head: kicker + title row (h1 & count on one
+       baseline) + deck on the section feed; term pages get a back link to
+       their hub and a Tag/Category kicker instead (prototype term view).
+       RSS stays in the h1 (拍板①: prototype dropped it, site keeps it). */ -}}
 <header class="page-header">
-  {{- if .Title }}
-  <h1>
-    {{ .Title }}
-    {{- if and (or (eq .Kind `term`) (eq .Kind `section`)) (.Param "ShowRssButtonInSectionTermList") }}
-    {{- with .OutputFormats.Get "rss" }}
-    <a href="{{ .RelPermalink }}" title="RSS" aria-label="RSS">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" height="23">
-        <path d="M4 11a9 9 0 0 1 9 9" />
-        <path d="M4 4a16 16 0 0 1 16 16" />
-        <circle cx="5" cy="19" r="1" />
-      </svg>
-    </a>
+  {{- if $isTerm }}
+  {{- with .Parent }}
+  <a class="term-back" href="{{ .RelPermalink }}">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M19 12H5M11 18l-6-6 6-6" />
+    </svg>
+    <span>{{ i18n (cond $isCatTerm "backCats" "backTags") }}</span>
+  </a>
+  {{- end }}
+  <p class="kicker">{{ i18n (cond $isCatTerm "termCatKicker" "termTagKicker") }}</p>
+  {{- else }}
+  <p class="kicker">{{ i18n "postsKicker" }}</p>
+  {{- end }}
+  <div class="title-row">
+    {{- if .Title }}
+    <h1>
+      {{ .Title }}
+      {{- if and (or (eq .Kind `term`) (eq .Kind `section`)) (.Param "ShowRssButtonInSectionTermList") }}
+      {{- with .OutputFormats.Get "rss" }}
+      <a href="{{ .RelPermalink }}" title="RSS" aria-label="RSS">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" height="23">
+          <path d="M4 11a9 9 0 0 1 9 9" />
+          <path d="M4 4a16 16 0 0 1 16 16" />
+          <circle cx="5" cy="19" r="1" />
+        </svg>
+      </a>
+      {{- end }}
+      {{- end }}
+    </h1>
     {{- end }}
-    {{- end }}
-  </h1>
+    <span class="page-count">{{ if $pre }}{{ $pre }} {{ end }}{{ len .Pages }} {{ i18n "postsUnit" }}</span>
+  </div>
+  {{- if not $isTerm }}
+  <p class="page-deck">{{ i18n "postsDeck" }}</p>
   {{- end }}
   {{- with .Description }}
   <div class="post-description">
     {{ . | markdownify }}
   </div>
   {{- end }}
-  <span class="page-count">{{ len .Pages }} {{ i18n "postsUnit" }}</span>
 </header>
 
 <div class="list-groups">
@@ -87,5 +111,17 @@
   {{- end }}
   {{- end }}
 </nav>
+{{- end }}
+
+{{- /* list foot (prototype posts view): sorting note + total on the left,
+       full-text RSS on the right. Section feed only — term pages end at
+       their year groups. */ -}}
+{{- if not $isTerm }}
+<div class="list-foot">
+  <span>{{ i18n "newestFirst" }} · {{ if $pre }}{{ $pre }} {{ end }}{{ len .Pages }} {{ i18n "postsUnit" }}</span>
+  {{- with site.Home.OutputFormats.Get "rss" }}
+  <a href="{{ .Permalink }}">{{ i18n "rssFull" }}</a>
+  {{- end }}
+</div>
 {{- end }}
 {{ end }}

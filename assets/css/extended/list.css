@@ -154,6 +154,81 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- term back-link + taxonomy text cloud + list foot (align-proto) ------
+   Prototype term/tax views: mono back link with a 14px left arrow, then a
+   borderless cloud — serif 22px terms with mono 12px counts, 26px column
+   gap (NOT pill chips; the theme's .terms-tags markup is retired from
+   these pages). list-foot closes the feed: sorting note + total left,
+   full-text RSS right. */
+.term-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+}
+
+.term-back svg {
+  width: 14px;
+  height: 14px;
+}
+
+.term-index-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 26px;
+  padding: var(--sp-6) 0 var(--sp-tail);
+}
+
+.term-index-cloud a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 32px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--secondary);
+}
+
+.term-index-cloud a span {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.list-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 24px;
+  padding: var(--sp-7) 0 var(--sp-tail);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--secondary);
+}
+
+.list-foot a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+@media (hover: hover) {
+  .term-back:hover,
+  .term-index-cloud a:hover,
+  .list-foot a:hover {
+    color: var(--accent);
+  }
+}
+
 /* ---- responsive ---------------------------------------------------------- */
 @media (max-width: 768px) {
   .year-group {

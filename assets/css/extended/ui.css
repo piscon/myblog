@@ -425,6 +425,56 @@ sup[id^="fnref:"] {
   margin-top: 8px;
 }
 
+/* ---- editorial page-head components (align-proto, prototype page-head
+   family): kicker small-caps line, baseline title row (h1 + count share
+   one row, prototype .page-title), deck subtitle. The .page-header shell
+   already carries --sp-head and the fluid h1 curve. Colors map the
+   prototype's --muted/--ink-2 onto --secondary (no new tokens). */
+.page-header .kicker {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.page-header .title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 14px;
+}
+
+/* the h1 keeps its fluid curve; inside the row its bottom margin would
+   only pad the row — drop it and let the deck/description own the gap */
+.page-header .title-row h1 {
+  margin-bottom: 0;
+}
+
+/* count rides the baseline now; the stacked layout's 8px offset is a
+   leftover of the pre-title-row shape */
+.page-header .title-row .page-count {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.page-header .page-deck {
+  margin: 18px 0 0;
+  max-width: 40em;
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--secondary);
+}
+
+@media screen and (max-width: 768px) {
+  .page-header .title-row {
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+}
+
 /* Input: the theme's 2px tertiary border + bold text shout → quiet
    field. Focus is covered by the global :focus-visible accent outline
    (typography.css) — text inputs match :focus-visible on any focus. */
