@@ -1,0 +1,131 @@
+[
+ {
+  "label": "tab-order-top-390",
+  "value": [
+   {
+    "tag": "A",
+    "txt": "跳到正文",
+    "tab": null
+   },
+   {
+    "tag": "A",
+    "txt": "二重奏\n      DEUX",
+    "tab": null
+   },
+   {
+    "tag": "BUTTON",
+    "txt": "",
+    "tab": null
+   },
+   {
+    "tag": "A",
+    "txt": "",
+    "tab": null
+   },
+   {
+    "tag": "BUTTON",
+    "txt": "",
+    "tab": null
+   },
+   {
+    "tag": "BUTTON",
+    "txt": "",
+    "tab": null
+   },
+   {
+    "tag": "MAIN",
+    "txt": "写日常，也写让日常运转的代码",
+    "tab": "-1"
+   },
+   {
+    "tag": "A",
+    "txt": "读这篇",
+    "tab": null
+   },
+   {
+    "tag": "A",
+    "txt": "",
+    "tab": "-1"
+   },
+   {
+    "tag": "A",
+    "txt": "全部文章",
+    "tab": null
+   },
+   {
+    "tag": "A",
+    "txt": "菜市场里的天气预报楼下菜市场",
+    "tab": null
+   },
+   {
+    "tag": "A",
+    "txt": "2026.11.05 · 日",
+    "tab": null
+   }
+  ]
+ },
+ {
+  "label": "lang-a11y",
+  "value": {
+   "expanded": "true",
+   "focus": "MAIN",
+   "roles": [
+    null,
+    null,
+    null
+   ],
+   "menuRole": null,
+   "haspopup": null
+  }
+ },
+ {
+  "label": "lang-arrowdown",
+  "value": {
+   "focus": "写日常，也写让日常运"
+  }
+ },
+ {
+  "label": "menu-open-a11y",
+  "value": {
+   "focus": "文章 ESSAYS",
+   "expanded": "true",
+   "inert": null
+  }
+ },
+ {
+  "label": "filter-state",
+  "value": {
+   "pressed": [
+    "全部 10:false",
+    "日常 5:false",
+    "技术 5:true"
+   ],
+   "count": "共 5 篇"
+  }
+ },
+ {
+  "label": "toc-details",
+  "value": {
+   "summaryTag": "SUMMARY",
+   "ariaExpanded": null,
+   "open": false
+  }
+ },
+ {
+  "label": "share-copy",
+  "value": {
+   "note": "复制失败，请手动复制地址栏",
+   "noteRole": "status"
+  }
+ },
+ {
+  "label": "search-focus",
+  "value": {
+   "autofocus": false,
+   "type": "search",
+   "value": "",
+   "label": null,
+   "formRole": "search"
+  }
+ }
+]

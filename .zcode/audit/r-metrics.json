@@ -1,0 +1,104 @@
+[
+ {
+  "label": "list-rhythm-390",
+  "value": {
+   "pageHead": {
+    "top": 69,
+    "h": 244,
+    "bottom": 312
+   },
+   "filters": {
+    "top": 346,
+    "h": 60,
+    "bottom": 406
+   },
+   "yearGroup": {
+    "top": 406,
+    "h": 1052,
+    "bottom": 1458
+   },
+   "yearLabel": {
+    "top": 483,
+    "h": 38,
+    "bottom": 521
+   },
+   "firstRow": {
+    "top": 567,
+    "h": 90,
+    "bottom": 657
+   },
+   "lastRow": {
+    "top": 1368,
+    "h": 89,
+    "bottom": 1458
+   },
+   "listFoot": {
+    "top": 1708,
+    "h": 166,
+    "bottom": 1874
+   }
+  }
+ },
+ {
+  "label": "article-rhythm-390",
+  "value": {
+   "deck": {
+    "top": 211,
+    "h": 89
+   },
+   "toc": {
+    "top": 324,
+    "h": 45
+   },
+   "cover": {
+    "top": 397,
+    "h": 259
+   },
+   "h2": 23,
+   "h2Top": 705,
+   "bodyTop": {
+    "top": 705,
+    "h": 3270
+   },
+   "share": {
+    "top": 4111,
+    "h": 71
+   }
+  }
+ },
+ {
+  "label": "search-geom-390",
+  "value": {
+   "head": {
+    "w": 342,
+    "fs": "16px",
+    "h": 2734
+   },
+   "form": {
+    "w": 342,
+    "fs": "16px",
+    "h": 56
+   },
+   "input": {
+    "w": 304,
+    "fs": "20px",
+    "h": 34
+   },
+   "hub": {
+    "w": 342,
+    "fs": "16px",
+    "h": 168
+   },
+   "cloud": {
+    "w": 342,
+    "fs": "16px",
+    "h": 117
+   },
+   "result": {
+    "w": 342,
+    "fs": "16px",
+    "h": 196
+   }
+  }
+ }
+]

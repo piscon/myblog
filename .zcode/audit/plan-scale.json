@@ -1,0 +1,27 @@
+{
+  "out": "r-scale.json",
+  "steps": [
+    { "viewport": { "width": 320, "height": 720, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1400 },
+    { "evalFile": "measure-layout.js", "label": "w320" },
+
+    { "viewport": { "width": 768, "height": 900, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w768" },
+    { "eval": "(() => { const nav=document.querySelector('.nav'), mb=document.querySelector('.menu-btn'); return {navDisplay:getComputedStyle(nav).display, menuDisplay:getComputedStyle(mb).display}; })()", "label": "w768-nav" },
+
+    { "viewport": { "width": 769, "height": 900, "mobile": false } },
+    { "eval": "(() => { const nav=document.querySelector('.nav'), mb=document.querySelector('.menu-btn'); return {navDisplay:getComputedStyle(nav).display, menuDisplay:getComputedStyle(mb).display, overflowX:document.documentElement.scrollWidth-innerWidth}; })()", "label": "w769-nav" },
+
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w390" },
+    { "shot": "s390-home.png" },
+
+    { "hash": "#/posts/zz-s03", "settle": 900 },
+    { "evalFile": "measure-layout.js", "label": "article-390" },
+    { "shot": "s390-article.png" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "evalFile": "measure-layout.js", "label": "w1440" },
+    { "shot": "s1440-home.png" }
+  ]
+}

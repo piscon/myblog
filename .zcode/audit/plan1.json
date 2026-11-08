@@ -1,0 +1,11 @@
+{
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "dsf": 2, "mobile": true } },
+    { "goto": "https://deux.top/zh/", "settle": 1800 },
+    { "evalFile": "measure-header.js", "label": "zh-home-390" },
+    { "shot": "m390-home.png" },
+    { "viewport": { "width": 1440, "height": 900, "dsf": 1, "mobile": false } },
+    { "evalFile": "measure-header.js", "label": "zh-home-1440" },
+    { "shot": "d1440-home.png" }
+  ]
+}

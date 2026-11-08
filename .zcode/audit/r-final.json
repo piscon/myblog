@@ -1,0 +1,44 @@
+[
+ {
+  "label": "tab-order-390",
+  "value": [
+   {
+    "t": "二重奏\n      DE",
+    "c": "brand",
+    "x": 24
+   },
+   {
+    "t": "",
+    "c": "theme-btn",
+    "x": 184
+   },
+   {
+    "t": "",
+    "c": "icon-btn",
+    "x": 230
+   },
+   {
+    "t": "",
+    "c": "lang-btn",
+    "x": 276
+   },
+   {
+    "t": "",
+    "c": "menu-btn",
+    "x": 322
+   }
+  ]
+ },
+ {
+  "label": "copy-pos",
+  "value": 402
+ },
+ {
+  "label": "copy-note-500ms",
+  "value": "已复制"
+ },
+ {
+  "label": "copy-note-2700ms",
+  "value": ""
+ }
+]

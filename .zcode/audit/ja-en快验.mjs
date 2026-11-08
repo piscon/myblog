@@ -1,0 +1,10 @@
+import { chromium } from '/tmp/pw-audit/node_modules/playwright-core/index.mjs';
+const b = await chromium.launch({ executablePath: process.env.HOME + '/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome', args: ['--no-sandbox'] });
+const p = await b.newPage({ viewport: { width: 390, height: 760 } });
+await p.goto('http://172.18.79.17:8123/二重奏-博客界面设计-交互版.html?v=8#/ja/posts', { waitUntil: 'load' });
+await p.waitForTimeout(800);
+console.log('ja: ' + await p.evaluate("document.querySelector('#view-posts .list-foot span').innerText.replace(/\\s+/g,' ')"));
+await p.evaluate("location.hash='#/en/posts'");
+await p.waitForTimeout(600);
+console.log('en: ' + await p.evaluate("document.querySelector('#view-posts .list-foot span').innerText.replace(/\\s+/g,' ')"));
+await b.close();

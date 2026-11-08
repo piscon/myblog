@@ -1,0 +1,14 @@
+{
+  "out": "r-orderpage3.json",
+  "steps": [
+    { "viewport": { "width": 1440, "height": 1000, "mobile": false } },
+    { "goto": "http://127.0.0.1:8124/order.html", "settle": 1000 },
+    { "scrollTo": 240 },
+    { "shot": "p1440-order2.png" },
+    { "eval": "(() => ({ overflowX: document.documentElement.scrollWidth - innerWidth }))()", "label": "ok-1440" },
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "scrollTo": 300 },
+    { "shot": "p390-order3.png" },
+    { "eval": "(() => ({ overflowX: document.documentElement.scrollWidth - innerWidth }))()", "label": "ok-390" }
+  ]
+}

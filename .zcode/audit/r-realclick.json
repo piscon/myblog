@@ -1,0 +1,25 @@
+[
+ {
+  "label": "copy-after-real-click",
+  "value": {
+   "note": "",
+   "noteVisible": true
+  }
+ },
+ {
+  "label": "search-label",
+  "value": {
+   "hasLabel": true,
+   "labelText": "搜索文章",
+   "placeholder": "搜标题、摘要或标签",
+   "aria": null,
+   "describedBy": "search-hint"
+  }
+ },
+ {
+  "label": "noop",
+  "value": {
+   "exists": true
+  }
+ }
+]

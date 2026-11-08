@@ -1,0 +1,14 @@
+{
+  "out": "r-final.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1400 },
+    { "eval": "(() => [...document.querySelectorAll('.site-head a[href], .site-head button')].filter(e => e.offsetWidth > 0 && getComputedStyle(e).visibility !== 'hidden').map(e => ({ t: (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 12), c: (e.className || e.id || '').toString().split(' ').pop(), x: Math.round(e.getBoundingClientRect().x) })))()", "label": "tab-order-390" },
+
+    { "hash": "#/posts/zz-s03", "settle": 900 },
+    { "eval": "(() => { const b = document.getElementById('copy-link'); b.scrollIntoView({ block: 'center' }); return Math.round(b.getBoundingClientRect().top); })()", "label": "copy-pos" },
+    { "realClick": "#copy-link", "settle": 500 },
+    { "eval": "(() => document.getElementById('copy-note').textContent)()", "label": "copy-note-500ms" },
+    { "eval": "(async () => { await new Promise(r => setTimeout(r, 2200)); return document.getElementById('copy-note').textContent; })()", "label": "copy-note-2700ms" }
+  ]
+}

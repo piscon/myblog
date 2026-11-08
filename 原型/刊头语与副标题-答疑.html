@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>刊头语与副标题 · 身份答疑</title>
+<style>
+  :root { --paper:#faf8f4; --ink:#26231e; --ink2:#55504a; --muted:#8a847c; --rule:#e4dfd6; --accent:#b08020; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.75 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+  .wrap { max-width:880px; margin:0 auto; padding:48px 24px 64px; }
+  h1 { font-size:26px; font-weight:800; letter-spacing:-.01em; margin:0 0 6px; }
+  .kicker { font-family:var(--mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 28px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; }
+  .panel { background:#fff; border:1px solid var(--rule); padding:22px 24px; }
+  .panel h2 { font-size:15px; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+  .panel h2 .n { font-family:var(--mono); font-size:11px; color:var(--accent); }
+  ul { margin:0; padding-left:1.2em; }
+  li { margin:.45em 0; color:var(--ink2); }
+  li strong { color:var(--ink); }
+  code { font-family:var(--mono); font-size:.85em; background:#f1ede5; padding:1px 5px; }
+  .quote { border-left:2px solid var(--accent); padding:2px 0 2px 14px; margin:12px 0; color:var(--ink2); font-size:14px; }
+  .mock-mast { display:flex; justify-content:space-between; border-bottom:1px solid var(--rule); padding:0 2px 9px; margin:14px 0 4px; font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--muted); }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px; }
+  th,td { text-align:left; padding:7px 10px 7px 0; border-bottom:1px solid var(--rule); vertical-align:top; }
+  th { font-weight:600; color:var(--ink); }
+  td { color:var(--ink2); }
+  .tag { font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; padding:2px 7px; white-space:nowrap; }
+  .keep { background:#e8f0e4; color:#3e6b34; } .cut { background:#f4e3e0; color:#9c4436; } .home { background:#eee8db; color:#7a6a4a; }
+  .foot { margin-top:28px; padding-top:16px; border-top:1px solid var(--rule); font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>这两块各是什么，谁该留下</h1>
+  <p class="kicker">Masthead &amp; Tagline · 二重奏设计稿 · 2026-11-08</p>
+
+  <div class="grid">
+    <section class="panel">
+      <h2><span class="n">01</span>刊头语（保留）</h2>
+      <div class="mock-mast"><span>写日常，也写让日常运转的代码。</span><span>ESSAYS &amp; NOTES · 2026</span></div>
+      <ul>
+        <li><strong>身份</strong>：首页刊头定位语（报刊 masthead 手法），<code>.masthead-line</code>，12px mono 大写小字＋底部细线</li>
+        <li><strong>作用</strong>：首页 hero 展示的是「最新一篇」，不是站长介绍——这条线是首页<strong>唯一的「本站是什么」一句话</strong>；首次来访的人靠它三秒定位</li>
+        <li><strong>为什么不是噪音</strong>：只出现在首页一次（其余 11 个路由都没有），不随滚动重复；手机端还自动收起英文半句省一行</li>
+        <li>英文半句另有职能：<strong>Essays &amp; Notes＝两大版块的英文名</strong>（日常随笔/技术笔记），与中文定位语互为声部</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2><span class="n">02</span>命名副标题（收敛到关于页）</h2>
+      <div class="quote">精神与思想的二重奏，自由与独立的交响曲。</div>
+      <ul>
+        <li>你指出的重复是对的：它曾同时出现在<strong>页脚（每页都有）</strong>和<strong>关于页引文</strong>两处</li>
+        <li><strong>归属判断</strong>：关于页才是它有上下文的地方——引文下面紧跟着「这句副标题就是名字的全部由来」的解释；页脚那份额外重复没有增量信息，纯粹的每页复读</li>
+        <li><strong>处理</strong>：页脚的 <code>.foot-tag</code> 已删除（页脚只剩品牌名＋导航＋版权行，高 386→306px）；关于页保留引文与解释；JS 注入有空值守卫，删除安全，ja/en 切换实测无报错</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2><span class="n">03</span>全文案现在的分布</h2>
+      <table>
+        <tr><th>文案</th><th>出现位置</th><th>判定</th></tr>
+        <tr><td>写日常，也写让日常运转的代码。<br><span style="color:var(--muted)">Essays &amp; Notes · 2026</span></td><td>首页刊头 ×1</td><td><span class="tag keep">保留</span></td></tr>
+        <tr><td>精神与思想的二重奏…（命名副标题）</td><td>关于页引文 ×1（带由来解释）</td><td><span class="tag home">唯一归属</span></td></tr>
+        <tr><td>同上，页脚版</td><td>曾每页出现</td><td><span class="tag cut">已删</span></td></tr>
+        <tr><td>© / 许可 / 技术栈</td><td>页脚版权行 ×1</td><td><span class="tag keep">保留</span></td></tr>
+      </table>
+      <p style="margin:14px 0 0;font-size:13.5px;color:var(--muted)">原则：一句话只在一个有上下文的地方出现；定位语管「首页第一眼」，命名故事管「关于页」。</p>
+    </section>
+  </div>
+
+  <p class="foot">改动：原型/二重奏-博客界面设计-交互版.html（页脚 HTML 删 .foot-tag、CSS 同步删规则）· 实测 ja/en 切换与页脚链接本地化正常</p>
+</div>
+</body>
+</html>

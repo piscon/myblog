@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>列表日期年份冗余 · 审计与修复</title>
+<style>
+  :root { --paper:#faf8f4; --ink:#26231e; --ink2:#55504a; --muted:#8a847c; --rule:#e4dfd6; --accent:#b08020; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.75 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+  .wrap { max-width:880px; margin:0 auto; padding:48px 24px 64px; }
+  h1 { font-size:26px; font-weight:800; letter-spacing:-.01em; margin:0 0 6px; }
+  .kicker { font-family:var(--mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 28px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; }
+  .panel { background:#fff; border:1px solid var(--rule); padding:22px 24px; }
+  .panel h2 { font-size:15px; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+  .panel h2 .n { font-family:var(--mono); font-size:11px; color:var(--accent); }
+  ul { margin:0; padding-left:1.2em; }
+  li { margin:.45em 0; color:var(--ink2); }
+  li strong { color:var(--ink); }
+  code { font-family:var(--mono); font-size:.85em; background:#f1ede5; padding:1px 5px; }
+  .demo { border:1px solid var(--rule); margin:12px 0 4px; padding:14px 16px; font-size:13.5px; }
+  .demo .yl { font-family:var(--mono); font-size:26px; letter-spacing:.02em; color:var(--ink); }
+  .demo .yl small { font-size:11px; color:var(--muted); margin-left:8px; }
+  .demo .row { display:grid; grid-template-columns:56px 1fr 62px 58px; gap:14px; padding:8px 0; border-bottom:1px solid var(--rule); align-items:baseline; }
+  .demo .row:last-child { border-bottom:0; }
+  .demo .d { font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .demo .t { font-weight:600; }
+  .demo .c,.demo .r { font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .demo .r { text-align:right; }
+  .demo.old .d::before { content:"2026."; color:#c0705a; }
+  .cutmark { text-decoration:line-through; color:#c0705a; }
+  .foot { margin-top:28px; padding-top:16px; border-top:1px solid var(--rule); font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>年份大字旁边的「2026.11.05」——不合理，已修</h1>
+  <p class="kicker">Redundancy Audit · yearGroupsHtml · 2026-11-08</p>
+
+  <div class="grid">
+    <section class="panel">
+      <h2><span class="n">01</span>判定与修法</h2>
+      <ul>
+        <li><strong>你的判断成立</strong>：行永远在年份组内，行首的「2026.」前缀信息量为零——年份归属已由组头大字＋<code>&lt;section aria-label="2026"&gt;</code> 双重表达</li>
+        <li><strong>修法</strong>：组内行日期只显示 <code>11.05</code>；完整日期保留在 <code>&lt;time datetime="2026-11-05"&gt;</code>（机器可读）和 <code>title</code> 悬停提示（人可读），无信息丢失</li>
+        <li><strong>影响面</strong>：posts 列表、归档页、标签/分类 term 页共用同一个 <code>yearGroupsHtml()</code>，一处修复三处生效</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2><span class="n">02</span>前后对照</h2>
+      <div class="demo old">
+        <span class="yl">2026<small>9</small></span>
+        <div class="row"><span class="d">11.05</span><span class="t">傍晚六点的琴声</span><span class="c">日常</span><span class="r">约 2 分钟</span></div>
+        <p style="margin:6px 0 0;font-size:12px;color:var(--muted)">改前每行日期是 <span class="cutmark">2026.</span>11.05 —— 高亮处即被删除的冗余前缀</p>
+      </div>
+      <div class="demo">
+        <span class="yl">2025<small>1</small></span>
+        <div class="row"><span class="d">11.26</span><span class="t">你好，世界</span><span class="c">日常</span><span class="r">约 1 分钟</span></div>
+        <p style="margin:6px 0 0;font-size:12px;color:var(--muted)">跨年边界也无需担心：2025 组下的 11.26 不会与 2026 组混淆——分组本身就是归属</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="n">03</span>顺带发现与保留项</h2>
+      <ul>
+        <li><strong>同类冗余一并修</strong>：分类 term 页（如「日常」）每行右侧的分类名与页头 term 标题完全相同——列表行现在自动收敛该列（<code>no-cat</code> 行）；posts 页筛选单一分类时同理；标签 term 页分类有变化，保留该列</li>
+        <li><strong>网格同步</strong>：日期列 98px→56px（按短日期收紧）；补了 <code>.no-cat</code> 的移动端列宽再断言（基础规则的特异性会压过 ≤768px 覆盖，实测抓到的回归）</li>
+        <li><strong>刻意保留的对照</strong>：首页「目录」台账是跨年混排、无年份组头，行日期保留完整 <code>2026.11.05</code>——那里年份是唯一信号，删了才叫丢信息</li>
+        <li><strong>检查过、未动的</strong>：hero 眉题「日常 / 日期」与署名行「日常随笔」属标签 vs 散文两种形态，不构成逐字重复</li>
+      </ul>
+    </section>
+  </div>
+
+  <p class="foot">改动：.zcode/audit/main.js.txt（timeShort + yearGroupsHtml opts.hideCat）经 build.sh 重接线 · CSS 行网格两处 · 实测 posts/归档/term/筛选四场景 + 移动端无回归</p>
+</div>
+</body>
+</html>

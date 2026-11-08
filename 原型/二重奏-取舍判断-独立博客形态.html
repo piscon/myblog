@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>独立博客的真实形态 · 取舍判断</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f7f3ea; --paper-2: #f0eadd; --ink: #1a1712; --ink-2: #3b3529;
+    --muted: #6b6455; --rule: #dfd6c4; --rule-strong: #c8bda6; --accent: #8a5d15;
+    --display: "Iowan Old Style", "Palatino Linotype", "Songti SC", "Noto Serif SC", "Noto Serif CJK SC", SimSun, serif;
+    --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --mono: "SFMono-Regular", Consolas, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.8 var(--sans); }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 28px 96px; }
+  header { padding: 56px 0 26px; border-bottom: 1px solid var(--rule); }
+  .kicker { font: 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 4vw, 42px); line-height: 1.25; margin: 0 0 14px; letter-spacing: -.01em; }
+  .lede { margin: 0; max-width: 42em; color: var(--ink-2); }
+  .meta { margin: 20px 0 0; font: 12px/1.9 var(--mono); color: var(--muted); letter-spacing: .04em; }
+  section { padding: 42px 0 0; }
+  h2 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0 0 4px; }
+  h2 .num { font: 12px/1 var(--mono); color: var(--accent); letter-spacing: .1em; margin-right: 10px; vertical-align: 2px; }
+  .sub { margin: 0 0 20px; font-size: 14px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 11px 12px 11px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  th:first-child, td:first-child { width: 84px; }
+  th:last-child, td:last-child { width: 116px; }
+  .verdict { color: var(--accent); font-weight: 500; }
+  .item { padding: 18px 0; border-top: 1px solid var(--rule); }
+  .item:first-of-type { border-top: 0; padding-top: 6px; }
+  .item h3 { font-size: 17px; font-weight: 500; margin: 0 0 6px; }
+  .item .q { font: 11px/1 var(--mono); letter-spacing: .08em; color: var(--muted); margin-right: 10px; }
+  .item p { margin: 4px 0; }
+  .item .call { color: var(--accent); }
+  code { font: .88em/1.6 var(--mono); background: var(--paper-2); padding: 1px 5px; }
+  .note { margin-top: 26px; padding: 16px 18px; background: var(--paper-2); border-left: 2px solid var(--rule-strong); font-size: 14px; color: var(--ink-2); }
+  .note b { font-weight: 500; }
+  footer { margin-top: 52px; padding-top: 18px; border-top: 1px solid var(--rule); font: 12px/1.9 var(--mono); color: var(--muted); letter-spacing: .04em; }
+  @media (max-width: 640px) { .wrap { padding: 0 20px 72px; } th, td { padding-right: 8px; } body { font-size: 16px; } }
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="kicker">Evidence · Independent Blogs</p>
+  <h1>独立博客的真实形态</h1>
+  <p class="lede">上一次审计留了 8 个「你拍板」。这次不猜了：抽 15 家独立博客逐站抓 HTML 与主样式，统计它们的断点、导航、目录、字号；再加两项只能在本机验证的事——Chrome 实际用了哪套字体、线上到底输出哪种 hreflang。下面每条判断都带数字。</p>
+  <p class="meta">2026-11-07 · 15 站样本（逐站 CSS/HTML）· Chrome 平台字体实测 · 线上 head 实测</p>
+</header>
+
+<section>
+  <h2><span class="num">01</span>四个维度的实测分布</h2>
+  <p class="sub">先看事实，再看判断。样本偏英文技术/写作博客，中文 3 家（阮一峰、张鑫旭、diygod）。</p>
+  <table>
+    <thead><tr><th>维度</th><th>样本事实</th><th>本站原值</th><th>结论</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>收纳断点</b></td>
+        <td>768 是最高频断点（<b>9/15</b>），1024（6）、640（5）。真正把导航收进汉堡的只有 <b>2 家</b>（550 / 640）；9 家从不收起或没有导航；jvns 到 866px 才换排，也不收汉堡。</td>
+        <td class="n">860</td>
+        <td class="verdict">→ 768</td>
+      </tr>
+      <tr>
+        <td><b>手机图标</b></td>
+        <td>众数是 <b>0 个</b>（8/15）；有图标的多为 1–3 个（搜索/主题/菜单）；4 个只有 1 家（类 App 布局，含上下篇）。没有 5 个以上的先例。</td>
+        <td class="n">4（改后）</td>
+        <td class="verdict">保留 4<br>记为例外</td>
+      </tr>
+      <tr>
+        <td><b>目录</b></td>
+        <td>15 家里只有 <b>1 家</b>有 TOC（diygod），位置在<b>右侧</b>，左侧 <b>0 家</b>；阅读进度条 0/15、阅读时长 0/15。文档站（MDN、Starlight）把 TOC 当默认骨架，也在右侧。</td>
+        <td class="n">右侧浮层</td>
+        <td class="verdict">维持右侧</td>
+      </tr>
+      <tr>
+        <td><b>信息架构</b></td>
+        <td>有导航的 5 家项数 3/4/5/10/12；<b>7 家根本没有导航条</b>。导航里出现「归档」的 <b>0 家</b>；独立归档页 2 家（jim-nielsen、阮一峰）；把归档折进列表/首页的 <b>9 家</b>。导航里放搜索的 0 家，标签入口 4 家全在首页或归档页。</td>
+        <td class="n">文章 关于 🔍</td>
+        <td class="verdict">不加<br>「归档」项</td>
+      </tr>
+      <tr>
+        <td><b>正文字号</b></td>
+        <td>16px 6 家、17px 1 家、17.6–18px 4 家、20–22px 4 家；列宽集中在 <b>512–740px</b>。</td>
+        <td class="n">18 / 680</td>
+        <td class="verdict">合规<br>不动</td>
+      </tr>
+      <tr>
+        <td><b>小字</b></td>
+        <td>最小字号：10px 1 家、11px 2 家、12px 4 家、13px 3 家、14–15px 3 家、16px 2 家，中位 <b>12.8px</b>；8px 只在 1 家的作者简介出现过一次，10px 只在 1 家侧栏深层列表。</td>
+        <td class="n">8 / 10 / 11 / 11.5 / 12</td>
+        <td class="verdict">→ 12 起</td>
+      </tr>
+      <tr>
+        <td><b>阶梯</b></td>
+        <td>手写站点多在 <b>6–9 级</b>，中位 7；Tailwind/Substack 这类工具站虚高到 10–16 级。</td>
+        <td class="n">30 个杂值</td>
+        <td class="verdict">→ 5 + 5 档</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">02</span>逐条判断</h2>
+  <p class="sub">每条都给「为什么是这个值」，以及反方在哪。</p>
+
+  <div class="item">
+    <h3><span class="q">01</span>断点：860 → <span class="call">768</span></h3>
+    <p>768 是样本最高频断点，也是 Tailwind <code>md</code> 与 Bootstrap 的约定值，等于「所有用现成框架的人都停在这里」。640 偏早（本站导航只有 2 项，640 会让平板用户白点一次汉堡）；860/866 只有两家，且那两家是 6 个文字链接才需要换排。你原来的 860 还让 iPad 竖屏（820/834）掉进手机布局，这是实打实的损失。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">02</span>归档：<span class="call">不设独立导航项</span></h3>
+    <p>「归档」在 15 家的导航里出现 <b>0 次</b>；有独立归档页的只有 2 家，其中阮一峰那页本质是「最近 20 篇 + 18 个分类」，jim-nielsen 是 812 篇的 List/Calendar 双视图——那是十年积累才需要的工具。你 10 来篇、文章页已经按年分组，独立归档页的信息增量接近零。</p>
+    <p>反方也成立：中文 Hexo/WordPress 语系读者对「归档」有肌肉记忆。折中办法是保留 URL 但降级——<span class="call">站点 <code>/archives/</code> 建议 301 到 <code>/posts/</code></span>，既不丢外链，也不占导航位。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">03</span>目录：留<span class="call">右侧</span></h3>
+    <p>弱证据，但是唯一的方向性证据：样本里唯一有 TOC 的博客在右侧，左侧 0 家；MDN、Starlight 这些文档站也把 TOC 固定在右栏（左栏留给站点导航）。你现在站点是左侧，属于少数派。改不改都不影响阅读，但「两套路径」不该长期并存——<span class="call">建议站点后续跟到右侧</span>。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">04</span>小字：硬下限 <span class="call">12px</span></h3>
+    <p>样本中位 12.8px；8px 全样本只出现一次（作者简介），10px 只出现一次（侧栏深层列表）。也就是说，把 8px 用在品牌副标、10px 用在标签计数，在真实博客里<b>没有先例</b>。已把 <code>.year-label small</code> 11→12、标签计数 10→12、<code>.toc-float-title</code> 10.5→12，并把所有 11.5 并入 12。</p>
+    <p><code>.brand-en</code>（DEUX）升到 10px 并<b>明确豁免</b>：它是标识副标而不是阅读文本，与正文下限是两套规则。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">05</span>阶梯：<span class="call">文字档 12/14/16/18/22 + 展示档 28/36/44/52/60</span></h3>
+    <p>手写站点中位 7 级，你原来 30 个值里有 11.5 / 14.5 / 17.5 三个半像素值和 24–58 之间 13 个近邻阶（24/25/26/29/31/34/36/38/40/44/46/48/50/58），相邻差常低于 5%，肉眼分辨不出，只增加维护成本。现在文字档 5 级、展示档 5 级，标题仍用 clamp 流式，档位只做端点。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">06</span>衬线：补 <span class="call">Noto Serif SC / JP</span></h3>
+    <p>不是审美判断，是实测到的 bug：旧栈写的是 <code>Noto Serif CJK SC</code>，而 Windows 上装的名字是 <code>Noto Serif SC</code>，名字对不上直接跳过，标题全部落到 <b>SimSun</b>。用 Chrome 的 <code>getPlatformFontsForNode</code> 取真实字体：改前 <code>.hero-title</code> = SimSun，补名后 = Noto Serif SC。零下载、纯本地字体，装的机器自动升级，没装的仍落 SimSun（不比现在差）。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">07</span>hreflang：<span class="call"><code>zh</code></span> 而不是 <code>zh-CN</code></h3>
+    <p>线上实测：<code>curl</code> 三语列表页，head 输出的是 <code>hreflang=zh</code>（Hugo 语言码），而 <code>&lt;html lang&gt;</code> 是 <code>zh-CN</code>。原型写成 <code>zh-CN</code> 会导致和站点自己的集群对不上。已改 hreflang，<code>lang</code> 保留 <code>zh-CN</code>。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">08</span>手机头部 4 个图标：<span class="call">保留</span>（明知越界）</h3>
+    <p>样本众数是 0 个，多数站点 1–3 个，4 个只有一家。但那些站点没有三语切换——你的语言入口是<b>内容可达性</b>，不是装饰。实测 320px 下：品牌 70px + 四个 44px 图标 + 间距 = 294px，仍余 26px，没有挤压。所以这次<b>让可达性优先于启发式</b>，并在文档里记成「已知例外」，而不是假装它符合惯例。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="q">09</span>进度条 / 阅读时长：<span class="call">保留</span></h3>
+    <p>15 家里 0 家有阅读进度条、0 家显示阅读时长。这两个是「超出惯例的增强」，不是错误——站点已经上线并写进设计定案，本轮不动。真要减负，它俩才是第一个该砍的，而不是语言入口。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>局限：什么会推翻这些判断</h2>
+  <div class="note">
+    <p><b>样本。</b>15 家偏英文技术/写作博客，中文只 3 家；「右侧 TOC」只有 1 个博客样本 + 文档站类推，属于弱证据。</p>
+    <p><b>方法。</b>断点与字号取自 CSS 原文，不是渲染快照；手机图标数是按 ≤480px 媒体查询推导，未逐站截图。zhangxinxu 用 Chrome UA 返回 403，换 Safari UA 才拿到。</p>
+    <p><b>字体。</b>结论依赖本机装了 Noto Serif SC。没装的 Windows 仍落 SimSun——补名不会让它更差，但也修不好没装字体的机器；真要全平台一致只能上自托管切片，那是另一个成本量级。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>已落地</h2>
+  <p>断点 860→768（含 JS resize 门控）；字号阶梯收敛（30 值 → 文字 5 档 + 展示 5 档，正文统一 18）；小字下限 12（品牌副标 10 豁免）；display 栈补 Noto Serif SC/JP；hreflang 改 <code>zh</code>。全部在真实 Chrome 复验：768px 时导航收起、769px 时展开，320/390/768/1440 零横向溢出，标题平台字体已从 SimSun 变为 Noto Serif SC。</p>
+  <p>站点侧只有一条待跟进：<code>/archives/</code> 301 到 <code>/posts/</code>；以及目录侧别要不要跟到右侧——这两条要动 Hugo 模板与 netlify.toml，不在这次原型范围内。</p>
+</section>
+
+<footer>
+  独立博客形态取样 · 15 站 · 2026-11-07<br>
+  样本：jvns.ca · danluu.com · leerob.com · overreacted.io · maggieappleton.com · robinrendle.com · craigmod.com · muan.co · tonsky.me · sive.rs · blog.jim-nielsen.com · ruanyifeng.com/blog · zhangxinxu.com · diygod.cc
+</footer>
+</div>
+</body>
+</html>

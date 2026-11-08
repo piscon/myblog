@@ -1,0 +1,35 @@
+[
+ {
+  "label": "font-probe",
+  "value": {
+   "available": {
+    "Iowan Old Style": true,
+    "Palatino Linotype": true,
+    "Songti SC": true,
+    "Noto Serif CJK SC": true,
+    "Noto Serif SC": true,
+    "Source Han Serif SC": true,
+    "SimSun": true,
+    "Noto Sans SC": true,
+    "Microsoft YaHei": true,
+    "PingFang SC": true,
+    "Noto Serif JP": true
+   },
+   "widths": {
+    "Iowan Old Style": 280,
+    "Palatino Linotype": 280,
+    "Songti SC": 280,
+    "Noto Serif CJK SC": 280,
+    "Noto Serif SC": 280,
+    "Source Han Serif SC": 280,
+    "SimSun": 280,
+    "Noto Sans SC": 280,
+    "Microsoft YaHei": 280,
+    "PingFang SC": 280,
+    "Noto Serif JP": 280
+   },
+   "h1Family": "\"Iowan Old Style\", \"Palatino Linotype\", Palatino, \"Songti SC\", \"Noto Serif CJK SC\", \"Source Han Serif SC\", SimSun, serif",
+   "h1Size": "58px"
+  }
+ }
+]

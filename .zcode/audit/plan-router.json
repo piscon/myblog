@@ -1,0 +1,21 @@
+{
+  "out": "r-router.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html#/posts", "settle": 1600 },
+    { "eval": "(async () => { window.scrollTo(0, 700); await new Promise(r=>setTimeout(r,250)); const b={y:Math.round(scrollY),h:location.hash}; const row=document.querySelector('#view-posts .post-row'); row.click(); await new Promise(r=>setTimeout(r,800)); const a={y:Math.round(scrollY),h:location.hash,title:document.title,focus:document.activeElement.tagName+'.'+document.activeElement.className}; history.back(); await new Promise(r=>setTimeout(r,800)); const back={y:Math.round(scrollY),h:location.hash,title:document.title}; return {before:b,after:a,back:back}; })()", "label": "router-scroll" },
+
+    { "eval": "(async () => { location.hash='#/posts/ai-update-blog'; await new Promise(r=>setTimeout(r,700)); window.scrollTo(0, 1200); await new Promise(r=>setTimeout(r,600)); const rb=document.getElementById('readbar'); const t=document.querySelector('.toc-float'); return {readbarHidden:rb?rb.hidden:null, readbarW: rb?Math.round(rb.getBoundingClientRect().width):null, tocFloat: t?{hidden:t.hidden,display:getComputedStyle(t).display}:null, h:location.hash}; })()", "label": "article-chrome-390" },
+
+    { "eval": "(async () => { const s=document.querySelector('.toc-inline summary'); if(!s) return 'NO_TOC'; s.click(); await new Promise(r=>setTimeout(r,300)); const d=document.querySelector('.toc-inline'); const r=d.getBoundingClientRect(); return {open:d.open, h:Math.round(r.height), summaryText:s.textContent.trim().slice(0,20), links:[...d.querySelectorAll('a')].length}; })()", "label": "toc-inline-390" },
+
+    { "eval": "(async () => { location.hash='#/search'; await new Promise(r=>setTimeout(r,600)); const i=document.getElementById('q'); i.value='钢琴'; i.dispatchEvent(new Event('input',{bubbles:true})); await new Promise(r=>setTimeout(r,400)); return {rows:document.querySelectorAll('#search-results .result-row').length, first:document.querySelector('#search-results .result-row h3')?.textContent, hubHidden:document.getElementById('tag-hub')?.hidden}; })()", "label": "search-type" },
+
+    { "eval": "(async () => { const i=document.getElementById('q'); i.value='zzzz'; i.dispatchEvent(new Event('input',{bubbles:true})); await new Promise(r=>setTimeout(r,400)); return {rows:document.querySelectorAll('#search-results .result-row').length, empty:document.querySelector('.empty-state')?getComputedStyle(document.querySelector('.empty-state')).display:null}; })()", "label": "search-empty" },
+
+    { "eval": "(async () => { const v=[...document.querySelectorAll('.view')].map(x=>({id:x.id, hidden:x.hidden, display:getComputedStyle(x).display})); return v; })()", "label": "views" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "eval": "(async () => { location.hash='#/posts/zz-s03'; await new Promise(r=>setTimeout(r,700)); window.scrollTo(0, 1500); await new Promise(r=>setTimeout(r,700)); const t=document.querySelector('.toc-float'); const r=t?t.getBoundingClientRect():null; return {toc:t?{hidden:t.hidden,display:getComputedStyle(t).display,x:r.x,y:r.y,w:r.width,h:r.height}:null, active:document.querySelector('.toc-float a[aria-current]')?.textContent?.trim().slice(0,20), scrollY:Math.round(scrollY)}; })()", "label": "toc-float-1440" }
+  ]
+}

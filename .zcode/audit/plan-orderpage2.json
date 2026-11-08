@@ -1,0 +1,10 @@
+{
+  "out": "r-orderpage2.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/order.html", "settle": 1200 },
+    { "scrollTo": 300 },
+    { "shot": "p390-order2.png" },
+    { "eval": "(() => ({ overflowX: document.documentElement.scrollWidth - innerWidth, tableH: Math.round(document.querySelector('table').getBoundingClientRect().height) }))()", "label": "page-390" }
+  ]
+}

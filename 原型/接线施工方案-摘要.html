@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接线施工方案 · 摘要（2026-11-08）</title>
+<style>
+:root{--bg:#f6f4ef;--panel:#fff;--ink:#1d1e20;--sub:#6b6f76;--line:#e3e0d8;--gold:#b08020;--ok:#2e7d4f;--warn:#a8562a}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Source Han Serif SC","Noto Serif SC","PingFang SC","Microsoft YaHei",serif;background:var(--bg);color:var(--ink);line-height:1.75;padding:40px 16px 80px}
+.wrap{max-width:1080px;margin:0 auto}
+header{margin-bottom:36px}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--gold);font-weight:600}
+h1{font-size:clamp(24px,3vw,34px);font-weight:800;margin:8px 0 6px;line-height:1.25}
+.meta{color:var(--sub);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px}
+.panel h2{font-size:17px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.panel ul,.panel ol{padding-left:1.3em}
+.panel li{margin:.45em 0;font-size:14.5px}
+.ok{color:var(--ok);font-weight:700}.warn{color:var(--warn);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:600;font-size:12px;letter-spacing:.08em}
+code{background:#efede6;border-radius:4px;padding:0 4px;font-size:.9em}
+footer{margin-top:32px;color:var(--sub);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">二重奏 · 原型 → Hugo 接线</div>
+  <h1>接线施工方案</h1>
+  <div class="meta">2026-11-08 定稿 ｜ 全文：<a href="接线施工方案.md">接线施工方案.md</a> ｜ 预算 6–7.5 工作日，6 阶段，覆盖模板 ≤6 文件</div>
+</header>
+<div class="grid">
+
+<section class="panel">
+<h2>① 开工前唯一待办：三项签认</h2>
+<table>
+<tr><th>#</th><th>默认（调研选边）</th><th>代价</th></tr>
+<tr><td class="warn">1</td><td>/posts/ 改<strong>年份分组文字目录</strong></td><td class="warn">推翻 11-07 Casper 堆叠卡（commit db03baf），最大视觉变化</td></tr>
+<tr><td>2</td><td>Inter 正文保留 + 衬线 display 上标题/品牌</td><td>fonts.css 只增不改，可回退</td></tr>
+<tr><td>3</td><td>TOC 浮层 左 → 右</td><td>纯 CSS 改动，不碰模板</td></tr>
+</table>
+</section>
+
+<section class="panel">
+<h2>② 分层落点</h2>
+<ul>
+<li><strong>Level 1 front matter</strong>：<span class="ok">零工作</span>——字段已够，.pages.yml 不动</li>
+<li><strong>Level 2 CSS/JS</strong>：工作量主体。extended CSS 重整（typography 改造 + home/list/chrome 三个新文件）；main.js.txt 去 hash 路由后重写进 site.js，交互件全保留</li>
+<li><strong>Level 3 模板</strong>：新增覆盖 ≤6——list / archives / terms / 404 / index(profileMode)；single.html <strong>不覆盖</strong>（TOC 右浮走纯 CSS）</li>
+<li><span class="warn">换轨决策</span>：间距标尺 <code>--u</code> 退役 → 原型 <code>--sp-1…9 + --sp-section/head/tail</code> 全站换轨（断言同步改写）</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>③ 六阶段施工（每阶段独立可回退）</h2>
+<ol>
+<li>Phase 0 准备：分支 + 基线截图 + 签认（0.5d）</li>
+<li>Phase 1 令牌与 chrome：--sp-* / 衬线 / 头部页脚换肤（1d）</li>
+<li>Phase 2 编辑部式首页（1d）</li>
+<li><span class="warn">Phase 3 列表系统</span>：文字目录+分页+term 页，拆 Casper 卡（1.5d）</li>
+<li>Phase 4 文章页：TOC 右浮、间距对齐，保留三档破格/srcset/giscus 跟随（1.5d）</li>
+<li>Phase 5 搜索/404/关于/留言板（1d）→ Phase 6 断言增量+全量回归+上线（1d）</li>
+</ol>
+</section>
+
+<section class="panel">
+<h2>④ 风险护栏</h2>
+<ul>
+<li>feature-check 63 → ~66 项：新增 7 条（文字目录/编辑部首页/404 出口/TOC 右浮/--sp 体系/衬线层/评论壳），退役失效断言</li>
+<li>施工全程不 push <code>content/zh/**</code>，翻译流水线零接触</li>
+<li>每阶段 commit 前本地 <code>hugo --gc --minify</code> 过闸；上线走 deploy preview + curl 抽查</li>
+<li>明确不做：CJK 网页字体、CSP、CMS actions、submodule 与 head SEO 契约改动</li>
+</ul>
+</section>
+
+</div>
+<footer>二重奏原型 · 接线施工方案 ｜ 全文见 原型/接线施工方案.md</footer>
+</div>
+</body>
+</html>

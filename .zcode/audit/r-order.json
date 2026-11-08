@@ -1,0 +1,114 @@
+[
+ {
+  "label": "order-320",
+  "value": [
+   {
+    "cls": "theme-btn",
+    "x": 118,
+    "right": 162,
+    "w": 44
+   },
+   {
+    "cls": "icon-btn",
+    "x": 164,
+    "right": 208,
+    "w": 44
+   },
+   {
+    "cls": "lang-wrap",
+    "x": 210,
+    "right": 254,
+    "w": 44
+   },
+   {
+    "cls": "menu-btn",
+    "x": 256,
+    "right": 300,
+    "w": 44
+   }
+  ]
+ },
+ {
+  "label": "fit-320",
+  "value": {
+   "overflowX": 0,
+   "brandRight": 94,
+   "firstIconX": 118
+  }
+ },
+ {
+  "label": "order-390",
+  "value": [
+   {
+    "cls": "theme-btn",
+    "x": 184,
+    "right": 228
+   },
+   {
+    "cls": "icon-btn",
+    "x": 230,
+    "right": 274
+   },
+   {
+    "cls": "lang-wrap",
+    "x": 276,
+    "right": 320
+   },
+   {
+    "cls": "menu-btn",
+    "x": 322,
+    "right": 366
+   }
+  ]
+ },
+ {
+  "label": "lang-panel-390",
+  "value": {
+   "x": 170,
+   "right": 366,
+   "y": 68,
+   "vw": 390
+  }
+ },
+ {
+  "label": "tab-order-390",
+  "value": []
+ },
+ {
+  "label": "order-1440",
+  "value": [
+   {
+    "cls": "theme-btn",
+    "x": 1127,
+    "right": 1171,
+    "d": "grid"
+   },
+   {
+    "cls": "icon-btn",
+    "x": 1173,
+    "right": 1217,
+    "d": "grid"
+   },
+   {
+    "cls": "lang-wrap",
+    "x": 1219,
+    "right": 1263,
+    "d": "flex"
+   },
+   {
+    "cls": "menu-btn",
+    "x": 0,
+    "right": 0,
+    "d": "none"
+   }
+  ]
+ },
+ {
+  "label": "lang-panel-1440",
+  "value": {
+   "x": 1067,
+   "right": 1263,
+   "y": 86
+  }
+ }
+]

@@ -1,0 +1,17 @@
+{
+  "out": "r-memo.json",
+  "steps": [
+    { "viewport": { "width": 1440, "height": 1000, "mobile": false } },
+    { "goto": "http://127.0.0.1:8124/memo.html", "settle": 1200 },
+    { "shot": "m1440.png" },
+    { "eval": "(() => ({ overflowX: document.documentElement.scrollWidth - innerWidth, tables: document.querySelectorAll('table').length, rows: document.querySelectorAll('tbody tr').length }))()", "label": "memo-1440" },
+
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "shot": "m390.png" },
+    { "eval": "(() => ({ overflowX: document.documentElement.scrollWidth - innerWidth }))()", "label": "memo-390" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1400 },
+    { "shot": "t1440.png" }
+  ]
+}

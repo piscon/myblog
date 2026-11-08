@@ -1,0 +1,379 @@
+<body>
+<a class="skip" href="#main" data-i18n="skip">跳到正文</a>
+
+<header class="site-head">
+  <div class="wrap head-inner">
+    <a class="brand" href="#/" aria-label="二重奏，返回首页">
+      <span class="brand-cn">二重奏</span>
+      <span class="brand-en">DEUX</span>
+    </a>
+
+    <nav class="nav" aria-label="主导航" data-i18n-aria="nav_label">
+      <a href="#/posts" data-nav="posts" data-i18n="nav_posts">文章</a>
+      <a href="#/about" data-nav="about" data-i18n="nav_about">关于</a>
+    </nav>
+
+    <div class="head-actions">
+      <!-- Control order is the evidence-backed one, not a preference:
+           right-to-left = menu (rightmost in 9/10 real headers; it's the
+           overflow), then language (W3C i18n: language links belong top
+           right and must not be hidden — someone who can't read the page
+           looks there first), then search (content action, 9/9 in the
+           right cluster), then theme (a preference; no platform spec, so
+           it takes the outermost slot). DOM order = visual order = tab
+           order. -->
+      <button class="icon-btn theme-btn" type="button" aria-label="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"></path></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      </button>
+      <a class="icon-btn" id="search-link" href="#/search" aria-label="搜索（Ctrl 或 Command 加 K）" data-i18n-aria="search_label">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+      </a>
+      <div class="lang-wrap">
+        <button class="icon-btn lang-btn" type="button" aria-label="切换语言" data-i18n-aria="lang_label" aria-expanded="false" aria-controls="lang-menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3.4 3 14.6 0 18M12 3c-3 3.4-3 14.6 0 18"></path></svg>
+        </button>
+        <div class="lang-menu" id="lang-menu" hidden>
+          <a href="#/" hreflang="zh" lang="zh-CN" data-lang-link="zh"><span>简体中文</span><em>ZH</em></a>
+          <a href="#/ja/" hreflang="ja" lang="ja" data-lang-link="ja"><span>日本語</span><em>JA</em></a>
+          <a href="#/en/" hreflang="en" lang="en" data-lang-link="en"><span>English</span><em>EN</em></a>
+        </div>
+      </div>
+      <button class="icon-btn menu-btn" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-menu" id="mobile-menu" aria-label="移动导航" hidden>
+    <a class="mm-link" href="#/posts"><span data-i18n="nav_posts">文章</span> <span>ESSAYS</span></a>
+    <a class="mm-link" href="#/about"><span data-i18n="nav_about">关于</span> <span>ABOUT</span></a>
+  </nav>
+</header>
+
+
+<div class="readbar" id="readbar" hidden></div>
+
+<nav class="toc-float" id="toc-float" aria-label="文章目录" hidden>
+  <p class="toc-float-title" data-i18n="toc_title">目录</p>
+  <ol id="toc-float-list"></ol>
+</nav>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="图片放大查看" hidden>
+  <button class="lb-close" id="lb-close" type="button" aria-label="关闭">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+  </button>
+  <img id="lb-img" alt="">
+  <p class="lb-cap" id="lb-cap"></p>
+</div>
+
+<main id="main" tabindex="-1">
+
+  <!-- HOME -->
+  <section class="view" id="view-home" data-view="home">
+    <div class="wrap">
+      <div class="masthead-line">
+        <span class="mh-cn" data-i18n="masthead_cn">写日常，也写让日常运转的代码。</span>
+        <span class="mh-en">Essays &amp; Notes · 2026</span>
+      </div>
+
+      <div class="hero">
+        <div class="hero-text reveal">
+          <p class="eyebrow"><span class="dot"></span><span id="hero-cat">日常</span> <span aria-hidden="true">/</span> <time datetime="2026-11-05">2026.11.05</time></p>
+          <h1 class="hero-title" id="hero-title">傍晚六点的琴声</h1>
+          <p class="hero-deck" id="hero-deck">搬来之后每天傍晚六点，隔壁都会响起一段总在同一处停下的钢琴。关于没弹完的半首曲子、不好意思敲的门，和「不打扰」这种温柔的距离。</p>
+          <div class="hero-actions">
+            <a class="read-link" href="#/posts/zz-s03"><span data-i18n="read_this">读这篇</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg>
+            </a>
+            <span class="hero-time" id="hero-time">约 2 分钟</span>
+          </div>
+          <p class="hero-byline" id="hero-byline">文 · 二重奏<span>／</span>日常随笔</p>
+        </div>
+
+        <figure class="hero-figure reveal">
+          <a href="#/posts/zz-s03" aria-hidden="true" tabindex="-1">
+            <img src="assets/piano-afternoon-7c1d.jpg" width="2000" height="1333" alt="午后阳光落在靠窗的旧钢琴上">
+          </a>
+          <figcaption class="figcap" id="hero-figcap">六点差五分，西窗的光落在琴键上。</figcaption>
+        </figure>
+      </div>
+
+      <section class="recent" aria-labelledby="recent-title">
+        <div class="section-head">
+          <h2 id="recent-title" data-i18n="recent_title">近作</h2>
+          <a class="section-link" href="#/posts"><span data-i18n="all_posts">全部文章</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg>
+          </a>
+        </div>
+        <div class="recent-grid" id="recent-grid"></div>
+      </section>
+
+      <section class="ledger" aria-labelledby="ledger-title">
+        <div class="section-head">
+          <h2 id="ledger-title" data-i18n="index_title">目录</h2>
+          <a class="section-link" href="#/archives"><span data-i18n="by_year">按年份浏览</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg>
+          </a>
+        </div>
+        <div class="ledger-list" id="ledger-list"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- POSTS -->
+  <section class="view" id="view-posts" data-view="posts" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker" id="posts-kicker">Archive · 目录</p>
+        <div class="page-title">
+          <h1 data-i18n="nav_posts">文章</h1>
+          <span class="page-count" id="list-count">共 10 篇</span>
+        </div>
+        <p class="page-deck" data-i18n="posts_deck">关于日常、写作，以及让这个站点运转的技术笔记。按时间排列，新的在上面。</p>
+      </div>
+
+      <div class="filters" role="group" aria-label="按分类筛选" id="list-filters" data-i18n-aria="filter_label"></div>
+
+      <div id="list-groups"></div>
+      <div class="list-foot">
+        <span><span data-i18n="newest_first">按时间倒序</span> · <span data-i18n="posts_total">共</span> <span id="list-foot-count">10</span> <span data-i18n="posts_unit">篇</span></span>
+        <a href="https://deux.top/zh/index.xml" data-i18n="rss_full">RSS 全文</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICLE -->
+  <section class="view" id="view-article" data-view="article" hidden>
+   <article>
+    <div class="wrap">
+      <div class="article-head">
+        <div class="article-kicker" id="art-kicker"></div>
+        <h1 class="article-title" id="art-title"></h1>
+        <p class="article-deck" id="art-deck"></p>
+        <details class="toc-inline" id="toc-inline" hidden>
+          <summary>
+            <span data-i18n="toc_title">目录</span><span class="toc-count" id="toc-count"></span><span class="toc-mark" aria-hidden="true"></span>
+          </summary>
+          <ol id="toc-inline-list"></ol>
+        </details>
+      </div>
+      <figure class="article-cover" id="art-cover"></figure>
+    </div>
+    <div class="wrap">
+      <div class="article-body" id="art-body"></div>
+      <div class="article-foot">
+        <div class="article-tags" id="art-tags"></div>
+        <div class="share-row" id="share-host"></div>
+        <nav class="pager" id="art-pager" aria-label="上一篇与下一篇"></nav>
+        <section class="related" aria-labelledby="related-title">
+          <h2 id="related-title">接着读</h2>
+          <div id="art-related"></div>
+        </section>
+        <section class="comments" id="art-comments" aria-labelledby="art-comments-title"></section>
+      </div>
+    </div>
+   </article>
+  </section>
+
+  <!-- ARCHIVES (compact year ledger) -->
+  <section class="view" id="view-archives" data-view="archives" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker" id="archives-kicker">Archive · 归档</p>
+        <div class="page-title">
+          <h1 data-i18n="archives_title">归档</h1>
+          <span class="page-count" id="archives-count"></span>
+        </div>
+        <p class="page-deck" data-i18n="archives_deck">按年份收拢的全部文字。能从任何一行进入。</p>
+      </div>
+      <div id="archives-groups"></div>
+      <div class="list-foot"><span data-i18n="newest_first">按时间倒序</span><a href="#/posts" data-i18n="all_posts">全部文章</a></div>
+    </div>
+  </section>
+
+  <!-- SEARCH -->
+  <section class="view" id="view-search" data-view="search" hidden>
+    <div class="wrap">
+      <div class="search-head">
+        <p class="kicker" id="search-kicker">Search · 搜索</p>
+        <div class="page-title"><h1 data-i18n="search_title">搜索</h1><span class="page-count" id="search-total">10 篇</span></div>
+        <form class="search-form" role="search" id="search-form">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+          <label class="sr-only" for="q">搜索文章</label>
+          <input class="search-input" id="q" type="search" name="q" placeholder="搜标题、摘要或标签" autocomplete="off" spellcheck="false" aria-describedby="search-hint">
+          <kbd>Ctrl / ⌘ K</kbd>
+        </form>
+        <div class="search-meta">
+          <span id="search-hint">输入关键词，结果即时出现。Esc 清空。</span>
+          <span id="search-count" aria-live="polite">共 10 篇</span>
+        </div>
+        <div class="filters" role="group" aria-label="按分类筛选" id="search-filters"></div>
+        <h2 class="sr-only">搜索结果</h2>
+        <div class="search-results" id="search-results"></div>
+        <section class="tag-hub" id="tag-hub" aria-labelledby="tag-hub-title" hidden>
+          <h2 id="tag-hub-title">标签</h2>
+          <div class="tag-cloud" id="tag-cloud"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="view" id="view-about" data-view="about" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker">About · 关于</p>
+        <div class="page-title"><h1>关于</h1><span class="page-count">二重奏</span></div>
+      </div>
+      <div class="about-grid">
+        <aside class="about-side">
+          <img class="about-avatar" src="assets/avatar-duet-4f7a.jpg" width="768" height="768" alt="二重奏的头像：蓝色短发、红色礼帽">
+          <div>
+            <p class="about-name">二重奏</p>
+            <p class="about-role">三语博客 · 日常与技术</p>
+          </div>
+          <div class="about-links">
+            <a href="https://github.com/piscon" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4 1.5-4-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C7.7 2.8 6.7 3.1 6.7 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 5.3 9.5c0 4.6 2.7 5.7 5.5 6-.5.6-.5 1.2-.5 2V21"></path></svg>
+              GitHub
+            </a>
+            <a href="mailto:hello@deux.top">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+              hello@deux.top
+            </a>
+            <a href="https://x.com/deux_top" target="_blank" rel="noopener noreferrer" aria-label="X 账号 @deux_top">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"></path></svg>
+              @deux_top
+            </a>
+          </div>
+        </aside>
+
+        <div class="about-main">
+          <p>你好，我是<strong>二重奏</strong>。</p>
+          <blockquote>精神与思想的二重奏，自由与独立的交响曲。</blockquote>
+          <p>这句副标题就是名字的全部由来：把理性的工程与感性的观察放在一起，让它们互为声部。</p>
+
+          <h2>这里写什么</h2>
+          <ul>
+            <li><strong>AI 与工具链</strong>：让模型真正替人干活的工程笔记——这个博客本身就由 AI 翻译流水线驱动，三语同步发布。</li>
+            <li><strong>建站与排版</strong>：Hugo / PaperMod 上的自定义都记录成可复现的约定。</li>
+            <li><strong>日常</strong>：技术之外的观察与随想。</li>
+          </ul>
+
+          <h2>联系方式</h2>
+          <p>GitHub：<a href="https://github.com/piscon" target="_blank" rel="noopener noreferrer">@piscon</a>（本站源码也在<a href="https://github.com/piscon/myblog" target="_blank" rel="noopener noreferrer">这里</a>）。邮件最好用 <a href="mailto:hello@deux.top">hello@deux.top</a>；X 上是 <a href="https://x.com/deux_top" target="_blank" rel="noopener noreferrer">@deux_top</a>。</p>
+          <p>喜欢的话可以订阅 <a href="https://deux.top/zh/index.xml">RSS 全文</a>，所有更新都会推送到你的阅读器。</p>
+
+          <h2>版权</h2>
+          <p>除非另有说明，本站全部内容采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a> 许可：署名、非商业、相同方式共享。转载请附上原文链接。</p>
+
+          <div class="about-note">
+            这个页面是一份界面设计稿中的示例页面。<br>
+            设计原型：Hugo + PaperMod · 中文 / 日本語 / English。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAXONOMY INDEX (tags / categories) -->
+  <section class="view" id="view-tax" data-view="tax" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker" id="tax-kicker"></p>
+        <div class="page-title"><h1 id="tax-title"></h1><span class="page-count" id="tax-count"></span></div>
+        <p class="term-note" id="tax-note"></p>
+      </div>
+      <div class="term-index-cloud" id="tax-cloud"></div>
+    </div>
+  </section>
+
+  <!-- TERM DETAIL (/tags/:term, /categories/:term) -->
+  <section class="view" id="view-term" data-view="term" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <a class="term-back" id="term-back" href="#/tags">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:1.6"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg>
+          <span id="term-back-label"></span>
+        </a>
+        <p class="kicker" id="term-kicker"></p>
+        <div class="page-title"><h1 id="term-title"></h1><span class="page-count" id="term-count"></span></div>
+      </div>
+      <div id="term-groups"></div>
+    </div>
+  </section>
+
+  <!-- GUESTBOOK -->
+  <section class="view" id="view-guestbook" data-view="guestbook" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker" id="gb-kicker">Guestbook · 留言</p>
+        <div class="page-title"><h1 id="gb-title">留言板</h1><span class="page-count">giscus</span></div>
+      </div>
+      <div class="guestbook-intro" id="gb-intro"></div>
+      <section class="comments" aria-labelledby="gb-comments-title" id="gb-comments"></section>
+    </div>
+  </section>
+
+  <!-- 404 -->
+  <section class="view" id="view-404" data-view="404" hidden>
+    <div class="wrap">
+      <div class="notfound">
+        <p class="notfound-code" aria-hidden="true">404</p>
+        <p class="notfound-msg" id="nf-msg"></p>
+        <nav class="notfound-actions" aria-label="404 快捷出口">
+          <a href="#/" id="nf-home">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"></path></svg>
+            <span id="nf-home-label"></span>
+          </a>
+          <a href="#/posts">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"></path></svg>
+            <span id="nf-posts-label"></span>
+          </a>
+          <a href="#/search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+            <span id="nf-search-label"></span>
+          </a>
+        </nav>
+        <section class="notfound-recent">
+          <h2 class="related-h" id="nf-recent-title" style="margin:0 0 14px;font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase"></h2>
+          <div id="nf-recent"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<noscript><div class="wrap"><p class="mono" style="padding:24px 0;color:var(--muted);font-size:12px">这个设计稿需要 JavaScript 才能切换页面、筛选与搜索。</p></div></noscript>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">二重奏</div>
+      </div>
+      <nav class="foot-links" aria-label="页脚导航">
+        <a href="#/posts" data-i18n="nav_posts">文章</a>
+        <a href="#/about" data-i18n="nav_about">关于</a>
+        <a href="#/guestbook" data-i18n="guestbook_title">留言板</a>
+        <a href="#/search" data-i18n="search_title">搜索</a>
+        <a href="https://deux.top/zh/index.xml" data-i18n="rss_full">RSS 全文</a>
+        <a href="https://github.com/piscon" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </div>
+    <div class="foot-meta">
+      <p>© 2026 二重奏 · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></p>
+      <p>Hugo · PaperMod · Netlify</p>
+    </div>
+  </div>
+</footer>
+
+
+
+
+
+
+</body>
+</html>

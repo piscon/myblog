@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>接线差距结论 · 二重奏原型</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --paper: #f7f3ea; --paper-2: #f0eadd; --ink: #1a1712; --ink-2: #3b3529;
+  --muted: #6b6455; --rule: #dfd6c4; --rule-strong: #c8bda6; --accent: #8a5d15;
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Noto Serif SC", SimSun, serif;
+  --mono: "SFMono-Regular", Consolas, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #16140f; --paper-2: #1e1b14; --ink: #ece6d8; --ink-2: #d3c9b6; --muted: #a49b87; --rule: #342f25; --rule-strong: #4a4333; --accent: #d8ab5b; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.75 "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+.wrap { max-width: 900px; margin: 0 auto; padding: 40px 28px 72px; }
+.kicker { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 5vw, 44px); line-height: 1.2; margin: 14px 0 6px; }
+.deck { font-size: 17px; line-height: 1.85; color: var(--ink-2); max-width: 42em; }
+.panel { border-top: 1px solid var(--rule); margin-top: 34px; padding-top: 22px; }
+.panel h2 { font-family: var(--mono); font-weight: 400; font-size: 12px; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; margin: 0 0 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-weight: 600; border-bottom: 1px solid var(--ink); padding: 8px 10px 8px 0; }
+td { border-bottom: 1px solid var(--rule); padding: 9px 10px 9px 0; vertical-align: top; }
+.ok { font-family: var(--mono); color: var(--accent); white-space: nowrap; }
+.no { font-family: var(--mono); color: var(--muted); white-space: nowrap; }
+p.note { font-size: 14px; color: var(--muted); }
+ul { padding-left: 1.3em; }
+li { margin: .45em 0; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: .2em; }
+.foot { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .06em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">Wiring Gap · 接线差距 · 2026-11-08</p>
+  <h1>交互版离「直接替换博客」还差什么</h1>
+  <p class="deck">对照线上站构建产物（public/）逐页核对后的结论：开工前原型只有 5/12 的页面类型；本轮把缺口全部补进原型——12 条路由、三语同页切换、文章页全部组件。页面形态层面已可 1:1 映射，剩余差距都在 Hugo 构建才能产出的一层。</p>
+
+  <section class="panel">
+    <h2>面板一 · 页面类型：5 → 12</h2>
+    <table>
+      <tr><th>路由（原型 = 站点）</th><th>本轮前</th><th>本轮后</th></tr>
+      <tr><td>#/ · #/posts · #/posts/:slug · #/search · #/about</td><td class="ok">已有</td><td class="ok">三语化 + 契约对齐</td></tr>
+      <tr><td>#/archives（归档台账）</td><td class="no">缺</td><td class="ok">新增</td></tr>
+      <tr><td>#/guestbook（留言板 = giscus 本体）</td><td class="no">缺</td><td class="ok">新增 · 三语真实引导语</td></tr>
+      <tr><td>#/tags · #/tags/:term</td><td class="no">缺（标签链到搜索）</td><td class="ok">真实 term 路由 · 18 词条</td></tr>
+      <tr><td>#/categories · #/categories/:term</td><td class="no">缺</td><td class="ok">新增 · 文章分类改指 term 页</td></tr>
+      <tr><td>未知路径 → 404 视图</td><td class="no">回落首页</td><td class="ok">404 + 三出口 + 最近 3 篇</td></tr>
+      <tr><td>#/ja/… · #/en/…（语言前缀路由）</td><td class="no">假菜单外链</td><td class="ok">全 chrome + 真实机翻译文</td></tr>
+    </table>
+    <p class="note">ja/en 数据不是占位：10 篇标题摘要、关于页、留言板、zz-s03 全文，全部取自仓库构建产物（即翻译流水线的真实输出）；无译文的瞬时窗口设计为「译文准备中」状态。</p>
+  </section>
+
+  <section class="panel">
+    <h2>面板二 · 文章页组件补齐</h2>
+    <ul>
+      <li><strong>灯箱</strong>：Esc/外点关闭、滚动锁、焦点回归（88dvh）</li>
+      <li><strong>代码复制</strong>：每块代码一枚按钮 + 2s 状态反馈</li>
+      <li><strong>#wide / #full 图文破格</strong>：与站点 kg-width 同公式，1440 实测 wide=1200px、列 680px，≤1248px 塌回</li>
+      <li><strong>视频门面</strong>（bilibili_bvid 形态）+ <strong>自托管音频</strong>（可播放演示音）</li>
+      <li><strong>脚注</strong>：sup 引用 + 注释节 + 回跳</li>
+      <li><strong>分享组</strong>：触屏走系统分享并隐藏 X/Telegram；桌面 X/TG + 复制（与站点行为一致）</li>
+      <li><strong>评论壳</strong>：giscus 的位置/间距/键盘序照站点预留，不加载第三方脚本</li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <h2>面板三 · 取舍（一切以调研为准）</h2>
+    <table>
+      <tr><th>分歧</th><th>调研证据</th><th>选边</th></tr>
+      <tr><td>列表：文字目录 vs Casper 卡</td><td>12 站实测：10/12 文字行，2/12 封面卡</td><td class="ok">文字目录（替换即现站 /posts/ 去卡片化，需签认）</td></tr>
+      <tr><td>TOC 侧别</td><td>既有 15 站调研：唯一有 TOC 的博客在右，文档站全在右</td><td class="ok">右侧（站点左侧浮层建议跟进迁移）</td></tr>
+      <tr><td>评论形态</td><td>样本中评论近缺席；本站已部署 giscus</td><td class="ok">保留 giscus（站点事实优先）</td></tr>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>面板四 · 仍留在 Hugo 侧的差距</h2>
+    <ul>
+      <li>head 契约：canonical / og / JSON-LD / hreflang+x-default / feed 发现 / OpenSearch link</li>
+      <li>giscus 真脚本与主题跟随（comments.html 已有，换壳即可）</li>
+      <li>搜索索引（fastsearch + fuse 权重）——原型为演示形态</li>
+      <li>RSS / sitemap / llms.txt / robots / 封面 srcset：纯构建产物</li>
+      <li>feature-check 增量断言；<strong>CMS 零新增字段</strong>（现有 front matter 足够表达全部形态）</li>
+    </ul>
+    <p class="note">验证：12 路由 × 390/768/1440 无横向溢出；灯箱/复制/Alt+//Ctrl+K/同页语言切换全部实测通过。</p>
+  </section>
+
+  <p class="foot">详细矩阵：原型/接线差距与替换清单.md ｜ 交互版：原型/二重奏-博客界面设计-交互版.html ｜ 依据：research-*.md + .zcode/audit/{r-inventory,survey-list}.md</p>
+</div>
+</body>
+</html>

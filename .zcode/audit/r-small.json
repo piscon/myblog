@@ -1,0 +1,682 @@
+[
+ {
+  "label": "small-targets",
+  "value": [
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "文章",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "inline"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "关于",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "inline"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "简体中文ZH",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "日本語JA",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "EnglishEN",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "mm-link",
+    "txt": "文章 ESSAYS",
+    "w": 0,
+    "h": 0,
+    "fs": "22px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "mm-link",
+    "txt": "关于 ABOUT",
+    "w": 0,
+    "h": 0,
+    "fs": "22px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "toc-link",
+    "txt": "一、准时得不像人",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "toc-link",
+    "txt": "二、停下来的那一小截",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "toc-link",
+    "txt": "三、关于「敲不敲门」",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "toc-link",
+    "txt": "四、一场没下的雨里",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "toc-link",
+    "txt": "五、今早的六点",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "read-link",
+    "txt": "读这篇",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "block"
+   },
+   {
+    "tag": "A",
+    "cls": "section-link",
+    "txt": "全部文章",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "recent-lead",
+    "txt": "菜市场里的天气预报楼下菜市场的摊",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "block"
+   },
+   {
+    "tag": "A",
+    "cls": "recent-item",
+    "txt": "2026.11.05 · 日常修",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "recent-item",
+    "txt": "2026.11.05 · 日常把",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "recent-item",
+    "txt": "2026.11.05 · 技术把",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "section-link",
+    "txt": "按年份浏览",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "ledger-row",
+    "txt": "2026.11.05给静态博客加",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "ledger-row",
+    "txt": "2026.11.05配置文件里那",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "ledger-row",
+    "txt": "2026.11.05用 Clou",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "ledger-row",
+    "txt": "2026.11.01如何使用 A",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "ledger-row",
+    "txt": "2025.11.26你好，世界日",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "filter",
+    "txt": "全部 10",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "block"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "filter",
+    "txt": "日常 5",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "block"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "filter",
+    "txt": "技术 5",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "block"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05傍晚六点的琴",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05菜市场里的天",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05修一把不肯合",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05把一张明信片",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05给静态博客加",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05把构建时间从",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05配置文件里那",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.05用 Clou",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2026.11.01如何使用 A",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "post-row",
+    "txt": "2025.11.26你好，世界日",
+    "w": 0,
+    "h": 0,
+    "fs": "16px",
+    "disp": "grid"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "RSS 订阅全文",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "kicker-cat",
+    "txt": "日常",
+    "w": 26,
+    "h": 22,
+    "fs": "12px",
+    "disp": "block"
+   },
+   {
+    "tag": "INPUT",
+    "cls": "",
+    "txt": "",
+    "w": 13,
+    "h": 13,
+    "fs": "13.3333px",
+    "disp": "block"
+   },
+   {
+    "tag": "INPUT",
+    "cls": "",
+    "txt": "",
+    "w": 13,
+    "h": 13,
+    "fs": "13.3333px",
+    "disp": "block"
+   },
+   {
+    "tag": "INPUT",
+    "cls": "",
+    "txt": "",
+    "w": 13,
+    "h": 13,
+    "fs": "13.3333px",
+    "disp": "block"
+   },
+   {
+    "tag": "INPUT",
+    "cls": "",
+    "txt": "",
+    "w": 13,
+    "h": 13,
+    "fs": "13.3333px",
+    "disp": "block"
+   },
+   {
+    "tag": "INPUT",
+    "cls": "search-input",
+    "txt": "",
+    "w": 0,
+    "h": 0,
+    "fs": "22px",
+    "disp": "block"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "filter",
+    "txt": "全部 10",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "block"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "filter",
+    "txt": "日常 5",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "block"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "filter",
+    "txt": "技术 5",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "block"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "Hugo 4",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "博客 2",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "AI 2",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "菜市场 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "复盘 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "开始 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "邻居 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "朋友 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "散步 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "声音 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "物件 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "信件 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "性能 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "修理 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "Cloudflare 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "CSS 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "JavaScript 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "BUTTON",
+    "cls": "",
+    "txt": "Netlify 1",
+    "w": 0,
+    "h": 0,
+    "fs": "12px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "GitHub",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "hello@deux.top",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "@deux_top",
+    "w": 0,
+    "h": 0,
+    "fs": "14px",
+    "disp": "flex"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "@piscon",
+    "w": 0,
+    "h": 0,
+    "fs": "18px",
+    "disp": "inline"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "这里",
+    "w": 0,
+    "h": 0,
+    "fs": "18px",
+    "disp": "inline"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "hello@deux.top",
+    "w": 0,
+    "h": 0,
+    "fs": "18px",
+    "disp": "inline"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "@deux_top",
+    "w": 0,
+    "h": 0,
+    "fs": "18px",
+    "disp": "inline"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "RSS 全文",
+    "w": 0,
+    "h": 0,
+    "fs": "18px",
+    "disp": "inline"
+   },
+   {
+    "tag": "A",
+    "cls": "",
+    "txt": "CC BY-NC-SA 4.0",
+    "w": 0,
+    "h": 0,
+    "fs": "18px",
+    "disp": "inline"
+   }
+  ]
+ }
+]

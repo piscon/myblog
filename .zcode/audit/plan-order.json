@@ -1,0 +1,25 @@
+{
+  "out": "r-order.json",
+  "steps": [
+    { "viewport": { "width": 320, "height": 720, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1400 },
+    { "eval": "(() => [...document.querySelectorAll('.head-actions > *')].map(el => { const r = el.getBoundingClientRect(); return { cls: el.className.split(' ').pop() || el.id, x: Math.round(r.x), right: Math.round(r.right), w: Math.round(r.width) }; }))()", "label": "order-320" },
+    { "eval": "(() => ({ overflowX: document.documentElement.scrollWidth - innerWidth, brandRight: Math.round(document.querySelector('.brand').getBoundingClientRect().right), firstIconX: Math.round(document.querySelector('.head-actions').getBoundingClientRect().x) }))()", "label": "fit-320" },
+
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "eval": "(() => [...document.querySelectorAll('.head-actions > *')].map(el => { const r = el.getBoundingClientRect(); return { cls: el.className.split(' ').pop() || el.id, x: Math.round(r.x), right: Math.round(r.right) }; }))()", "label": "order-390" },
+    { "shot": "o390.png" },
+    { "click": ".lang-btn", "settle": 400 },
+    { "eval": "(() => { const m = document.getElementById('lang-menu'); const r = m.getBoundingClientRect(); return { x: Math.round(r.x), right: Math.round(r.right), y: Math.round(r.y), vw: innerWidth }; })()", "label": "lang-panel-390" },
+    { "shot": "o390-lang.png" },
+    { "key": "Escape", "settle": 250 },
+
+    { "eval": "(() => { const els = [...document.querySelectorAll('.header a[href], .header button')].filter(e => e.offsetWidth > 0).map(e => (e.className || e.id || e.tagName).toString().split(' ').pop()); return els; })()", "label": "tab-order-390" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "eval": "(() => [...document.querySelectorAll('.head-actions > *')].map(el => { const r = el.getBoundingClientRect(); return { cls: el.className.split(' ').pop() || el.id, x: Math.round(r.x), right: Math.round(r.right), d: getComputedStyle(el).display }; }))()", "label": "order-1440" },
+    { "click": ".lang-btn", "settle": 400 },
+    { "eval": "(() => { const m = document.getElementById('lang-menu'); const r = m.getBoundingClientRect(); return { x: Math.round(r.x), right: Math.round(r.right), y: Math.round(r.y) }; })()", "label": "lang-panel-1440" },
+    { "shot": "o1440-lang.png" }
+  ]
+}

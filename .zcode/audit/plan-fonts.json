@@ -1,0 +1,8 @@
+{
+  "out": "r-fonts.json",
+  "steps": [
+    { "viewport": { "width": 1440, "height": 900, "dst": 1, "mobile": false } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1200 },
+    { "eval": "(() => { const fams=['Iowan Old Style','Palatino Linotype','Songti SC','Noto Serif CJK SC','Noto Serif SC','Source Han Serif SC','SimSun','Noto Sans SC','Microsoft YaHei','PingFang SC','Noto Serif JP']; const res={}; for (const f of fams) { try { res[f]=document.fonts.check('40px \"'+f+'\"'); } catch(e) { res[f]='err'; } } const c=document.createElement('canvas').getContext('2d'); const t='傍晚六点的琴声'; const w={}; for (const f of fams) { c.font='40px \"'+f+'\", monospace'; w[f]=Math.round(c.measureText(t).width); } const h1=document.querySelector('.hero-title'); const cs=getComputedStyle(h1); return {available:res, widths:w, h1Family:cs.fontFamily, h1Size:cs.fontSize}; })()", "label": "font-probe" }
+  ]
+}

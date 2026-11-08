@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>页脚改进说明 · 二重奏设计稿</title>
+<style>
+  :root { --paper:#faf8f4; --ink:#26231e; --ink2:#55504a; --muted:#8a847c; --rule:#e4dfd6; --accent:#b08020; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.75 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+  .wrap { max-width:880px; margin:0 auto; padding:48px 24px 64px; }
+  h1 { font-size:26px; font-weight:800; letter-spacing:-.01em; margin:0 0 6px; }
+  .kicker { font-family:var(--mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 28px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; }
+  .panel { background:#fff; border:1px solid var(--rule); padding:22px 24px; }
+  .panel h2 { font-size:15px; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+  .panel h2 .n { font-family:var(--mono); font-size:11px; color:var(--accent); }
+  ul { margin:0; padding-left:1.2em; }
+  li { margin:.45em 0; color:var(--ink2); }
+  li strong { color:var(--ink); }
+  code { font-family:var(--mono); font-size:.85em; background:#f1ede5; padding:1px 5px; }
+  .before, .after { border-radius:0; }
+  .mock { border-top:1px solid var(--rule); padding:14px 2px 4px; font-size:13px; color:var(--ink2); }
+  .mock .grp { margin:0 0 10px; }
+  .mock .noisy { font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .mock .strike { text-decoration:line-through; color:#c0b8ac; }
+  .mock .brand { font-weight:700; }
+  .foot { margin-top:28px; padding-top:16px; border-top:1px solid var(--rule); font-size:13px; color:var(--muted); }
+  a { color:inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>页脚改进：从四个声部收敛为两个</h1>
+  <p class="kicker">Footer Redesign · 二重奏-博客界面设计-交互版.html · 2026-11-08</p>
+
+  <div class="grid">
+    <section class="panel">
+      <h2><span class="n">01</span>旧页脚的问题</h2>
+      <ul>
+        <li><strong>四组信息五种排版</strong>：22px 品牌、14px 链接、12px mono ×3 行、底部又叠 2 行 mono，全堆在一屏里</li>
+        <li><strong>两条分割线</strong>：页脚顶线 + 底栏顶线，把 386px 高度切成三段碎片</li>
+        <li><strong>语言行与头部 globe 重复</strong>：语言入口出现两次，与站点「语言列表已收敛(仅头部)」的定案相悖</li>
+        <li><strong>原型水印混进交付面</strong>：「界面设计稿 · 交互版 · 2026」属于元信息，不是页面内容</li>
+      </ul>
+      <div class="mock before">
+        <div class="grp brand">二重奏 <span style="font-weight:400;color:var(--muted)">＋标语</span></div>
+        <div class="grp">文章 · 关于 · 留言板 · 搜索 · RSS · GitHub</div>
+        <div class="grp noisy">© 2026 二重奏<br>CC BY-NC-SA 4.0<br>简体中文 · 日本語 · English <span class="strike">←删</span></div>
+        <div class="grp noisy">Hugo · PaperMod · Netlify<br><span class="strike">界面设计稿 · 交互版 · 2026 ←删</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="n">02</span>新结构</h2>
+      <ul>
+        <li><strong>两个声部</strong>：左＝品牌＋标语（品牌声），右＝六个导航链接（功能声），<code>space-between</code> 各据一缘</li>
+        <li><strong>一条版权线</strong>：细线上方内容、下方单行「© 2026 二重奏 · CC BY-NC-SA 4.0（可点）｜Hugo · PaperMod · Netlify」，两端对齐</li>
+        <li><strong>语言只留头部 globe</strong>；CC 链接改为语言中立 URL，ja/en 不再落到中文 deed</li>
+      </ul>
+      <div class="mock after">
+        <div class="grp" style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap">
+          <span class="brand">二重奏 <span style="font-weight:400;color:var(--muted)">＋标语</span></span>
+          <span>文章 · 关于 · 留言板 · 搜索 · RSS · GitHub</span>
+        </div>
+        <div class="grp noisy" style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:10px;margin-top:12px">
+          <span>© 2026 二重奏 · CC BY-NC-SA 4.0</span><span>Hugo · PaperMod · Netlify</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="n">03</span>兼容与验证</h2>
+      <ul>
+        <li><strong>JS 耦合点全保</strong>：<code>.foot-links a</code> 前 5 个顺序不变（语言切换时按索引改写 href）；<code>.foot-tag</code> 保留（i18n 标语注入）；<code>.foot-bottom span[1]</code> 有空值保护，删除后安全 no-op</li>
+        <li><strong>真机验证</strong>：440px 视口高度 386→328px，链接单行放下；切日文后标语/链接全部本地化、无控制台错误</li>
+        <li><strong>文档同步</strong>：UX-交互说明.md 两处「页脚语言行」旧约定已更新</li>
+      </ul>
+    </section>
+  </div>
+
+  <p class="foot">改动文件：原型/二重奏-博客界面设计-交互版.html（页脚 HTML + Footer CSS 块）· 原型/UX-交互说明.md · 不影响 Hugo 站点</p>
+</div>
+</body>
+</html>

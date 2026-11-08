@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>二重奏 · 交互版界面审计（第 2 轮）</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f7f3ea; --paper-2: #f0eadd; --ink: #1a1712; --ink-2: #3b3529;
+    --muted: #6b6455; --rule: #dfd6c4; --rule-strong: #c8bda6; --accent: #8a5d15;
+    --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Noto Serif CJK SC", SimSun, serif;
+    --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --mono: "SFMono-Regular", Consolas, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.75 var(--sans); }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 28px 96px; }
+  header { padding: 56px 0 28px; border-bottom: 1px solid var(--rule); }
+  .kicker { font: 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 4vw, 42px); line-height: 1.25; margin: 0 0 14px; letter-spacing: -.01em; }
+  .lede { margin: 0; max-width: 40em; color: var(--ink-2); }
+  .meta { margin: 22px 0 0; font: 12px/1.9 var(--mono); color: var(--muted); letter-spacing: .04em; }
+  .meta b { color: var(--ink); font-weight: 500; }
+  section { padding: 44px 0 0; }
+  h2 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0 0 4px; }
+  h2 .num { font: 12px/1 var(--mono); color: var(--accent); letter-spacing: .1em; margin-right: 10px; vertical-align: 2px; }
+  .sub { margin: 0 0 22px; font-size: 13px; color: var(--muted); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .card { background: var(--paper); padding: 18px 18px 16px; }
+  .card .n { font-family: var(--display); font-size: 34px; line-height: 1; }
+  .card .l { margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .card.hot .n { color: var(--accent); }
+  .item { padding: 20px 0; border-top: 1px solid var(--rule); }
+  .item:first-of-type { border-top: 0; }
+  .item h3 { font-size: 17px; font-weight: 500; margin: 0 0 8px; line-height: 1.5; }
+  .tag { font: 11px/1 var(--mono); letter-spacing: .08em; padding: 3px 6px; border: 1px solid var(--rule-strong); color: var(--muted); vertical-align: 3px; margin-right: 8px; }
+  .tag.p0 { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .tag.p1 { border-color: var(--accent); color: var(--accent); }
+  .item p { margin: 6px 0; }
+  .item ul { margin: 8px 0 0; padding-left: 20px; }
+  .item li { margin: 4px 0; }
+  code { font: .88em/1.6 var(--mono); background: var(--paper-2); padding: 1px 5px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ok { color: #4a6b3f; }
+  .warn { color: var(--accent); }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule); font: 12px/1.9 var(--mono); color: var(--muted); letter-spacing: .04em; }
+  @media (max-width: 640px) {
+    .split { grid-template-columns: 1fr; gap: 0; }
+    .wrap { padding: 0 20px 72px; }
+    th, td { padding-right: 8px; }
+  }
+  @media print { body { background: #fff; } .card, .item { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="kicker">Interface Audit · Round 2</p>
+  <h1>二重奏 · 交互版界面审计</h1>
+  <p class="lede">对象：<code>原型/二重奏-博客界面设计-交互版.html</code>。方法不是读代码猜结论——用真实 Chrome 在 320 / 360 / 390 / 414 / 860 / 861 / 1200 / 1440 八个视口实测几何、逐项走交互路径，再看 DOM 与样式。<b>一句话结论：你看到的语言切换器问题成立，另外挖出 2 个 P1 与 8 项需要拍板的取舍。</b></p>
+  <p class="meta">2026-11-07 · 真实 Chrome 浏览器（CDP 设备模拟）· 5 个视图 × 8 个视口 · 已改 3 处，待定 8 处</p>
+</header>
+
+<section>
+  <h2><span class="num">01</span>总览</h2>
+  <p class="sub">修完的、待拍的、本来就没问题的，分开列。</p>
+  <div class="cards">
+    <div class="card hot"><div class="n">1</div><div class="l">P0 已修<br>语言切换器在汉堡里</div></div>
+    <div class="card hot"><div class="n">2</div><div class="l">P1 已修<br>正文残留 Markdown、面板锁滚动</div></div>
+    <div class="card"><div class="n">8</div><div class="l">P2 / 待拍板<br>断点、目录侧别、归档、字号政策</div></div>
+    <div class="card"><div class="n ok">0</div><div class="l">横向溢出<br>8 个视口全部为 0</div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>已修复</h2>
+  <p class="sub">每条都给证据与复验方式，不留“应该好了”。</p>
+
+  <div class="item">
+    <h3><span class="tag p0">P0</span>语言切换器被收进汉堡，而头部明明有 136px 空档</h3>
+    <p><b>证据。</b>≤860px 有一条 <code>.lang-wrap{display:none}</code>，语言只能进汉堡面板（文章 / 关于 / <span class="warn">简体中文 日本語 English</span>）。而实测 390px 下：品牌右缘 94px、搜索图标左缘 230px——中间空了 <b>136px</b>；320px 下同样空 66px 且仍能容下第四个 44px 图标。</p>
+    <p><b>改法。</b>语言 globe 在<b>所有宽度</b>常驻头部（与搜索/主题/汉堡同款 44px），汉堡面板只留站点导航；≤860px 时下拉面板锚定 <code>.head-actions</code> 而非 44px 按钮，196px 宽在 320px 也不会从左边出界；当前语言沿用桌面同款金色对勾；两个面板互斥。</p>
+    <p><b>复验（真实浏览器）。</b>320px：<code>🌐118–162 · 🔍164–208 · 🌙210–254 · ☰256–300</code>，右侧留 20px，<code>scrollWidth = 320</code>；390px：<code>🌐184–228 · 🔍230–274 · 🌙276–320 · ☰322–366</code>；面板展开后 <code>x=170.3 / right=366.3</code>，完整在视口内。860 / 1440 无溢出。开汉堡→语言自动关闭，开语言→汉堡自动关闭，<code>aria-expanded</code> 双向同步。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="tag p1">P1</span>正文里 9 处 Markdown 标记没渲染，读者直接看到星号</h3>
+    <p><b>证据。</b>扫描全部 10 篇正文：<code>zz-s04 / zz-s05 / zz-s07</code> 与 <code>cf-auto-translate</code> 里有字面量 <code>**「送到」…**</code>；<code>zz-s01 / zz-s02 / zz-s03 / zz-s06</code> 里有字面量 <code>*后来那盆绿萝…*</code>。页面渲染成一串裸星号，正文语气全被破坏。</p>
+    <p><b>改法。</b>代码块（<code>&lt;pre&gt;</code>）内原样保留——那里是「AI 把 Markdown 翻烂」的示例，星号必须留；其余全部转成 <code>&lt;strong&gt;</code> / <code>&lt;em&gt;</code>。复验：代码块外残留 <b>0 处</b>。</p>
+  </div>
+
+  <div class="item">
+    <h3><span class="tag p1">P1</span>汉堡面板打开时锁死整页滚动，却没有焦点陷阱</h3>
+    <p><b>证据。</b>面板只有 198px 高（下拉，不是模态），但 <code>setMenu()</code> 里写着 <code>document.body.style.overflow = 'hidden'</code>。结果：页面冻住不能滚，键盘 <kbd>Tab</kbd> 却能一路走出面板到被冻住的正文里——两头都别扭。<b>改法。</b>去掉滚动锁，给面板 <code>max-height: calc(100dvh − 68px)</code> + 自身滚动 + <code>overscroll-behavior: contain</code>（将来加菜单项也不会把尾巴顶出屏幕）。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>待你拍板</h2>
+  <p class="sub">这些不是 bug，是设计决定；但落地前不定，站上就会长成两套。</p>
+  <table>
+    <thead><tr><th>项</th><th>现状</th><th>影响 / 建议</th></tr></thead>
+    <tbody>
+      <tr><td><b>断点</b></td><td>交互版 860，站点 768</td><td>860 会让 iPad 竖屏（820 / 834）也进手机布局：品牌缩水、导航收进汉堡。建议跟站点统一到 768，或明确「平板算手机」。</td></tr>
+      <tr><td><b>目录侧别</b></td><td>交互版浮动在右，站点在左</td><td>两套阅读路径。站点现行是左浮动（<code>translate(-100%,-50%)</code>），改右侧要重算与内容列的间距。</td></tr>
+      <tr><td><b>归档入口</b></td><td>交互版只有 文章 / 关于，归档并入「文章」页</td><td>站点有独立 <code>/archives/</code> 菜单项与多年分组。合并需处理旧链接与 sitemap；保留则交互版要加回第三个菜单项。</td></tr>
+      <tr><td><b>字号下限</b></td><td>文档写「元信息 12px 下限」</td><td>实际仍有 <code>.brand-en</code> 8px、<code>.year-label small</code> 11px、标签计数 10px。要么补进 12px 规则，要么把政策改成「标签类可到 10px」。</td></tr>
+      <tr><td><b>字号阶梯</b></td><td>共 15 级，含 11.5 / 14.5 / 17.5</td><td>近邻级差常低于 5%，肉眼分不出，只增加维护成本。建议收敛到 9–10 级，去掉半像素值。</td></tr>
+      <tr><td><b>中文衬线回退</b></td><td>display 栈未按语言分栈</td><td>Windows 上汉字落到 SimSun（笔画细、气质老），与 mac 的 Songti 差很远。§5 已列 ja/en，zh 也要补。</td></tr>
+      <tr><td><b>hreflang 取值</b></td><td>原型写 <code>zh-CN</code></td><td>站点由 Hugo 按语言码输出（<code>zh</code>）。落地时以 head 的 <code>link[rel=alternate]</code> 为数据源即可，原型标注建议对齐。</td></tr>
+      <tr><td><b>文档里 5 个 <code>h1</code></b></td><td>每个视图各一个，靠 <code>hidden</code> 隐藏</td><td>落地到 Hugo 每页只有 1 个，无碍；作为交付稿建议注明，免得接手的人当成错误。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">04</span>复验数据</h2>
+  <p class="sub">全部来自真实浏览器测量，不是估算。</p>
+  <div class="split">
+    <div>
+      <table>
+        <thead><tr><th>视口</th><th>头部实测</th><th>溢出</th></tr></thead>
+        <tbody>
+          <tr><td class="num">320</td><td class="num">94 → 118 空 24px</td><td class="ok">0</td></tr>
+          <tr><td class="num">390</td><td class="num">94 → 184 空 90px</td><td class="ok">0</td></tr>
+          <tr><td class="num">860</td><td class="num">94 → 654</td><td class="ok">0</td></tr>
+          <tr><td class="num">1440</td><td class="num">nav 1004–1094 · 图标 1126–1262</td><td class="ok">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>检查</th><th>结果</th></tr></thead>
+        <tbody>
+          <tr><td>正文对比度</td><td class="ok">10.98 : 1</td></tr>
+          <tr><td>次级文字 / 图注</td><td class="ok">5.30 : 1</td></tr>
+          <tr><td>深色模式（正文 / 次级）</td><td class="ok">11.22 / 6.68</td></tr>
+          <tr><td>小于 24px 的可点目标</td><td class="ok">0 个</td></tr>
+          <tr><td>重复 ID / 缺 alt / 坏 aria 引用</td><td class="ok">0 / 0 / 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:26px">顺手走了一遍、确认没问题的：搜索过滤与空状态、目录 <code>&lt;details&gt;</code>↔右侧浮层的切换、滚动进度条、Esc / 外点 / 焦点回归、hover 反馈全部锁在 <code>@media(hover:hover)</code> 内、<code>prefers-reduced-motion</code> 与打印样式。</p>
+</section>
+
+<section>
+  <h2><span class="num">05</span>下一步</h2>
+  <p>先定三个会影响模板结构的选择：<b>断点</b>、<b>目录侧别</b>、<b>归档入口</b>。这三项定了，剩下的（字号收敛、衬线栈、hreflang）都能在站点层 <code>assets/css/extended/</code> 与 <code>i18n/</code> 里一次映射完，不用碰 PaperMod 本体。</p>
+  <p>本轮改动集中在 <code>原型/二重奏-博客界面设计-交互版.html</code> 的头部样式、面板脚本与正文数据；<code>原型/UX-交互说明.md</code> 的 §1 / §4 / §5 / §6 已同步，不会出现文档和产物各说一套。</p>
+</section>
+
+<footer>
+  二重奏 · 界面审计（第 2 轮）· 2026-11-07<br>
+  验证环境：真实 Chrome + CDP 设备模拟（320 / 360 / 390 / 414 / 860 / 861 / 1200 / 1440）
+</footer>
+</div>
+</body>
+</html>

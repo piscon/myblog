@@ -1,0 +1,42 @@
+{
+  "out": "r-views.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html#/posts", "settle": 1600 },
+    { "evalFile": "measure-a11y.js", "label": "posts-390" },
+    { "shot": "p390-posts.png" },
+
+    { "hash": "#/posts/zz-s03", "settle": 1200 },
+    { "evalFile": "measure-a11y.js", "label": "article-390" },
+    { "shot": "p390-article.png" },
+
+    { "hash": "#/search", "settle": 900 },
+    { "evalFile": "measure-a11y.js", "label": "search-390" },
+    { "shot": "p390-search.png" },
+
+    { "hash": "#/about", "settle": 900 },
+    { "evalFile": "measure-a11y.js", "label": "about-390" },
+    { "shot": "p390-about.png" },
+
+    { "hash": "#/", "settle": 900 },
+    { "click": ".menu-btn", "settle": 500 },
+    { "eval": "(() => { const m = document.getElementById('mobile-menu'); const r = m.getBoundingClientRect(); return { open: !m.hidden, rect: {x:r.x,y:r.y,w:r.width,h:r.height,bottom:r.bottom}, vh: innerHeight, bodyOverflow: document.body.style.overflow, focus: document.activeElement && document.activeElement.textContent.trim().slice(0,20), langs: [...m.querySelectorAll('.mm-langs a')].map(a => a.textContent.trim()) }; })()", "label": "menu-open-390" },
+    { "shot": "p390-menu.png" },
+    { "key": "Escape", "settle": 400 },
+    { "eval": "(() => ({ open: !document.getElementById('mobile-menu').hidden, focus: document.activeElement.className }))()", "label": "menu-after-esc" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "hash": "#/posts/zz-s03", "settle": 1200 },
+    { "evalFile": "measure-a11y.js", "label": "article-1440" },
+    { "shot": "p1440-article.png" },
+    { "click": ".lang-btn", "settle": 400 },
+    { "eval": "(() => { const m = document.getElementById('lang-menu'); const r = m.getBoundingClientRect(); return { hidden: m.hidden, rect: {x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom}, expanded: document.querySelector('.lang-btn').getAttribute('aria-expanded') }; })()", "label": "lang-open-1440" },
+    { "key": "Escape", "settle": 300 },
+    { "eval": "(() => ({ hidden: document.getElementById('lang-menu').hidden, focus: document.activeElement.className }))()", "label": "lang-after-esc" },
+
+    { "viewport": { "width": 390, "height": 844, "mobile": true, "dark": true } },
+    { "hash": "#/", "settle": 900 },
+    { "shot": "p390-dark.png" },
+    { "evalFile": "measure-a11y.js", "label": "home-390-dark" }
+  ]
+}

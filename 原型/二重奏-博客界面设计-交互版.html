@@ -1,0 +1,3091 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>二重奏 · 个人博客界面设计</title>
+<meta name="description" content="二重奏个人博客界面设计：首页、文章目录、文章页、搜索与关于。图文为主的编辑式排版。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f7f3ea">
+<script>
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search).get('theme');
+      var saved = localStorage.getItem('duet-theme');
+      var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var theme = (q === 'light' || q === 'dark') ? q : (saved || (dark ? 'dark' : 'light'));
+      document.documentElement.setAttribute('data-theme', theme);
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', theme === 'dark' ? '#16140f' : '#f7f3ea');
+    } catch (e) {}
+  })();
+  try {
+    var lm = location.hash.match(/^#\/(ja|en)\//);
+    if (lm) document.documentElement.lang = lm[1];
+  } catch (e) {}
+</script>
+<style>
+/* ------------------------------------------------------------------
+   Tokens
+   Warm paper, ink, one bronze accent. No cards, no shadows, no
+   gradients — structure comes from hairline rules and whitespace.
+------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --paper: #f7f3ea;
+  --paper-2: #f0eadd;
+  --ink: #1a1712;
+  --ink-2: #3b3529;
+  --muted: #6b6455;
+  --faint: #857d6c;
+  --rule: #dfd6c4;
+  --rule-strong: #c8bda6;
+  --accent: #8a5d15;
+  --accent-soft: rgba(138, 93, 21, .13);
+  --code-bg: #221f18;
+  --code-ink: #ece6d8;
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Noto Serif CJK SC", "Noto Serif SC", "Noto Serif JP", "Source Han Serif SC", SimSun, serif;
+  --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --gap: 40px;
+  --max: 1180px;
+  --measure: 680px;
+  /* Spacing scale — 4px grid. New rules take a token, never a bare number.
+     See 原型/留白审计-报告.html for the measurement behind each step. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 28px;
+  --sp-6: 40px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --sp-section: 96px;   /* between chapters */
+  --sp-head: 64px;      /* page head top */
+  --sp-tail: 96px;      /* last block → footer rule */
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #16140f;
+  --paper-2: #1e1b14;
+  --ink: #ece6d8;
+  --ink-2: #d3c9b6;
+  --muted: #a49b87;
+  --faint: #7b7261;
+  --rule: #342f25;
+  --rule-strong: #4a4333;
+  --accent: #d8ab5b;
+  --accent-soft: rgba(216, 171, 91, .14);
+  --code-bg: #0d0c09;
+  --code-ink: #e8e1d1;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color .3s ease, color .3s ease;
+}
+
+::selection { background: var(--accent-soft); color: var(--ink); }
+
+a { color: inherit; text-decoration: none; }
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+img { display: block; max-width: 100%; height: auto; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 1px; }
+/* #main is the skip link's target, not a control: the global focus ring
+   around it draws a 2px bronze rule across the bottom of every page (its
+   lower edge lands exactly on the footer hairline). Rings stay on the
+   interactive elements that need them. */
+#main:focus { outline: none; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip {
+  position: fixed; left: 16px; top: -80px; z-index: 200;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 16px; font-size: 14px;
+  transition: top .2s ease;
+}
+.skip:focus { top: 12px; }
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding-left: var(--gap);
+  padding-right: var(--gap);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .03em;
+}
+
+/* ------------------------------------------------------------------
+   Header
+------------------------------------------------------------------- */
+.site-head {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  transition: background-color .3s ease;
+}
+@supports (backdrop-filter: blur(10px)) {
+  .site-head { background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); }
+}
+
+.head-inner {
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.brand-cn {
+  font-family: var(--display);
+  font-size: 26px;
+  letter-spacing: .06em;
+}
+.brand-en {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .34em;
+  color: var(--muted);
+  padding-left: 2px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  margin-left: auto;
+  margin-right: 8px;
+}
+.nav a {
+  position: relative;
+  font-size: 14px;
+  color: var(--muted);
+  padding: 6px 0;
+  transition: color .2s ease;
+}
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .25s ease;
+}
+.nav a[aria-current="page"]::after { transform: scaleX(1); }
+.nav a[aria-current="page"] { color: var(--ink); }
+
+.head-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; align-self: stretch; }
+
+.icon-btn {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  color: var(--ink-2);
+  transition: color .2s ease, background-color .2s ease;
+  border-radius: 2px;
+}
+.icon-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.theme-btn .i-sun { display: none; }
+:root[data-theme="dark"] .theme-btn .i-sun { display: block; }
+:root[data-theme="dark"] .theme-btn .i-moon { display: none; }
+
+.menu-btn { display: none; }
+
+/* mobile menu */
+.mobile-menu {
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding: 6px var(--gap) 20px;
+  /* A dropdown, not a sheet: it never freezes the page behind it, and if
+     the list ever grows past the viewport it scrolls itself instead of
+     pushing the tail below the fold (100dvh keeps iOS toolbars honest). */
+  max-height: calc(100vh - 68px);
+  max-height: calc(100dvh - 68px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.mobile-menu[hidden] { display: none; }
+.mobile-menu a.mm-link:focus-visible { outline: none; background: var(--paper-2); box-shadow: inset 3px 0 0 var(--accent); }
+.mobile-menu a.mm-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--display);
+  font-size: 22px;
+}
+.mobile-menu a.mm-link span {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------
+   Home
+------------------------------------------------------------------- */
+.masthead-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 0 13px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.masthead-line .mh-cn { letter-spacing: .08em; }
+.masthead-line .mh-en { white-space: nowrap; }
+
+.hero {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 32px;
+  padding: 74px 0 var(--sp-section);
+  align-items: start;
+}
+.hero-text { grid-column: 1 / span 5; padding-top: 6px; display: flex; flex-direction: column; align-self: stretch; }
+.hero-figure { grid-column: 6 / span 7; margin: 0; padding-top: 34px; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.eyebrow .dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; flex: none; }
+
+.hero-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(36px, 4.9vw, 60px);
+  line-height: 1.16;
+  letter-spacing: -.005em;
+  margin: 16px 0 0;
+  text-wrap: pretty;
+}
+.hero-deck {
+  margin: 24px 0 0;
+  font-size: 18px;
+  line-height: 1.86;
+  color: var(--ink-2);
+  max-width: 30em;
+}
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 34px;
+}
+.read-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 3px;
+}
+.read-link svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; transition: transform .25s ease; }
+.hero-time { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.hero-byline { margin: auto 0 0; padding-top: 42px; font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); }
+.hero-byline span { color: var(--faint); padding: 0 7px; }
+
+.hero-figure a { display: block; overflow: hidden; }
+.hero-figure img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  transition: transform .7s cubic-bezier(.16, 1, .3, 1);
+}
+.figcap {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin-top: 11px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  letter-spacing: .02em;
+}
+.figcap::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: var(--rule-strong);
+  transform: translateY(-4px);
+  flex: none;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 0 0;
+  /* 分隔线收敛：板块之间不画线，靠留白 + kicker 标题承载（列表行分隔线保留） */
+}
+.section-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: .02em;
+}
+.section-link {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.section-link svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+.recent { padding: 0 0 var(--sp-section); }
+.recent-grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 48px;
+  margin-top: 34px;
+}
+.recent-lead { display: block; }
+.recent-lead img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.recent-lead h3 {
+  margin: 20px 0 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.42;
+  letter-spacing: 0;
+  text-wrap: pretty;
+}
+.recent-lead p { margin: 10px 0 0; font-size: 14px; line-height: 1.8; color: var(--ink-2); }
+.recent-meta { margin-top: 12px; font-family: var(--mono); font-size: 12px; letter-spacing: .05em; color: var(--muted); }
+
+.recent-list { border-top: 1px solid var(--rule); }
+.recent-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 18px;
+  padding: var(--sp-5) 0 var(--sp-5);
+  border-bottom: 1px solid var(--rule);
+}
+.recent-item .ri-date { font-family: var(--mono); font-size: 12px; letter-spacing: .05em; color: var(--muted); grid-column: 1 / -1; }
+.recent-item h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.6;
+}
+.recent-item .ri-arrow { align-self: center; color: var(--faint); transition: transform .25s ease, color .25s ease; }
+.recent-item .ri-arrow svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+.ledger { padding: 0 0 var(--sp-section); }
+.ledger-list { margin-top: 18px; }
+.ledger-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 74px 62px;
+  align-items: baseline;
+  gap: 20px;
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--rule);
+}
+.ledger-row:first-child { border-top: 1px solid var(--rule); }
+.ledger-row .l-date { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.ledger-row .l-title { font-family: var(--display); font-size: 18px; line-height: 1.5; }
+.ledger-row .l-cat { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+.ledger-row .l-read { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; letter-spacing: .04em; }
+
+/* ------------------------------------------------------------------
+   Page heads / list
+------------------------------------------------------------------- */
+.page-head { padding: var(--sp-head) 0 0; }
+.page-head .kicker {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.page-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 14px;
+}
+.page-title h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(36px, 4.4vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -.005em;
+}
+.page-count { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .06em; white-space: nowrap; }
+.page-deck { margin: 18px 0 0; max-width: 40em; font-size: 16px; line-height: 1.85; color: var(--ink-2); }
+/* posts / about 两页页头已删：首元素直接承接页头顶距（基类 border-top 已在分隔线收敛中移除） */
+#view-posts .filters { margin-top: 0; padding-top: var(--sp-head); }
+#view-about .about-grid { padding-top: var(--sp-head); }
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: var(--sp-4) 0 0;
+  margin-top: var(--sp-7);
+}
+.filter {
+  position: relative;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--muted);
+  padding: 6px 0 8px;
+}
+.filter span { color: var(--muted); margin-left: 4px; }
+.filter::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .22s ease;
+}
+.filter[aria-pressed="true"] { color: var(--ink); }
+.filter[aria-pressed="true"]::after { transform: scaleX(1); }
+
+.year-group {
+  display: grid;
+  grid-template-columns: 156px 1fr;
+  gap: 40px;
+  padding-top: var(--sp-8);
+}
+/* The group directly under the filter band keeps the band tight (16 above /
+   40 below the labels); later groups take the full section step. Desktop
+   only — on phones the year label stacks and owns the gap itself. */
+@media (min-width: 769px) {
+  .filters + #list-groups > .year-group { padding-top: var(--sp-6); }
+}
+.year-label {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 60px;
+  line-height: .95;
+  letter-spacing: -.02em;
+  color: var(--faint);
+  font-variant-numeric: lining-nums;
+}
+.year-label small {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+.post-row {
+  display: grid;
+  /* 56px fits "11.05" — the year lives in the .year-label heading above,
+     so row dates no longer repeat it (title tooltip keeps the full date). */
+  grid-template-columns: 56px 1fr 62px 58px;
+  align-items: baseline;
+  gap: 22px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule);
+}
+/* rows without the cat column (constant cat: category term pages, or the
+   list filtered to one category) drop that track too */
+.post-row.no-cat { grid-template-columns: 56px 1fr 58px; }
+.post-row:first-child { border-top: 1px solid var(--rule); }
+.post-row .p-date { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.post-row .p-title { font-family: var(--display); font-size: 22px; line-height: 1.5; text-wrap: pretty; }
+.post-row .p-cat { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+.post-row .p-read { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; letter-spacing: .04em; }
+.list-foot { padding: var(--sp-7) 0 var(--sp-tail); display: flex; justify-content: space-between; gap: 24px; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+
+/* 分页条：与 list-foot 同声部（mono 12px muted）；当前页金底强调，禁用态降透明度 */
+.pager-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px;
+  margin: var(--sp-5) 0 0;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--muted);
+}
+.pager-bar[hidden] { display: none; }
+.pager-bar a, .pager-bar span[aria-disabled] { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 0 7px; }
+.pager-bar a { color: var(--ink-2); text-decoration: none; }
+.pager-bar .pg-cur { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 0 7px; color: var(--ink); border-bottom: 2px solid var(--accent); }
+.pager-bar .pg-gap { padding: 0 4px; }
+.pager-bar span[aria-disabled] { opacity: .45; }
+
+/* 回顶按钮 */
+.top-btn {
+  position: fixed; right: 20px; bottom: 20px; width: 44px; height: 44px;
+  border-radius: 50%; border: 1px solid var(--rule); background: var(--paper);
+  color: var(--ink-2); display: grid; place-items: center; cursor: pointer; z-index: 40;
+}
+.top-btn[hidden] { display: none; }
+.top-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ------------------------------------------------------------------
+   Article
+------------------------------------------------------------------- */
+.readbar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0;
+  background: var(--accent);
+  z-index: 120;
+  transition: opacity .2s ease;
+}
+.readbar[hidden] { display: none; }
+
+.article-head { padding: var(--sp-head) 0 0; max-width: var(--measure); margin: 0 auto; }
+.article-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.article-kicker .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--rule-strong); }
+.article-title {
+  margin: 20px 0 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(28px, 4.4vw, 52px);
+  line-height: 1.24;
+  letter-spacing: -.005em;
+  max-width: 18em;
+  text-wrap: pretty;
+}
+.article-deck {
+  margin: 22px 0 0;
+  max-width: 36em;
+  font-size: 18px;
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+.article-cover { margin: 40px 0 0; }
+.article-cover img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.article-cover .figcap { margin-top: 12px; }
+
+.article-body {
+  max-width: var(--measure);
+  margin: 70px auto 0;
+  font-size: 18px;
+  line-height: 1.9;
+  color: var(--ink-2);
+  position: relative;
+}
+.article-body > p { margin: var(--sp-5) 0; }
+.article-body > p:first-of-type {
+  margin-top: 0;
+  font-size: 22px;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.article-body h2 {
+  margin: 2.5em 0 .85em;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.45;
+  color: var(--ink);
+  letter-spacing: 0;
+  scroll-margin-top: 110px;
+}
+.article-body h3 {
+  margin: 2em 0 .6em;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.article-body strong { font-weight: 600; color: var(--ink); }
+.article-body em { font-style: italic; }
+.article-body a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .22em;
+  text-decoration-color: var(--faint);
+}
+
+.article-body ul, .article-body ol { margin: var(--sp-5) 0; padding-left: 1.4em; }
+.article-body li { margin: .5em 0; }
+.article-body li::marker { color: var(--faint); }
+
+.article-body blockquote {
+  margin: var(--sp-6) 0;
+  padding: 2px 0 2px 24px;
+  border-left: 2px solid var(--accent);
+  font-family: var(--display);
+  font-size: 22px;
+  line-height: 1.8;
+  color: var(--ink);
+}
+.article-body blockquote p { margin: 0; }
+.article-body blockquote p + p { margin-top: .8em; }
+
+.article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--sp-6) 0;
+  font-size: 14px;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+}
+.article-body th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--ink);
+}
+.article-body td { padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+.article-body th:first-child, .article-body td:first-child { padding-left: 0; }
+.article-body tr:last-child td { border-bottom: 1px solid var(--rule-strong); }
+
+.article-body hr { border: 0; border-top: 1px solid var(--rule); margin: 56px auto; width: 100%; }
+
+.article-body code {
+  font-family: var(--mono);
+  font-size: .78em;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--ink);
+}
+.article-body pre {
+  margin: var(--sp-6) 0;
+  padding: 20px 22px;
+  overflow-x: auto;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  border-radius: 2px;
+  font-size: 14px;
+  line-height: 1.75;
+  tab-size: 4;
+}
+.article-body pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.article-body .highlight { margin: var(--sp-6) 0; }
+.article-body .highlight pre { margin: 0; }
+
+.article-body ul:has(> li > input[type="checkbox"]) { list-style: none; padding-left: 2px; }
+.article-body ul:has(> li > input[type="checkbox"]) li { display: flex; align-items: baseline; gap: 10px; }
+.article-body li > input[type="checkbox"] { accent-color: var(--accent); margin: 0 2px 0 0; transform: translateY(2px); }
+
+.article-body figure { margin: var(--sp-7) 0; }
+.article-body figure img { width: 100%; }
+.article-body figcaption {
+  margin-top: 11px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  letter-spacing: .02em;
+}
+
+/* fig--margin 的 caption 曾在 ≥1200px 悬挂到阅读列左侧（"margin voice" 实验位）
+   ——与全站「caption 恒在图下」的语言冲突、观感如同错位，已回归图下默认形态 */
+@media (min-width: 1200px) {
+  .article-body blockquote.pullquote {
+    margin: 2.6em -110px;
+    padding: 0;
+    border: 0;
+    text-align: center;
+    font-size: 28px;
+    line-height: 1.55;
+    letter-spacing: -.005em;
+  }
+}
+
+.article-foot { max-width: var(--measure); margin: 0 auto; }
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 18px;
+  margin-top: 64px;
+  padding-top: 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .05em;
+  color: var(--muted);
+}
+.article-tags a { color: var(--ink-2); border-bottom: 1px solid var(--rule-strong); padding-bottom: 1px; }
+
+.share-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 26px;
+  padding-bottom: 30px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 2px;
+  color: var(--ink-2);
+  border-bottom: 1px solid transparent;
+}
+.share-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.share-note { color: var(--accent); }
+
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 34px;
+  padding-bottom: 40px;
+}
+.pager a { display: block; }
+.pager .pg-label { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.pager .pg-empty { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); padding-top: 4px; }
+.pager .pg-title { display: block; margin-top: 7px; font-family: var(--display); font-size: 18px; line-height: 1.55; }
+.pager .pg-next { text-align: right; }
+
+.related { padding: 38px 0 0; }
+.related h2 {
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.related-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 13px 0;
+}
+.related-row + .related-row { border-top: 1px solid var(--rule); }
+.related-row .r-title { font-family: var(--display); font-size: 18px; line-height: 1.55; }
+.related-row .r-date { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+/* ------------------------------------------------------------------
+   Search
+------------------------------------------------------------------- */
+.search-head { padding: var(--sp-head) 0 0; }
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 6px 0 15px;
+  border-bottom: 1px solid var(--ink);
+}
+.search-form:focus-within { border-color: var(--accent); }
+.search-form svg { width: 22px; height: 22px; stroke: var(--muted); fill: none; stroke-width: 1.5; flex: none; }
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--display);
+  font-size: 22px;
+  line-height: 1.5;
+  color: var(--ink);
+  padding: 2px 0;
+}
+.search-input::placeholder { color: var(--muted); }
+.search-input:focus { outline: none; }
+.search-form kbd {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--muted);
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+.search-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+.search-results { margin-top: var(--sp-6); }
+.result-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 22px;
+  padding: 19px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.result-row:first-child { border-top: 1px solid var(--rule); }
+.result-row .res-date { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.result-row h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 22px; line-height: 1.5; }
+.result-row p { margin: 6px 0 0; font-size: 14px; line-height: 1.75; color: var(--muted); }
+.result-row mark { background: var(--accent-soft); color: var(--ink); padding: 0 1px; }
+
+.empty-state {
+  padding: 72px 0 80px;
+  border-top: 1px solid var(--rule);
+}
+.empty-state h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 22px; }
+.empty-state p { margin: 12px 0 0; color: var(--muted); font-size: 14px; line-height: 1.8; }
+.empty-state .hint-links { margin-top: 18px; display: flex; gap: 14px; flex-wrap: wrap; }
+.empty-state .hint-links button { font-family: var(--mono); font-size: 12px; color: var(--ink-2); border-bottom: 1px solid var(--rule-strong); padding-bottom: 1px; }
+
+/* ------------------------------------------------------------------
+   About
+------------------------------------------------------------------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: 224px 1fr;
+  gap: 56px;
+  padding: var(--sp-6) 0 var(--sp-tail);
+}
+.about-side { position: sticky; top: 118px; align-self: start; }
+.about-avatar {
+  width: 104px; height: 104px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+}
+.about-name { margin: 18px 0 0; font-family: var(--display); font-size: 28px; font-weight: 400; }
+.about-role { margin: 6px 0 0; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+.about-links { margin-top: 22px; display: flex; flex-direction: column; gap: 9px; font-size: 14px; }
+.about-links a { color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; }
+.about-links svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+.about-main { max-width: 660px; font-size: 18px; line-height: 1.9; color: var(--ink-2); }
+.about-main > p:first-child { margin-top: 0; font-size: 22px; color: var(--ink); }
+.about-main p { margin: 1.4em 0; }
+.about-main blockquote {
+  margin: 2em 0;
+  font-family: var(--display);
+  font-size: 28px;
+  line-height: 1.6;
+  color: var(--ink);
+  padding-left: 22px;
+  border-left: 2px solid var(--accent);
+}
+.about-main h2 {
+  margin: 2.2em 0 .7em;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--ink);
+}
+.about-main ul { padding-left: 1.3em; }
+.about-main li { margin: .5em 0; }
+.about-main a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em; text-decoration-color: var(--rule-strong); }
+.about-note {
+  margin-top: 46px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.9;
+  letter-spacing: .02em;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------
+   Footer
+------------------------------------------------------------------- */
+.site-foot {
+  border-top: 1px solid var(--rule);
+  padding: 48px 0 36px;
+}
+/* One line only: colophon on the left; the two entries the header doesn't
+   offer (guestbook, full-text RSS) as icons on the right. The brand block is
+   gone — the header logo already carries it. One rule, one line, one voice. */
+.foot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+.foot-meta p { margin: 0; }
+.foot-meta a { color: var(--muted); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em; text-decoration-color: var(--rule-strong); }
+.foot-icons { display: flex; gap: 4px; }
+.foot-icons a { text-decoration: none; }
+.foot-icons svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+
+/* ------------------------------------------------------------------
+   Interaction layer: language, TOC, tag hub, type floors, targets
+------------------------------------------------------------------- */
+
+/* language menu */
+.lang-wrap { position: relative; align-self: stretch; display: flex; align-items: center; }
+.lang-menu {
+  position: absolute; right: 0; top: 100%; width: 196px;
+  background: var(--paper); border: 1px solid var(--rule); padding: 4px 0; z-index: 60;
+}
+.lang-menu[hidden] { display: none; }
+.lang-menu a {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 44px; padding: 0 14px; font-size: 14px; color: var(--ink-2);
+}
+.lang-menu a em {
+  font-family: var(--mono); font-style: normal; font-size: 12px;
+  letter-spacing: .08em; color: var(--muted);
+}
+.lang-menu a[aria-current="true"] { color: var(--ink); font-weight: 600; }
+.lang-menu a[aria-current="true"] em { color: var(--accent); }
+/* The language switcher lives in the header at EVERY width: one 44px
+   globe, same form and same 44px target as the other header icons. The
+   earlier ≤860px rule hid the whole wrapper and left the language row
+   inside the hamburger — a top-level choice buried two taps deep while
+   136px of the mobile header sat empty. On phones the panel anchors to
+   .head-actions instead of the 44px button, so its 196px width can never
+   run off the left edge at 320px. */
+@media (max-width: 768px) {
+  .lang-wrap { position: static; }
+  .head-actions { position: relative; }
+  .lang-menu { top: 100%; right: 0; }
+}
+
+/* article table of contents */
+.toc-inline {
+  margin: 24px 0 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.toc-inline[hidden] { display: none; }
+.toc-inline summary {
+  display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 0;
+  cursor: pointer; list-style: none; font-family: var(--mono); font-size: 12px;
+  letter-spacing: .06em; color: var(--muted);
+}
+.toc-inline summary::-webkit-details-marker { display: none; }
+.toc-inline .toc-count { color: var(--muted); font-size: 12px; }
+.toc-inline .toc-mark { margin-left: auto; font-family: var(--mono); color: var(--muted); }
+.toc-inline .toc-mark::before { content: "+"; }
+.toc-inline[open] .toc-mark::before { content: "−"; }
+.toc-inline ol { margin: 0 0 12px; padding: 0 0 0 18px; font-size: 14px; line-height: 1.75; }
+.toc-inline li { margin: 0; }
+.toc-inline a {
+  display: flex; align-items: center; min-height: 24px; padding: 4px 0; color: var(--ink-2);
+}
+.toc-inline a[aria-current="location"] { color: var(--accent); }
+
+.toc-float { display: none; }
+.toc-float[hidden] { display: none; }
+.toc-float-title {
+  margin: 0 0 8px; font-family: var(--mono); font-size: 12px;
+  letter-spacing: .16em; color: var(--muted); text-transform: uppercase;
+}
+.toc-float ol { list-style: none; margin: 0; padding: 0; }
+.toc-float a {
+  display: flex; align-items: center; min-height: 24px;
+  padding: 5px 0 5px 12px; margin-left: -1px;
+  border-left: 2px solid transparent;
+  font-size: 12px; line-height: 1.6; color: var(--muted);
+}
+.toc-float a[aria-current="location"] { color: var(--accent); border-left-color: var(--accent); }
+@media (min-width: 1200px) {
+  .toc-inline { display: none; }
+  .toc-float {
+    display: block; position: fixed; top: 120px; right: 32px; width: 200px;
+    max-height: calc(100vh - 200px); max-height: calc(100dvh - 200px);
+    overflow-y: auto;
+    padding-left: 14px; border-left: 1px solid var(--rule); z-index: 20;
+  }
+  .toc-float[hidden] { display: none; }
+}
+
+/* search tag hub */
+.tag-hub { margin-top: 40px; padding-top: 20px; padding-bottom: var(--sp-tail); }
+.tag-hub[hidden] { display: none; }
+.tag-hub h2 {
+  margin: 0 0 10px; font-family: var(--mono); font-weight: 400; font-size: 12px;
+  letter-spacing: .12em; color: var(--muted); text-transform: uppercase;
+}
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.tag-cloud button {
+  display: inline-flex; align-items: baseline; gap: 5px; min-height: 24px;
+  padding: 4px 0 3px; border: 0; border-bottom: 1px solid var(--rule-strong);
+  background: none; font-size: 12px; line-height: 1.5; color: var(--ink-2); cursor: pointer;
+}
+.tag-cloud button span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.tag-cloud button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.tag-cloud button[aria-pressed="true"] span { color: var(--accent); }
+
+/* article category link, search measure, active search icon */
+.article-kicker a { color: inherit; border-bottom: 1px solid var(--rule-strong); padding-bottom: 1px; }
+.search-head { max-width: 860px; margin: 0 auto; }
+.result-row p { max-width: 40em; }
+.icon-btn[aria-current="page"] { color: var(--ink); background: var(--paper-2); }
+
+/* footer language links */
+.foot-meta a { color: inherit; border-bottom: 1px solid transparent; }
+.foot-meta a[aria-current="true"] { color: var(--ink); }
+
+/* small-type floor: 12px for metadata and labels */
+.figcap, .recent-meta, .recent-item .ri-date, .ledger-row .l-date, .ledger-row .l-cat,
+.ledger-row .l-read, .post-row .p-date, .post-row .p-cat, .post-row .p-read,
+.article-kicker, .search-meta, .result-row .res-date, .pager .pg-label, .pager .pg-empty,
+.related h2, .related-row .r-date, .foot-meta, .foot-bottom, .list-foot, .hero-byline,
+.eyebrow, .masthead-line, .page-count, .article-tags, .share-row, .about-role,
+.filter, .search-form kbd { font-size: 12px; }
+
+/* standalone link targets: at least 24px high */
+.foot-meta a, .article-tags a, .section-link, .list-foot a,
+.tag-cloud button { display: inline-flex; align-items: center; min-height: 24px; }
+
+/* pointer-only hover feedback; touch taps never leave a sticky state */
+@media (hover: hover) {
+  .nav a:hover { color: var(--ink); }
+  .nav a:hover::after { transform: scaleX(1); }
+  .icon-btn:hover { color: var(--ink); background: var(--paper-2); }
+  .read-link:hover svg { transform: translateX(4px); }
+  .hero-figure a:hover img { transform: scale(1.015); }
+  .section-link:hover { color: var(--ink); }
+  .recent-lead:hover h3 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+  .recent-item:hover h3 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .recent-item:hover .ri-arrow { transform: translateX(4px); color: var(--ink); }
+  .ledger-row:hover .l-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .filter:hover { color: var(--ink); }
+  .post-row:hover .p-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+  .list-foot a:hover { color: var(--accent); }
+  .pager-bar a:hover { color: var(--accent); }
+  .top-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .article-body a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  .article-tags a:hover { color: var(--accent); border-color: var(--accent); }
+  .share-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .pager a:hover .pg-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .related-row:hover .r-title { text-decoration: underline; text-underline-offset: 4px; }
+  .result-row:hover h3 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+  .empty-state .hint-links button:hover { color: var(--accent); border-color: var(--accent); }
+  .about-links a:hover { color: var(--accent); }
+  .about-main a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  .article-kicker a:hover { color: var(--accent); }
+  .lang-menu a:hover { background: var(--paper-2); }
+  .foot-meta a:hover { color: var(--accent); }
+  .toc-inline summary:hover { color: var(--ink); }
+  .toc-inline a:hover, .toc-float a:hover { color: var(--ink); }
+  .tag-cloud button:hover { color: var(--accent); border-color: var(--accent); }
+}
+
+/* ------------------------------------------------------------------
+   Wiring layer: term pages, guestbook, 404, comments, code copy,
+   lightbox, media, footnotes, share, translation note
+   (everything the live site ships that the prototype lacked)
+------------------------------------------------------------------- */
+
+/* taxonomy index + term pages */
+.term-index-cloud { display: flex; flex-wrap: wrap; gap: 6px 26px; padding: var(--sp-6) 0 var(--sp-tail); }
+.term-index-cloud a {
+  display: inline-flex; align-items: baseline; gap: 6px; min-height: 32px;
+  font-family: var(--display); font-size: 22px; color: var(--ink-2);
+}
+.term-index-cloud a span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.term-back {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted);
+}
+.term-note { margin: 14px 0 0; max-width: 40em; font-size: 14px; line-height: 1.8; color: var(--muted); }
+
+/* guestbook */
+.guestbook-intro { max-width: var(--measure); padding: var(--sp-6) 0 6px; font-size: 18px; line-height: 1.9; color: var(--ink-2); }
+.guestbook-intro p { margin: 1.1em 0; }
+
+/* 404 */
+.notfound { padding: 88px 0 var(--sp-tail); }
+.notfound-code {
+  font-family: var(--mono); font-size: clamp(64px, 14vw, 120px);
+  line-height: 1; letter-spacing: .04em; color: var(--rule-strong);
+}
+.notfound-msg { margin: 22px 0 0; max-width: 34em; font-family: var(--display); font-size: 22px; line-height: 1.7; }
+.notfound-actions { display: flex; flex-wrap: wrap; gap: 14px 30px; margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--rule); }
+.notfound-actions a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; color: var(--ink-2); }
+.notfound-actions svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.notfound-recent { margin-top: 40px; }
+
+/* comments (giscus shell). The real site renders the giscus iframe here;
+   the prototype draws the reserved box so layout, spacing and focus
+   order can be reviewed without loading a third-party script. */
+.comments { margin-top: 56px; padding-bottom: var(--sp-tail); }
+.comments h2 {
+  margin: 0 0 14px; font-family: var(--mono); font-weight: 400; font-size: 12px;
+  letter-spacing: .16em; color: var(--muted); text-transform: uppercase;
+}
+.giscus-shell {
+  border: 1px solid var(--rule); padding: 22px 22px 24px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--muted);
+}
+.giscus-shell .g-brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); }
+.giscus-shell .g-brand svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.giscus-shell .g-note { flex-basis: 100%; line-height: 1.8; }
+.giscus-signin {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 14px;
+  border: 1px solid var(--rule-strong); font-family: var(--mono); font-size: 12px; color: var(--ink-2);
+}
+
+/* code copy buttons */
+.article-body .code-block { position: relative; margin: var(--sp-6) 0; }
+.article-body .code-block pre { margin: 0; }
+.copy-code {
+  position: absolute; top: 8px; right: 8px;
+  min-height: 32px; padding: 4px 10px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--code-ink);
+  background: rgba(236, 230, 216, .08);
+  border: 1px solid rgba(236, 230, 216, .22);
+  opacity: .75;
+}
+.copy-code:focus-visible { outline-color: var(--accent); opacity: 1; }
+.copy-code.done { color: var(--accent); border-color: var(--accent); opacity: 1; }
+
+/* lightbox */
+.lightbox {
+  position: fixed; inset: 0; z-index: 300;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--paper-2) 94%, transparent);
+  padding: var(--gap);
+}
+.lightbox[hidden] { display: none; }
+.lightbox img { max-width: min(1200px, 100%); max-height: 88vh; max-height: 88dvh; width: auto; }
+.lightbox .lb-cap {
+  position: absolute; left: 0; right: 0; bottom: 18px; text-align: center;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--muted);
+}
+.lightbox .lb-close {
+  position: absolute; top: 14px; right: 14px; width: 44px; height: 44px;
+  display: grid; place-items: center; color: var(--ink-2);
+}
+.lightbox svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+@media (hover: hover) {
+  .article-body figure img, .article-cover img { cursor: zoom-in; }
+  .lb-close:hover { color: var(--ink); }
+}
+
+/* in-article image breakout tiers (#wide / #full, the site's kg-width pair).
+   The reading column is centered inside .wrap, so breakout = pull the margin
+   out to the same edges the page header and footer use. */
+.article-body figure.fig--wide { width: min(1200px, calc(100vw - 2 * var(--gap))); margin-left: calc(50% - min(600px, (100vw - 2 * var(--gap)) / 2)); }
+.article-body figure.fig--full { width: calc(100vw - 2 * var(--gap)); margin-left: calc(50% - (100vw - 2 * var(--gap)) / 2); }
+.article-body .media--wide { width: min(1200px, calc(100vw - 2 * var(--gap))); margin-left: calc(50% - min(600px, (100vw - 2 * var(--gap)) / 2)); }
+.article-body .media--full { width: calc(100vw - 2 * var(--gap)); margin-left: calc(50% - (100vw - 2 * var(--gap)) / 2); }
+@media (max-width: 1248px) {
+  .article-body figure.fig--wide, .article-body figure.fig--full,
+  .article-body .media--wide, .article-body .media--full { width: 100%; margin-left: 0; }
+}
+
+/* media embeds: video facade (bilibili_bvid / youtube_id) + self-hosted audio */
+.media-embed { margin: var(--sp-7) 0; }
+.media-embed .video-facade {
+  position: relative; aspect-ratio: 16 / 9; width: 100%;
+  background: var(--code-bg); border: 1px solid var(--rule);
+  display: grid; place-items: center;
+}
+.media-embed .video-facade button {
+  width: 68px; height: 68px; border-radius: 50%;
+  border: 1px solid rgba(236, 230, 216, .5);
+  display: grid; place-items: center; color: var(--code-ink);
+}
+.media-embed .video-facade svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; margin-left: 3px; }
+.media-embed .video-facade .vf-tag {
+  position: absolute; left: 14px; bottom: 12px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: rgba(236, 230, 216, .72);
+}
+.media-embed audio { display: block; width: 100%; margin-top: 0; }
+.media-embed figcaption { margin-top: 11px; }
+
+/* footnotes */
+.article-body .footnotes { margin-top: 3em; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 14px; line-height: 1.8; color: var(--muted); }
+.article-body .footnotes h2 { margin: 0 0 10px; font-family: var(--mono); font-weight: 400; font-size: 12px; letter-spacing: .14em; color: var(--muted); }
+.article-body sup a { font-family: var(--mono); font-size: .72em; text-decoration: none; border-bottom: 1px solid var(--rule-strong); margin-left: 2px; }
+.article-body .footnotes li { margin: .4em 0; }
+
+/* share row: native share + X + Telegram + copy, one rhythm */
+.share-row .share-x, .share-row .share-tg, .share-row .share-native { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 2px; color: var(--ink-2); border-bottom: 1px solid transparent; }
+.share-row .share-x svg, .share-row .share-tg svg, .share-row .share-native svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.share-group { display: inline-flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+
+/* translation-pending state (real transient state: minutes after a zh push,
+   before the pipeline lands the ja/en build) */
+.trans-note {
+  margin: 0 0 2em; padding: 14px 18px;
+  border: 1px solid var(--rule); border-left: 2px solid var(--accent);
+  font-size: 14px; line-height: 1.8; color: var(--muted);
+}
+
+@media (hover: hover) {
+  .term-index-cloud a:hover { color: var(--accent); }
+  .term-back:hover { color: var(--accent); }
+  .notfound-actions a:hover { color: var(--accent); }
+  .giscus-signin:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-code:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+  .share-row .share-x:hover, .share-row .share-tg:hover, .share-row .share-native:hover { color: var(--accent); border-color: var(--accent); }
+  .article-body .footnotes a:hover, .article-body sup a:hover { color: var(--accent); }
+}
+
+/* ------------------------------------------------------------------
+   Views, reveal, responsive
+------------------------------------------------------------------- */
+.view[hidden] { display: none; }
+.view-enter { animation: viewIn .32s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 1080px) {
+  .hero-text { grid-column: 1 / span 6; align-self: start; }
+  .hero-byline { margin-top: 0; padding-top: 24px; }
+  .hero-figure { grid-column: 7 / span 6; }
+  .recent-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
+  .year-group { grid-template-columns: 112px 1fr; gap: 28px; }
+  .year-label { font-size: 44px; }
+}
+
+@media (max-width: 768px) {
+  :root { --gap: 24px; --sp-section: 72px; --sp-head: 48px; --sp-tail: 72px; }
+  .nav { display: none; }
+  .menu-btn { display: grid; }
+  .head-inner { min-height: 68px; }
+  .brand-cn { font-size: 22px; }
+  .brand-en { font-size: 10px; }
+
+  .masthead-line { padding-top: 20px; }
+  .masthead-line .mh-en { display: none; }
+
+  .hero { grid-template-columns: 1fr; gap: 30px; padding: var(--sp-head) 0 var(--sp-section); }
+  .hero-text, .hero-figure { grid-column: 1 / -1; }
+  .hero-text { padding-top: 0; }
+  .hero-title { font-size: clamp(36px, 8vw, 44px); }
+  .hero-deck { font-size: 16px; }
+  .hero-byline { padding-top: 24px; }
+  .hero-figure img { aspect-ratio: 4 / 3; }
+
+  .recent-grid { grid-template-columns: 1fr; gap: 34px; }
+  .recent-lead h3 { font-size: 28px; }
+
+  .ledger-row { grid-template-columns: 82px 1fr 54px; gap: 14px; }
+  .ledger-row .l-read { display: none; }
+
+  .page-head { padding-top: var(--sp-head); }
+  .page-title { flex-wrap: wrap; gap: 8px 20px; }
+  .filters { gap: 20px; overflow-x: auto; }
+  .year-group { grid-template-columns: 1fr; gap: 12px; padding-top: var(--sp-7); }
+  .year-label { font-size: 36px; display: flex; align-items: baseline; gap: 12px; }
+  .year-label small { margin: 0; }
+  .post-row { grid-template-columns: 1fr auto; gap: 3px 14px; }
+  .post-row.no-cat { grid-template-columns: 1fr auto; } /* re-assert: base .no-cat track would otherwise win on specificity */
+  .post-row .p-date { grid-column: 1 / -1; }
+  .post-row .p-cat { display: none; }
+  .post-row .p-title { font-size: 18px; }
+  .post-row .p-read { align-self: baseline; }
+
+  .article-head { padding-top: var(--sp-head); }
+  .article-cover { margin-top: 28px; }
+  .article-body { margin-top: 46px; font-size: 18px; line-height: 1.9; }
+  .article-body > p:first-of-type { font-size: 18px; }
+  .article-body h2 { font-size: 22px; margin-top: 2.1em; }
+  .article-body table { font-size: 14px; }
+  .article-body th, .article-body td { padding: 8px 8px; }
+  .article-body blockquote { font-size: 18px; padding-left: 18px; }
+
+  .pager { gap: 20px; }
+  .related-row { gap: 16px; }
+
+  .search-head { padding-top: var(--sp-head); }
+  .search-input { font-size: 22px; }
+  .result-row { grid-template-columns: 1fr; gap: 4px; }
+
+  .about-grid { grid-template-columns: 1fr; gap: 36px; padding-bottom: 76px; }
+  .about-side { position: static; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .about-avatar { width: 76px; height: 76px; }
+  .about-name { margin: 0; font-size: 22px; }
+  .about-role { margin: 4px 0 0; }
+  .about-links { margin: 0; width: 100%; flex-direction: row; flex-wrap: wrap; gap: 8px 18px; }
+  .about-main { font-size: 18px; }
+  .about-main blockquote { font-size: 22px; line-height: 1.65; }
+
+  .foot-grid { grid-template-columns: 1fr 1fr; gap: 34px; }
+  .foot-bottom { flex-direction: column; gap: 6px; }
+}
+
+@media (max-width: 560px) {
+  .hero-actions { gap: 16px; }
+  .hero-figure img { aspect-ratio: 3 / 2; }
+  .section-head h2 { font-size: 22px; }
+  .recent-item h3 { font-size: 18px; }
+  .ledger-row { grid-template-columns: 1fr; gap: 2px; padding: 14px 0; }
+  .ledger-row .l-date { font-size: 12px; }
+  .ledger-row .l-title { font-size: 18px; }
+  .ledger-row .l-cat { display: none; }
+  .page-title h1 { font-size: 36px; }
+  .filters { gap: 18px; }
+  .filter { padding: 10px 0 11px; }
+  .post-row .p-read { display: none; }
+  .article-title { font-size: 28px; }
+  .article-deck { font-size: 16px; }
+  .article-body { font-size: 18px; }
+  .article-body table { display: block; overflow-x: auto; white-space: nowrap; }
+  .pager { grid-template-columns: 1fr; }
+  .pager .pg-next { text-align: left; }
+  .foot-grid { grid-template-columns: 1fr; gap: 28px; }
+  .search-form kbd { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+
+@media print {
+  .site-head, .site-foot, .readbar, .rail, .share-row, .pager, .related, .filters, .toc-float, .toc-inline, .top-btn { display: none !important; }
+  body { background: #fff; color: #000; }
+  .article-body { max-width: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">跳到正文</a>
+
+<header class="site-head">
+  <div class="wrap head-inner">
+    <a class="brand" href="#/" aria-label="二重奏，返回首页">
+      <span class="brand-cn">二重奏</span>
+      <span class="brand-en">DEUX</span>
+    </a>
+
+    <nav class="nav" aria-label="主导航" data-i18n-aria="nav_label">
+      <a href="#/posts" data-nav="posts" data-i18n="nav_posts">文章</a>
+      <a href="#/about" data-nav="about" data-i18n="nav_about">关于</a>
+    </nav>
+
+    <div class="head-actions">
+      <!-- Control order is the evidence-backed one, not a preference:
+           right-to-left = menu (rightmost in 9/10 real headers; it's the
+           overflow), then language (W3C i18n: language links belong top
+           right and must not be hidden — someone who can't read the page
+           looks there first), then search (content action, 9/9 in the
+           right cluster), then theme (a preference; no platform spec, so
+           it takes the outermost slot). DOM order = visual order = tab
+           order. -->
+      <button class="icon-btn theme-btn" type="button" aria-label="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"></path></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      </button>
+      <a class="icon-btn" id="search-link" href="#/search" aria-label="搜索（Ctrl 或 Command 加 K）" data-i18n-aria="search_label">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+      </a>
+      <div class="lang-wrap">
+        <button class="icon-btn lang-btn" type="button" aria-label="切换语言" data-i18n-aria="lang_label" aria-expanded="false" aria-controls="lang-menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3.4 3 14.6 0 18M12 3c-3 3.4-3 14.6 0 18"></path></svg>
+        </button>
+        <div class="lang-menu" id="lang-menu" hidden>
+          <a href="#/" hreflang="zh" lang="zh-CN" data-lang-link="zh"><span>简体中文</span><em>ZH</em></a>
+          <a href="#/ja/" hreflang="ja" lang="ja" data-lang-link="ja"><span>日本語</span><em>JA</em></a>
+          <a href="#/en/" hreflang="en" lang="en" data-lang-link="en"><span>English</span><em>EN</em></a>
+        </div>
+      </div>
+      <button class="icon-btn menu-btn" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-menu" id="mobile-menu" aria-label="移动导航" hidden>
+    <a class="mm-link" href="#/posts"><span data-i18n="nav_posts">文章</span> <span>ESSAYS</span></a>
+    <a class="mm-link" href="#/about"><span data-i18n="nav_about">关于</span> <span>ABOUT</span></a>
+  </nav>
+</header>
+
+
+<div class="readbar" id="readbar" hidden></div>
+
+<nav class="toc-float" id="toc-float" aria-label="文章目录" hidden>
+  <p class="toc-float-title" data-i18n="toc_title">目录</p>
+  <ol id="toc-float-list"></ol>
+</nav>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="图片放大查看" hidden>
+  <button class="lb-close" id="lb-close" type="button" aria-label="关闭">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+  </button>
+  <img id="lb-img" alt="">
+  <p class="lb-cap" id="lb-cap"></p>
+</div>
+
+<main id="main" tabindex="-1">
+
+  <!-- HOME -->
+  <section class="view" id="view-home" data-view="home">
+    <div class="wrap">
+      <div class="masthead-line">
+        <span class="mh-cn" data-i18n="masthead_cn">写日常，也写让日常运转的代码。</span>
+        <span class="mh-en">Essays &amp; Notes · 2026</span>
+      </div>
+
+      <div class="hero">
+        <div class="hero-text reveal">
+          <p class="eyebrow"><span class="dot"></span><span id="hero-cat">日常</span> <span aria-hidden="true">/</span> <time datetime="2026-11-05">2026.11.05</time></p>
+          <h1 class="hero-title" id="hero-title">傍晚六点的琴声</h1>
+          <p class="hero-deck" id="hero-deck">搬来之后每天傍晚六点，隔壁都会响起一段总在同一处停下的钢琴。关于没弹完的半首曲子、不好意思敲的门，和「不打扰」这种温柔的距离。</p>
+          <div class="hero-actions">
+            <a class="read-link" href="#/posts/zz-s03"><span data-i18n="read_this">读这篇</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg>
+            </a>
+            <span class="hero-time" id="hero-time">约 2 分钟</span>
+          </div>
+          <p class="hero-byline" id="hero-byline">文 · 二重奏<span>／</span>日常随笔</p>
+        </div>
+
+        <figure class="hero-figure reveal">
+          <a href="#/posts/zz-s03" aria-hidden="true" tabindex="-1">
+            <img src="assets/piano-afternoon-7c1d.jpg" width="2000" height="1333" alt="午后阳光落在靠窗的旧钢琴上">
+          </a>
+          <figcaption class="figcap" id="hero-figcap">六点差五分，西窗的光落在琴键上。</figcaption>
+        </figure>
+      </div>
+
+      <section class="recent" aria-labelledby="recent-title">
+        <div class="section-head">
+          <h2 id="recent-title" data-i18n="recent_title">近作</h2>
+          <a class="section-link" href="#/posts"><span data-i18n="all_posts">全部文章</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg>
+          </a>
+        </div>
+        <div class="recent-grid" id="recent-grid"></div>
+      </section>
+
+      <section class="ledger" aria-labelledby="ledger-title">
+        <div class="section-head">
+          <h2 id="ledger-title" data-i18n="index_title">目录</h2>
+          <a class="section-link" href="#/archives"><span data-i18n="by_year">按年份浏览</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg>
+          </a>
+        </div>
+        <div class="ledger-list" id="ledger-list"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- POSTS -->
+  <section class="view" id="view-posts" data-view="posts" hidden>
+    <div class="wrap">
+      <!-- 页头（kicker/标题/计数/描述）已删：筛选行直接承接页头顶距 -->
+
+      <div class="filters" role="group" aria-label="按分类筛选" id="list-filters" data-i18n-aria="filter_label"></div>
+
+      <div id="list-groups"></div>
+      <!-- 分页：数字分页条（主流定稿——Hugo pagerSize 同构；原型 8 篇/页演示双页） -->
+      <nav class="pager-bar" id="list-pager" hidden aria-label="分页" data-i18n-aria="pager_label"></nav>
+      <div class="list-foot">
+        <span><span data-i18n="newest_first">按时间倒序</span> · <span data-i18n="posts_total">共</span> <span id="list-foot-count">10</span> <span data-i18n="posts_unit">篇</span></span>
+        <a href="https://deux.top/zh/index.xml" data-i18n="rss_full">RSS 全文</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICLE -->
+  <section class="view" id="view-article" data-view="article" hidden>
+   <article>
+    <div class="wrap">
+      <div class="article-head">
+        <div class="article-kicker" id="art-kicker"></div>
+        <h1 class="article-title" id="art-title"></h1>
+        <p class="article-deck" id="art-deck"></p>
+        <details class="toc-inline" id="toc-inline" hidden>
+          <summary>
+            <span data-i18n="toc_title">目录</span><span class="toc-count" id="toc-count"></span><span class="toc-mark" aria-hidden="true"></span>
+          </summary>
+          <ol id="toc-inline-list"></ol>
+        </details>
+      </div>
+      <figure class="article-cover" id="art-cover"></figure>
+    </div>
+    <div class="wrap">
+      <div class="article-body" id="art-body"></div>
+      <div class="article-foot">
+        <div class="article-tags" id="art-tags"></div>
+        <div class="share-row" id="share-host"></div>
+        <nav class="pager" id="art-pager" aria-label="上一篇与下一篇"></nav>
+        <section class="related" aria-labelledby="related-title">
+          <h2 id="related-title">接着读</h2>
+          <div id="art-related"></div>
+        </section>
+        <section class="comments" id="art-comments" aria-labelledby="art-comments-title"></section>
+      </div>
+    </div>
+   </article>
+  </section>
+
+  <!-- ARCHIVES (compact year ledger) -->
+  <section class="view" id="view-archives" data-view="archives" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker" id="archives-kicker">Archive · 归档</p>
+        <div class="page-title">
+          <h1 data-i18n="archives_title">归档</h1>
+          <span class="page-count" id="archives-count"></span>
+        </div>
+        <p class="page-deck" data-i18n="archives_deck">按年份收拢的全部文字。能从任何一行进入。</p>
+      </div>
+      <div id="archives-groups"></div>
+      <div class="list-foot"><span data-i18n="newest_first">按时间倒序</span><a href="#/posts" data-i18n="all_posts">全部文章</a></div>
+    </div>
+  </section>
+
+  <!-- SEARCH -->
+  <section class="view" id="view-search" data-view="search" hidden>
+    <div class="wrap">
+      <div class="search-head">
+        <p class="kicker" id="search-kicker">Search · 搜索</p>
+        <div class="page-title"><h1 data-i18n="search_title">搜索</h1><span class="page-count" id="search-total">10 篇</span></div>
+        <form class="search-form" role="search" id="search-form">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+          <label class="sr-only" for="q">搜索文章</label>
+          <input class="search-input" id="q" type="search" name="q" placeholder="搜标题、摘要或标签" autocomplete="off" spellcheck="false" aria-describedby="search-hint">
+          <kbd>Ctrl / ⌘ K</kbd>
+        </form>
+        <div class="search-meta">
+          <span id="search-hint">输入关键词，结果即时出现。Esc 清空。</span>
+          <span id="search-count" aria-live="polite">共 10 篇</span>
+        </div>
+        <div class="filters" role="group" aria-label="按分类筛选" id="search-filters"></div>
+        <h2 class="sr-only">搜索结果</h2>
+        <div class="search-results" id="search-results"></div>
+        <section class="tag-hub" id="tag-hub" aria-labelledby="tag-hub-title" hidden>
+          <h2 id="tag-hub-title">标签</h2>
+          <div class="tag-cloud" id="tag-cloud"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="view" id="view-about" data-view="about" hidden>
+    <div class="wrap">
+      <!-- 页头（kicker/标题/署名）已删：正文网格直接承接页头顶距 -->
+      <div class="about-grid">
+        <aside class="about-side">
+          <img class="about-avatar" src="assets/avatar-duet-4f7a.jpg" width="768" height="768" alt="二重奏的头像：蓝色短发、红色礼帽">
+          <div>
+            <p class="about-name">二重奏</p>
+            <p class="about-role">三语博客 · 日常与技术</p>
+          </div>
+          <div class="about-links">
+            <a href="https://github.com/piscon" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4 1.5-4-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C7.7 2.8 6.7 3.1 6.7 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 5.3 9.5c0 4.6 2.7 5.7 5.5 6-.5.6-.5 1.2-.5 2V21"></path></svg>
+              GitHub
+            </a>
+            <a href="mailto:hello@deux.top">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+              hello@deux.top
+            </a>
+            <a href="https://x.com/deux_top" target="_blank" rel="noopener noreferrer" aria-label="X 账号 @deux_top">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"></path></svg>
+              @deux_top
+            </a>
+          </div>
+        </aside>
+
+        <div class="about-main">
+          <p>你好，我是<strong>二重奏</strong>。</p>
+          <blockquote>精神与思想的二重奏，自由与独立的交响曲。</blockquote>
+          <p>这句副标题就是名字的全部由来：把理性的工程与感性的观察放在一起，让它们互为声部。</p>
+
+          <h2>这里写什么</h2>
+          <ul>
+            <li><strong>AI 与工具链</strong>：让模型真正替人干活的工程笔记——这个博客本身就由 AI 翻译流水线驱动，三语同步发布。</li>
+            <li><strong>建站与排版</strong>：Hugo / PaperMod 上的自定义都记录成可复现的约定。</li>
+            <li><strong>日常</strong>：技术之外的观察与随想。</li>
+          </ul>
+
+          <h2>联系方式</h2>
+          <p>GitHub：<a href="https://github.com/piscon" target="_blank" rel="noopener noreferrer">@piscon</a>（本站源码也在<a href="https://github.com/piscon/myblog" target="_blank" rel="noopener noreferrer">这里</a>）。邮件最好用 <a href="mailto:hello@deux.top">hello@deux.top</a>；X 上是 <a href="https://x.com/deux_top" target="_blank" rel="noopener noreferrer">@deux_top</a>。</p>
+          <p>喜欢的话可以订阅 <a href="https://deux.top/zh/index.xml">RSS 全文</a>，所有更新都会推送到你的阅读器。</p>
+
+          <h2>版权</h2>
+          <p>除非另有说明，本站全部内容采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a> 许可：署名、非商业、相同方式共享。转载请附上原文链接。</p>
+
+          <div class="about-note">
+            这个页面是一份界面设计稿中的示例页面。<br>
+            设计原型：Hugo + PaperMod · 中文 / 日本語 / English。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAXONOMY INDEX (tags / categories) -->
+  <section class="view" id="view-tax" data-view="tax" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker" id="tax-kicker"></p>
+        <div class="page-title"><h1 id="tax-title"></h1><span class="page-count" id="tax-count"></span></div>
+        <p class="term-note" id="tax-note"></p>
+      </div>
+      <div class="term-index-cloud" id="tax-cloud"></div>
+    </div>
+  </section>
+
+  <!-- TERM DETAIL (/tags/:term, /categories/:term) -->
+  <section class="view" id="view-term" data-view="term" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <a class="term-back" id="term-back" href="#/tags">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" style="stroke:currentColor;fill:none;stroke-width:1.6"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg>
+          <span id="term-back-label"></span>
+        </a>
+        <p class="kicker" id="term-kicker"></p>
+        <div class="page-title"><h1 id="term-title"></h1><span class="page-count" id="term-count"></span></div>
+      </div>
+      <div id="term-groups"></div>
+    </div>
+  </section>
+
+  <!-- GUESTBOOK -->
+  <section class="view" id="view-guestbook" data-view="guestbook" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="kicker" id="gb-kicker">Guestbook · 留言</p>
+        <div class="page-title"><h1 id="gb-title">留言板</h1><span class="page-count">giscus</span></div>
+      </div>
+      <div class="guestbook-intro" id="gb-intro"></div>
+      <section class="comments" aria-labelledby="gb-comments-title" id="gb-comments"></section>
+    </div>
+  </section>
+
+  <!-- 404 -->
+  <section class="view" id="view-404" data-view="404" hidden>
+    <div class="wrap">
+      <div class="notfound">
+        <p class="notfound-code" aria-hidden="true">404</p>
+        <p class="notfound-msg" id="nf-msg"></p>
+        <nav class="notfound-actions" aria-label="404 快捷出口">
+          <a href="#/" id="nf-home">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"></path></svg>
+            <span id="nf-home-label"></span>
+          </a>
+          <a href="#/posts">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"></path></svg>
+            <span id="nf-posts-label"></span>
+          </a>
+          <a href="#/search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+            <span id="nf-search-label"></span>
+          </a>
+        </nav>
+        <section class="notfound-recent">
+          <h2 class="related-h" id="nf-recent-title" style="margin:0 0 14px;font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase"></h2>
+          <div id="nf-recent"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<noscript><div class="wrap"><p class="mono" style="padding:24px 0;color:var(--muted);font-size:12px">这个设计稿需要 JavaScript 才能切换页面、筛选与搜索。</p></div></noscript>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-meta">
+      <p>© 2026 二重奏 · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></p>
+      <!-- 头部没有的两个入口（留言板/RSS）收成图标，与版权行同排靠右；品牌块已去——头部 logo 已承载 -->
+      <nav class="foot-icons" aria-label="页脚导航">
+        <a href="#/guestbook" aria-label="留言板" data-i18n-aria="guestbook_title">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </a>
+        <a href="https://deux.top/zh/index.xml" aria-label="RSS 全文" data-i18n-aria="rss_full">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+        </a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<!-- 回顶：长页无回顶路径曾是设计遗漏；与线上站 #top-link 同构，44px 目标 -->
+<button class="top-btn" id="top-btn" hidden aria-label="回到顶部" data-i18n-aria="top_label">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="17 11 12 6 7 11"></polyline><polyline points="17 18 12 13 7 18"></polyline></svg>
+</button>
+
+<script type="application/json" id="post-data">[{"slug":"ai-update-blog","title":"如何使用 AI 来更新博客","desc":"不用手动写 Markdown 和提交，只要把 GitHub 连上 AI，用自然语言说明想写什么，AI 就会读仓库、生成文章并提交。","meta":"2026年11月1日 · 更新于 2026年11月3日 · 1 分钟 · 技术","cats":["技术"],"tags":["AI","Hugo","博客"],"body":"<p>不用打开编辑器手动写 Markdown，再自己 git commit。</p> <p>只要把 GitHub 连上 AI，用自然语言说明想写的内容，AI 就会自动读仓库、生成文章、并提交。</p> <p>这篇文章就是用这个流程写的。</p> <h2 id=\"准备\">准备</h2> <ol> <li>有一个 GitHub 仓库（例如 <code>myblog</code>）</li> <li>在 AI 对话界面里连上 GitHub 账号</li> <li>确认 AI 有读写仓库的权限</li> </ol> <h2 id=\"实际流程\">实际流程</h2> <h3 id=\"1-先让-ai-读仓库\">1. 先让 AI 读仓库</h3> <p>直接说：</p> <blockquote> <p>你能读取 github 的 myblog 仓库吗？</p> </blockquote> <p>AI 会自动：</p> <ul> <li>确认你的 GitHub 账号</li> <li>找到仓库</li> <li>列出文件结构</li> <li>读取 <code>hugo.toml</code> 和现有文章</li> </ul> <h3 id=\"2-告诉-ai-想写什么\">2. 告诉 AI 想写什么</h3> <p>例如：</p> <blockquote> <p>帮我写第二篇文章。主题：如何使用 AI 来更新博客，思路就按照你现在的工作流来写就行了。简单易懂，三语版本</p> </blockquote> <h3 id=\"3-ai-生成并提交\">3. AI 生成并提交</h3> <p>AI 会按仓库结构创建：</p> <ul> <li><code>content/zh/posts/...</code></li> <li><code>content/ja/posts/...</code></li> <li><code>content/en/posts/...</code></li> </ul> <p>然后一次性提交到 <code>master</code> 分支。</p> <p>提交后，Netlify 等 CI 会自动构建并部署。</p> <h2 id=\"提示\">提示</h2> <ul> <li>用自然语言说明，结果越接近你的风格</li> <li>可以指定三语、封面图、日期等</li> <li>修改现有文章也是同样：先让 AI 读，再说明改法</li> <li>想先看内容再提交，直接说就行</li> </ul> <h2 id=\"总结\">总结</h2> <p>连上 GitHub → 用自然语言指令 → AI 读仓库 + 写文章 + 提交。</p> <p>你负责想内容，AI 负责落地。</p>","img":[]},{"slug":"cf-auto-translate","title":"用 Cloudflare Workers AI 给博客搭自动翻译流水线","desc":"写完中文 push 上去，日文英文版几分钟内自动生成上线。本文用大白话讲清楚这条流水线怎么运作：为什么要先把 Markdown 拆开再喂给 AI、怎么做到改一个错别字只花一次调用的钱、以及 AI 译坏了谁来兜底。","meta":"2026年11月5日 · 4 分钟 · 技术","cats":["技术"],"tags":["AI","Cloudflare","Hugo"],"body":"<p>这个博客是三语的（简体中文 / 日本語 / English）。我写完中文 push 上去，日文版和英文版几分钟内自动生成、自动部署上线——中间没有任何人工翻译的环节。这篇文章用大白话讲清楚它是怎么运作的，以及过程中踩过的坑。</p> <h2 id=\"一整体长什么样\">一、整体长什么样</h2> <p>整条流水线跑在 GitHub Actions 上，全部用免费资源：</p> <pre tabindex=\"0\"><code>写完中文文章 push → GitHub Actions 触发翻译 → 调 Cloudflare Workers AI（免费额度） → 译文先过几道自动检查 → 检查通过，机器人提交回仓库 → Netlify 自动部署，日/英文版上线 </code></pre><p>动手之前定了四条规矩，后来证明每条都救过命：</p> <ul> <li><strong>译文进 git</strong>。日文英文版是仓库里的真实文件，随时可以打开看、可以改、可以回滚。AI 只是「初稿作者」，不是发布通道</li> <li><strong>访客侧完全静态</strong>。API 密钥只存在于 GitHub Actions 里，网页上零密钥、零第三方脚本，读者不会为我多用一度电</li> <li><strong>每次调用都有账单</strong>。所有请求经过 AI Gateway，花了多少 token、折多少钱、耗时多少，一条条记着</li> <li><strong>部分失败不拖垮整体</strong>。日文翻成功了、英文翻挂了，那就日文先上线，英文留着旧版等重试</li> </ul> <h2 id=\"二核心难题ai-会把-markdown-翻烂\">二、核心难题：AI 会把 Markdown 翻烂</h2> <p>让 AI 翻译纯文字，效果已经很好。但博客文章不是纯文字——它混着链接、代码块、表格、列表标记。早期直接把整篇 Markdown 扔给模型，翻出来的东西经常「看着像对的」，实际上烂掉了。真实案例：</p> <pre tabindex=\"0\"><code>原文：1. *感谢 [Hugo](https://gohugo.io) 提供代码支持* 翻后：[1. *Hugo](https://gohugo.io)に…（列表标记和星号被吞进了链接文字） </code></pre><p>最坑的是这类损伤<strong>不会报错</strong>——链接还是那个链接，页面照样渲染，不仔细看根本发现不了。光靠在提示词里写「请保持格式」，实测没用：模型看得见语法，就忍不住要动语法。</p> <p>最后用的办法很直接：<strong>别让 AI 看见语法</strong>。</p> <p>翻译之前，程序先把文章「拆开」：代码块、链接地址、行内代码、各种标记符号，全部替换成 «0» «1» 这样的编号占位符。AI 看到的只剩纯中文句子加几个编号，它想破坏语法也无从下手。翻完之后程序把占位符原样换回去。</p> <p>拆分用的是 Markdown 解析器（remark）按语法树定位，而不是正则表达式硬匹配——解析器认识所有规范语法，以后出现新语法也不用打补丁。翻完还有几道自动检查：</p> <ol> <li><strong>编号完整性</strong>：每个占位符必须恰好回来一次，少了、多了、重复了都算失败</li> <li><strong>位置检查</strong>：列表标记必须还在行首，收尾符号必须还在行尾</li> <li><strong>结构比对</strong>：译文和原文的链接数、标题数、表格数必须一致</li> </ol> <p>检查不过就自动重试；还是不行就把这一段切小了重翻；再不行，单行原样保留——一行没翻译，好过整篇是坏的。</p> <h2 id=\"三省钱机制改多少翻多少\">三、省钱机制：改多少，翻多少</h2> <p>每个译文文件带两个「指纹」（hash），一个对应正文，一个对应标题摘要这些字段：</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-toml\" data-lang=\"toml\"><span style=\"display:flex;\"><span><span style=\"color:#a6e22e\">source_hash</span> = <span style=\"color:#e6db74\">'…'</span> <span style=\"color:#75715e\"># 正文的指纹</span> </span></span><span style=\"display:flex;\"><span><span style=\"color:#a6e22e\">source_fields_hash</span> = <span style=\"color:#e6db74\">'…'</span> <span style=\"color:#75715e\"># 字段的指纹</span> </span></span></code></pre></div><p>翻译前先比对指纹：</p> <ul> <li>改了<strong>正文</strong> → 只重翻正文，标题摘要沿用旧的</li> <li>只改了<strong>摘要或标签</strong> → 只重翻字段，正文分文不花</li> <li>什么都不变 → 零次调用（每周日凌晨的定时对账就是这样全量扫描一遍，干净时一分钱不花）</li> </ul> <p>另外 Cloudflare 的 AI Gateway 自带 7 天缓存：同样的请求第二次问，直接返回上次的答案，不计费。所以修一个错别字推上去，往往只需要花真正变了的那部分的钱。</p> <p>实测数字：免费计划每天 10,000 neurons（Cloudflare 的算力计价单位），一篇三千字文章翻一个语言大约 50-160 neurons——一天翻十几篇也用不完。</p> <h2 id=\"四中文摘要也归它管\">四、中文摘要也归它管</h2> <p>有时候写完文章忘了填摘要。流水线发现中文文章没有 <code>description</code>，会自动按正文内容补写一段 70-160 字的摘要，写回文章文件。三个语言的摘要都以这段为源头翻译——<strong>三语摘要永远说的是同一件事</strong>。之后你在 CMS 里手改摘要保存，三语自动跟着更新。</p> <h2 id=\"五人永远有一票\">五、人永远有一票</h2> <p>自动化最容易走偏的方向是「机器全自动，人没法插手」。这条流水线给人工留了完整的接手路径：</p> <ul> <li>在 CMS 里给某篇译文勾<strong>「锁定译文」</strong>：这份译文从此视同人工稿件，永不覆盖、永不删除，中文原文更新也不再同步</li> <li>在 CMS 里给中文文章勾<strong>「不翻译」</strong>：这篇直接退出流水线</li> <li>校对过的机翻不会被无脑重翻：只要中文原文对应部分没动，指纹就没变，就不会花钱重译</li> <li>生命周期自动同步：中文文章删除，译文跟着清理；中文转草稿，译文跟着下架</li> </ul> <h2 id=\"六踩过的坑如果你也想搭一套\">六、踩过的坑（如果你也想搭一套）</h2> <p>几个花真金白银（和时间）换来的教训：</p> <ul> <li><strong>速率限制要主动适配</strong>。Cloudflare 的限流比文档上写的更容易触发，客户端固定放慢请求速度（每 2 秒一个）比事后退避省心得多</li> <li><strong>别让 AI 用 JSON 格式输出正文</strong>。Markdown 塞进 JSON 会被模型拆得七零八落，正文必须走纯文本</li> <li><strong>失败时宁可保守</strong>。译文存疑就不发布，旧版继续挂着，等下次重试——静态博客的「旧」远没有「坏」致命</li> <li><strong>每道防线都要有离线自测</strong>。这套系统的检查逻辑有几十条断言，每次改动跑一遍，零 API 消耗</li> </ul> <h2 id=\"七这篇就是活样板\">七、这篇就是活样板</h2> <p>你现在看到的日文版和英文版，就是刚才这次 push 之后几分钟内自动翻译、自动部署的。切到页头的语言切换器对比着看——AI 翻得自然与否，一眼便知。</p>","img":[]},{"slug":"first","title":"你好，世界","desc":"博客的第一篇文章：记录这个三语静态博客的诞生——Hugo + PaperMod 搭建、Netlify 部署、Pages CMS 在线编辑，以及感谢 Hugo、PaperMod 与 Pages CMS 三个开源项目。","meta":"2025年11月26日 · 更新于 2026年11月5日 · 1 分钟 · 日常","cats":["日常"],"tags":["博客","开始"],"body":"<p>新的开端，新的出发！</p> <h3 id=\"这是我的第一篇博客文章以此纪念\">这是我的第一篇博客文章，以此纪念！</h3> <ol> <li><em>感谢 <a href=\"https://gohugo.io\">Hugo</a> 提供代码支持</em></li> <li><em>感谢 <a href=\"https://github.com/adityatelange/hugo-PaperMod\">PaperMod</a> 提供主题支持</em></li> <li><em>感谢 <a href=\"https://pagescms.org\">Pages CMS</a> 提供快速编辑支持</em></li> </ol>","img":[]},{"slug":"zz-s01","title":"菜市场里的天气预报","desc":"楼下菜市场的摊主们比手机上的天气软件准。关于一把芹菜、一句「明天有雨」，和那些不用联网也能运转的小小预报系统。","meta":"2026年11月5日 · 2 分钟 · 日常","cats":["日常"],"tags":["菜市场","散步"],"body":"<h2 id=\"一比-app-准的那句话\">一、比 App 准的那句话</h2> <p>我手机里的天气软件说本周都是晴天，但周六早上卖豆腐的阿姨一边找零一边说：「今天带伞，下午有雨。」我问她怎么知道，她指了指自己的膝盖，又指了指摊上那堆有点发蔫的芹菜。</p> <blockquote> <p>「菜比人先知道。」她说这话时没抬头，手上的塑料袋已经撕好了。</p> </blockquote> <p>结果下午三点真的下了，不大，但足够把没带伞的人淋得一路小跑。我站在便利店屋檐下，想起早上那把芹菜——<strong>它确实比我的手机先知道</strong>。</p> <h2 id=\"二摊主们的观测网\">二、摊主们的观测网</h2> <p>后来我留意了几天，发现菜市场里有一套自己的观测办法：</p> <table> <thead> <tr> <th>摊主</th> <th>看什么</th> <th>预报什么</th> </tr> </thead> <tbody> <tr> <td>卖豆腐的</td> <td>膝盖、芹菜</td> <td>半天内的雨</td> </tr> <tr> <td>卖鱼的</td> <td>水盆里的气泡</td> <td>闷热或转凉</td> </tr> <tr> <td>卖花的</td> <td>花瓣边缘</td> <td>第二天有没有风</td> </tr> <tr> <td>修鞋的</td> <td>门口的灰</td> <td>「别晒被子」</td> </tr> </tbody> </table> <ul> <li><input checked disabled type=\"checkbox\"> 问过豆腐阿姨</li> <li><input checked disabled type=\"checkbox\"> 问过卖鱼的</li> <li><input disabled type=\"checkbox\"> 没敢问修鞋的为什么看灰</li> <li><input disabled type=\"checkbox\"> 也没验证「别晒被子」那次准不准</li> </ul> <p>这些办法没有一条写在纸上，全靠<strong>站在那里</strong>久了才攒出来。我试着用手机查「为什么下雨前芹菜会蔫」，跳出来一堆大棚湿度控制的论文，没有一篇提到菜市场。</p> <h2 id=\"三一次误报\">三、一次误报</h2> <p>当然也有不准的时候。上周三卖花的说「明天风大」，我特意把窗台那盆绿萝搬进屋，结果第二天一丝风都没有，太阳好得过分。</p> <p>隔天去问，她笑了一下：「<strong>花说有风，是它自己想吹风。</strong>」我把这句记在手机备忘录里，比任何一条推送都舍不得删。</p> <p><em>后来那盆绿萝还是放回了窗台。</em>它大概也不介意被多搬一趟。</p> <h2 id=\"四为什么不直接看手机\">四、为什么不直接看手机</h2> <p>想了想，大概不是准不准的问题。手机给的是「降水概率 30%」，菜市场给的是「带伞」——后者带着一个具体的人，替你把决定做了一半。</p> <blockquote> <p>前者是数据，后者是招呼。人偶尔需要被招呼一下。</p> </blockquote> <p>楼下便利店的店员也这样。我买伞那天她没说「下雨了」，只说「今天绕远路啦？」，顺手把靠门那把最结实的递过来。伞柄上贴着一张手写标签：<strong>「别借给别人，会丢。」</strong> 字歪歪扭扭，但那个「丢」描了两遍。</p> <h2 id=\"五收尾\">五、收尾</h2> <p>今晚窗外又有点闷。我没开天气软件，先去阳台看了看那盆绿萝——叶子没垂，应该暂时没雨。</p> <p>不过还是把伞放到了门口。豆腐阿姨的膝盖大概比我的手机靠谱，但<strong>多带一把伞这件事，本来也不需要谁批准</strong>。</p> <hr>","img":[]},{"slug":"zz-s02","title":"修一把不肯合上的伞","desc":"一把卡了半年的折叠伞，拆开之后发现只是一粒沙子。关于「坏掉」和「其实没坏」之间那点小距离，以及修东西时手比脑子先明白的时刻。","meta":"2026年11月5日 · 2 分钟 · 日常","cats":["日常"],"tags":["修理","物件"],"body":"<h2 id=\"一它只是合不上\">一、它只是合不上</h2> <p>这把伞是去年秋天买的，浅灰色，八骨。用了不到一个月，收伞时按钮按下去会「咔」一声，但中杆卡在半截，怎么也压不回去。之后每次出门我都得把它<strong>举着进地铁</strong>，像举一根不太体面的旗杆。</p> <p>试过的办法按顺序列一下：</p> <ol> <li>往按钮缝里滴过缝纫机油</li> <li>用牙签掏过杆上的小孔</li> <li>拿吹风机对着中杆吹了三分钟</li> <li><del>想过直接扔掉</del>（没舍得）</li> </ol> <blockquote> <p>前三种都没用。第四种最接近成功，但每次走到垃圾桶边又会拐回来。</p> </blockquote> <h2 id=\"二拆开之后\">二、拆开之后</h2> <p>周六下午实在没事，找了把小螺丝刀，把伞柄尾端的塑料盖撬开。里面掉出来<strong>一粒很小的沙子</strong>，灰白色，比芝麻还小。</p> <table> <thead> <tr> <th>部件</th> <th>我以为的问题</th> <th>实际</th> </tr> </thead> <tbody> <tr> <td>按钮</td> <td>弹簧断了</td> <td>好好的</td> </tr> <tr> <td>中杆</td> <td>变形了</td> <td>只是被沙子垫住</td> </tr> <tr> <td>伞骨</td> <td>锈了</td> <td>一点锈都没有</td> </tr> <tr> <td>我</td> <td>手太笨</td> <td>只是没拆过</td> </tr> </tbody> </table> <p>把沙子吹掉、原样装回去，按钮「嗒」一声就到底了。整个过程<strong>不到四分钟</strong>，而我举着它挤了半年的地铁。</p> <p><em>那粒沙子我没扔，放在窗台装胶囊的小玻璃瓶里。</em>它现在看起来像个纪念品。</p> <h2 id=\"三手比脑子先明白\">三、手比脑子先明白</h2> <p>修完坐在地上想了一会儿，觉得有意思的不是「沙子」而是「半年」。这半年里我给这把伞编过好几个故事：弹簧老化、骨架变形、买到残次品。每一个都挺合理，也<strong>每一个都是错的</strong>。</p> <ul> <li><input checked disabled type=\"checkbox\"> 拆开</li> <li><input checked disabled type=\"checkbox\"> 找到沙子</li> <li><input disabled type=\"checkbox\"> 编过的那些故事没地方道歉</li> <li><input disabled type=\"checkbox\"> 下次能不能先拆再猜</li> </ul> <blockquote> <p>东西坏掉的时候，人最先补上的往往不是零件，是解释。</p> </blockquote> <p>楼下修鞋的师傅以前说过一句差不多的话，当时我没听懂。他一边给一只皮鞋上线一边说：「<strong>别急着说它坏了，先看看里头有没有东西。</strong>」现在有点懂了。</p> <h2 id=\"四顺手修了别的\">四、顺手修了别的</h2> <p>那天之后像开了个开关，我又把家里几样「大概坏了」的东西翻出来：</p> <ul> <li>台灯：灯泡松了，拧紧就好</li> <li>抽屉：轨道里卡了一枚硬币，推不动不是因为木头胀</li> <li>那台总连不上打印机的旧电脑：只是网线插在了第二个口上</li> </ul> <p><strong>没有一样是真的坏了。</strong> 这结论让我有点不好意思，又有点高兴。</p> <h2 id=\"五留着那粒沙子\">五、留着那粒沙子</h2> <p>伞现在收得利落，浅灰色的布面有几道旧折痕，洗不掉也不必洗。</p> <p>玻璃瓶里那粒沙子，朋友来家里看见问过一次，我说「是半年的地铁」。她没追问，只说「挺值的」。</p> <blockquote> <p>有些东西不是被修好的，是<strong>终于被看了一眼</strong>。</p> </blockquote> <p>窗外这会儿没雨，伞靠在门后，收得很短。我偶尔还是会按一下那个按钮，听那声「嗒」——纯粹为了确认它还在。</p>","img":[]},{"slug":"zz-s03","title":"傍晚六点的琴声","desc":"搬来之后每天傍晚六点，隔壁都会响起一段总在同一处停下的钢琴。关于没弹完的半首曲子、不好意思敲的门，和「不打扰」这种温柔的距离。","meta":"2026年11月5日 · 2 分钟 · 日常","cats":["日常"],"tags":["邻居","声音"],"body":"<h2 id=\"一准时得不像人\">一、准时得不像人</h2> <p>搬来第三天发现的：<strong>每天傍晚六点整</strong>，隔壁会响起钢琴。不是整首，是一段大概两分钟的练习，音阶居多，中间夹几个反复试的和弦，然后在同一个地方停住。</p> <p>我特意记了一周：</p> <table> <thead> <tr> <th>星期</th> <th>开始</th> <th>停在哪</th> <th>之后</th> </tr> </thead> <tbody> <tr> <td>一</td> <td>18:00</td> <td>第三小节</td> <td>安静</td> </tr> <tr> <td>三</td> <td>18:00</td> <td>第三小节</td> <td>安静</td> </tr> <tr> <td>五</td> <td>17:58</td> <td>第三小节</td> <td>多试了一次</td> </tr> <tr> <td>日</td> <td>18:01</td> <td>第二小节</td> <td>安静</td> </tr> </tbody> </table> <ul> <li><input checked disabled type=\"checkbox\"> 记满七天</li> <li><input checked disabled type=\"checkbox\"> 确认不是录音</li> <li><input disabled type=\"checkbox\"> 没听出是哪首曲子</li> <li><input disabled type=\"checkbox\"> 也没去敲过门</li> </ul> <blockquote> <p>准时得让人怀疑，弹的人是不是也在等一天里的这个刻度。</p> </blockquote> <h2 id=\"二停下来的那一小截\">二、停下来的那一小截</h2> <p>最在意的其实是「停」。两分钟里前一半很顺，到第三小节会<strong>慢下来</strong>，试两遍，然后就没了。不是弹错那种慌张的断，是<strong>很平静地不弹了</strong>。</p> <p>有天我正好在厨房洗杯子，水声盖住了一半，等关掉水龙头，那边已经安静了。手里那只杯子还滴着水，我站在原地愣了几秒，说不上失望，更像<strong>错过了一句没说完的话</strong>。</p> <p><em>后来我养成个习惯：六点前把水关小一点。</em>纯属多事，但也没耽误什么。</p> <h2 id=\"三关于敲不敲门\">三、关于「敲不敲门」</h2> <p>想过很多次要不要去问。理由排得挺齐：</p> <ol> <li>问曲名，顺便谢谢</li> <li>说「那段很好听」</li> <li><del>送点什么过去</del>（太重了）</li> <li>什么都不说，只是继续听</li> </ol> <p>第 4 条最后胜出。倒不是怕生，是觉得<strong>一旦问了，那两分钟就变成「给谁听的」了</strong>。现在这样挺好：弹的人不必知道隔壁有人，听的人也不必表示听见。</p> <blockquote> <p>有些距离不是疏远，是留给声音自己的空间。</p> </blockquote> <p>楼下便利店店员有回闲聊，说「六点那家练琴吧？我在这儿听了两年啦」。我点点头，没说自己也记了一周。<strong>原来不止一个人</strong>在 quietly 听着，这让我挺高兴。</p> <h2 id=\"四一场没下的雨里\">四、一场没下的雨里</h2> <p>上周四天气闷得反常，六点那会儿天已经暗成深蓝，琴声照旧起来。弹到第三小节，窗外恰好滚过一声很远的雷，不高，像有人把桌子轻轻挪了一下。</p> <p>琴停了大概三秒，然后<strong>把第三小节从头又弹了一遍</strong>，这次顺过去了，接到第四小节，弹了四个音，收了。</p> <p>我后来没再听到第四小节之后的部分。但那天算听完了半首。</p> <p><strong>不是曲子终于弹完，是那天它被允许往前走了一点点。</strong></p> <h2 id=\"五今早的六点\">五、今早的六点</h2> <p>今天下班早，六点差五分到的家。把钥匙放进玄关那个裂了釉的碗里，没开水龙头，也没开灯，就坐在窗边等。</p> <p>六点整，音阶起来了。风从没关严的窗缝里进来，带着一点楼下梧桐叶子的味道。</p> <p>我没去敲那扇门。以后大概也不会。</p> <blockquote> <p>一段每天准时出现、又不要求被回应的声音，是搬进新地方之后，最先让我觉得「可以待下来」的东西。</p> </blockquote>","img":[]},{"slug":"zz-s04","title":"把一张明信片寄丢之后","desc":"给朋友寄了张明信片，写了地址却没贴够邮票，退回来时边角已经磨毛。关于「没送到」这件事本身，以及后来干脆不补寄的那个决定。","meta":"2026年11月5日 · 2 分钟 · 日常","cats":["日常"],"tags":["信件","朋友"],"body":"<h2 id=\"一退件\">一、退件</h2> <p>寄出去第九天，它回来了。信封上盖了个淡得快看不清的戳，旁边手写一行小字：「邮资不足」。右下角我原本写地址的地方被磨得发毛，纸角卷起来，像被谁在路上反复捏过。</p> <blockquote> <p>它没到该到的地方，倒是<strong>先替我走了一趟来回</strong>。</p> </blockquote> <p>明信片正面是傍晚的河堤，橘色的天，背面我写了三行：</p> <ol> <li>这边梧桐开始落叶了</li> <li>新家窗台能看见对面楼的灯</li> <li>「settle in 了再回信，不急」</li> </ol> <p>第三行里那个英文是照着朋友塞给我的茶包便签抄的，字丑，但当时觉得<strong>刚好就是想说的那句</strong>。</p> <h2 id=\"二算错的邮资\">二、算错的邮资</h2> <p>问题出在我按明信片算了，没算它其实被我塞进了一个<strong>薄牛皮纸信封</strong>里。多出来的几克，差了一枚邮票。</p> <table> <thead> <tr> <th>我以为</th> <th>实际</th> </tr> </thead> <tbody> <tr> <td>明信片，一张票够</td> <td>装了信封，按信函算</td> </tr> <tr> <td>三天到</td> <td>九天，还退回来了</td> </tr> <tr> <td>写清地址就行</td> <td>还得贴对</td> </tr> <tr> <td>寄出=结束</td> <td>寄出=开始等</td> </tr> </tbody> </table> <ul> <li><input checked disabled type=\"checkbox\"> 写的地址没错</li> <li><input checked disabled type=\"checkbox\"> 内容没写错</li> <li><input disabled type=\"checkbox\"> 邮资算错了</li> <li><input disabled type=\"checkbox\"> 补寄这件事，最后没做</li> </ul> <p><em>那枚少贴的邮票，我现在还记得是浅蓝色的那版。</em></p> <h2 id=\"三为什么没补寄\">三、为什么没补寄</h2> <p>退件在桌上放了两天。补一枚邮票、重新投进楼下那个绿筒，前后不到五分钟。但我越看那张磨毛的边角，越觉得<strong>它已经不是原来那张了</strong>。</p> <p>原来那张是「我寄给朋友的话」。退回来这张多了戳记、多了别人手写的字、多了一趟我没跟着走的路。<strong>再寄出去，寄的就是这段来回，不是那三行字了。</strong></p> <blockquote> <p>有些东西一旦带着经历回来，就不适合再当作没发生过。</p> </blockquote> <p>给朋友发了条消息，把三行字原样打过去，末尾加一句「本来寄了张纸，它自己旅游回来了」。她回了一串笑，说「<strong>那张纸比我先旅游了</strong>」，然后聊了半小时别的。</p> <h2 id=\"四后来它去了抽屉\">四、后来它去了抽屉</h2> <p>没扔，也没补寄。夹进玄关那本一直没翻完的书里，正好压着上次散步捡的那片完整梧桐叶。</p> <p>后来又收到过朋友寄来的东西：一包茶、一张她那边河堤的照片、一张便签写着「这次邮票贴够了」。<strong>她显然把这当成一个可以继续的玩笑</strong>，这挺好。</p> <p>我把便签也夹进同一页。现在那本书里有一片叶子、一张退回的明信片、一张贴够邮票的便签，谁也没压着谁。</p> <h2 id=\"五一点没什么用的结论\">五、一点没什么用的结论</h2> <p>想了想，寄丢这件事教我的不是「要贴够邮票」——那查一下就知道。是<strong>「送到」并不是一封信唯一能发生的事</strong>。</p> <ul> <li>它可能替你多走一段路</li> <li>可能带回来别人的字迹</li> <li>可能让一句「不急」真的变成不急</li> <li><del>可能提醒你下次别犯同样的错</del>（大概还是会忘）</li> </ul> <p>窗外今晚没风。楼下那个绿筒还立在原处，投口擦得挺干净。我路过时摸了摸口袋，没有要寄的东西，也没觉得缺什么。</p> <blockquote> <p>没送到的那张，最后也没算丢。它只是换了个地方待着。</p> </blockquote>","img":[]},{"slug":"zz-s05","title":"给静态博客加一个不打扰的阅读进度条","desc":"用不到四十行 CSS 和一小段 JS 给文章页加进度条：不引第三方库、不改主题本体、JS 禁用时自动回退。记录取舍过程和两个踩过的小坑。","meta":"2026年11月5日 · 2 分钟 · 技术","cats":["技术"],"tags":["Hugo","CSS","JavaScript"],"body":"<h2 id=\"一需求只有一句话\">一、需求只有一句话</h2> <p><strong>读者翻到哪儿，顶上那条线就走到哪儿。</strong> 不加数字、不加百分比、不弹提示，鼠标移上去也不变粗。就这一句。</p> <p>博客是 Hugo + PaperMod，主题每周更新，所以动手前先给自己划了条线：<strong>绝不改 submodule 本体</strong>。能放在站点层的都放站点层。</p> <blockquote> <p>主题是易变依赖，逻辑放进去，每次 weekly PR 都要人工看 diff。</p> </blockquote> <h2 id=\"二放在哪一层\">二、放在哪一层</h2> <table> <thead> <tr> <th>方案</th> <th>改动位置</th> <th>升级成本</th> <th>结论</th> </tr> </thead> <tbody> <tr> <td>改主题 header 模板</td> <td>submodule 内</td> <td>每周冲突</td> <td>✗ 直接排除</td> </tr> <tr> <td>覆盖 <code>extend_head.html</code></td> <td>站点 <code>layouts/_partials/</code></td> <td>低</td> <td>✓ 注入 CSS/JS</td> </tr> <tr> <td>自建 shortcode</td> <td>每篇文章正文</td> <td>高</td> <td>✗ CMS 会破坏语法</td> </tr> <tr> <td>纯 CSS <code>scroll-timeline</code></td> <td>站点 CSS</td> <td>最低</td> <td>△ 兼容性不够</td> </tr> </tbody> </table> <p>最后选了第 2 条 + 一小段原生 JS。CSS 走 <code>assets/css/extended/</code>，JS 走 <code>assets/js/site.js</code>，都由主题的 <code>extend_head</code> 钩子带指纹加载。</p> <ul> <li><input checked disabled type=\"checkbox\"> 用站点层扩展点</li> <li><input checked disabled type=\"checkbox\"> 零第三方依赖</li> <li><input disabled type=\"checkbox\"> 没做 IE 兼容（早就不做了）</li> <li><input disabled type=\"checkbox\"> 没加 prefers-reduced-motion 开关（记一下）</li> </ul> <h2 id=\"三那三十几行\">三、那三十几行</h2> <p>核心其实就一句：<code>scrollY / (scrollHeight - innerHeight)</code>。</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-js\" data-lang=\"js\"><span style=\"display:flex;\"><span><span style=\"color:#66d9ef\">function</span> <span style=\"color:#a6e22e\">updateProgress</span>() { </span></span><span style=\"display:flex;\"><span> <span style=\"color:#66d9ef\">const</span> <span style=\"color:#a6e22e\">h</span> <span style=\"color:#f92672\">=</span> document.<span style=\"color:#a6e22e\">documentElement</span>; </span></span><span style=\"display:flex;\"><span> <span style=\"color:#66d9ef\">const</span> <span style=\"color:#a6e22e\">max</span> <span style=\"color:#f92672\">=</span> <span style=\"color:#a6e22e\">h</span>.<span style=\"color:#a6e22e\">scrollHeight</span> <span style=\"color:#f92672\">-</span> <span style=\"color:#a6e22e\">h</span>.<span style=\"color:#a6e22e\">clientHeight</span>; </span></span><span style=\"display:flex;\"><span> <span style=\"color:#66d9ef\">const</span> <span style=\"color:#a6e22e\">p</span> <span style=\"color:#f92672\">=</span> <span style=\"color:#a6e22e\">max</span> <span style=\"color:#f92672\">&gt;</span> <span style=\"color:#ae81ff\">0</span> <span style=\"color:#f92672\">?</span> Math.<span style=\"color:#a6e22e\">min</span>(<span style=\"color:#ae81ff\">1</span>, <span style=\"color:#a6e22e\">h</span>.<span style=\"color:#a6e22e\">scrollTop</span> <span style=\"color:#f92672\">/</span> <span style=\"color:#a6e22e\">max</span>) <span style=\"color:#f92672\">:</span> <span style=\"color:#ae81ff\">0</span>; </span></span><span style=\"display:flex;\"><span> document.<span style=\"color:#a6e22e\">querySelector</span>(<span style=\"color:#e6db74\">'.reading-progress'</span>) </span></span><span style=\"display:flex;\"><span> <span style=\"color:#f92672\">?</span>.<span style=\"color:#a6e22e\">style</span>.<span style=\"color:#a6e22e\">setProperty</span>(<span style=\"color:#e6db74\">'--p'</span>, String(<span style=\"color:#a6e22e\">p</span>)); </span></span><span style=\"display:flex;\"><span>} </span></span></code></pre></div><p>CSS 侧用 <code>--p</code> 控制 <code>scaleX</code>，比改 <code>width</code> 少一次重排：</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-css\" data-lang=\"css\"><span style=\"display:flex;\"><span>.<span style=\"color:#a6e22e\">reading-progress</span> { </span></span><span style=\"display:flex;\"><span> <span style=\"color:#66d9ef\">position</span>: <span style=\"color:#66d9ef\">fixed</span>; <span style=\"color:#66d9ef\">inset</span>: <span style=\"color:#ae81ff\">0</span> <span style=\"color:#ae81ff\">0</span> <span style=\"color:#66d9ef\">auto</span>; <span style=\"color:#66d9ef\">height</span>: <span style=\"color:#ae81ff\">2</span><span style=\"color:#66d9ef\">px</span>; </span></span><span style=\"display:flex;\"><span> <span style=\"color:#66d9ef\">transform</span>: scaleX(<span style=\"color:#a6e22e\">var</span>(<span style=\"color:#f92672\">--</span>p, <span style=\"color:#ae81ff\">0</span>)); <span style=\"color:#66d9ef\">transform-origin</span>: <span style=\"color:#66d9ef\">left</span>; </span></span><span style=\"display:flex;\"><span> <span style=\"color:#66d9ef\">background</span>: <span style=\"color:#a6e22e\">var</span>(<span style=\"color:#f92672\">--</span>primary); pointer-events: <span style=\"color:#66d9ef\">none</span>; </span></span><span style=\"display:flex;\"><span>} </span></span></code></pre></div><p><strong>注意 <code>pointer-events: none</code>。</strong> 第一版忘了加，进度条横在页头最上面，把主题切换按钮的点击区盖掉了一像素，排查了半小时才拍到。</p> <h2 id=\"四js-禁用时怎么办\">四、JS 禁用时怎么办</h2> <p>进度条本身是「增强」而不是「内容」，所以 JS 不跑就不该出现一条空线。做法是<strong>默认 <code>display: none</code>，由 JS 加一个 class 才显示</strong>：</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-css\" data-lang=\"css\"><span style=\"display:flex;\"><span>.<span style=\"color:#a6e22e\">reading-progress</span> { <span style=\"color:#66d9ef\">display</span>: <span style=\"color:#66d9ef\">none</span>; } </span></span><span style=\"display:flex;\"><span><span style=\"color:#f92672\">html</span>.<span style=\"color:#a6e22e\">has-js</span> .<span style=\"color:#a6e22e\">reading-progress</span> { <span style=\"color:#66d9ef\">display</span>: <span style=\"color:#66d9ef\">block</span>; } </span></span></code></pre></div><p><code>site.js</code> 第一行加 <code>document.documentElement.classList.add('has-js')</code>。这样脚本没加载、被拦、或报错中途退出，页面都保持原样。</p> <blockquote> <p>增强功能要<strong>自己证明自己可用</strong>，不能让读者替你兜底。</p> </blockquote> <h2 id=\"五两个小坑\">五、两个小坑</h2> <ol> <li><strong>首页没有 <code>.post-single</code></strong>，别在列表页也渲染。<code>site.js</code> 里先查这个选择器，查不到直接 return</li> <li><strong>长目录会撑高页面</strong>，滚动分母跟着变，进度条到中段会轻微回退。最后按 <code>document.body.scrollHeight</code> 取一次基准，没做动态重算——<strong>够用就行</strong></li> </ol> <table> <thead> <tr> <th>坑</th> <th>现象</th> <th>处理</th> </tr> </thead> <tbody> <tr> <td>缺 pointer-events</td> <td>按钮点不到</td> <td>加一行 CSS</td> </tr> <tr> <td>列表页也显示</td> <td>首页顶部多根线</td> <td>选择器门控</td> </tr> <tr> <td>目录撑高</td> <td>中段轻微回退</td> <td>接受</td> </tr> </tbody> </table> <h2 id=\"六收尾\">六、收尾</h2> <p>整段改动只有两个文件、三十几行，没碰主题，没装包。<code>hugo --gc --minify</code> 之后那条线几乎看不见，正是想要的。</p> <blockquote> <p><strong>「几乎看不见」</strong>是这个功能唯一的设计目标。做到之后就别再给它加东西了。</p> </blockquote>","img":[]},{"slug":"zz-s06","title":"把构建时间从八秒压到两秒：一次没什么技术含量的优化","desc":"Hugo 构建慢了半秒都要查清楚。这次的元凶不是模板也不是图片，是一条被反复调用的分类查询。记录定位过程、三个无效尝试，和最后那行删掉的代码。","meta":"2026年11月5日 · 2 分钟 · 技术","cats":["技术"],"tags":["Hugo","性能"],"body":"<h2 id=\"一八秒不算慢但不对劲\">一、八秒不算慢，但不对劲</h2> <p>站点不到三十篇文章，<code>hugo --gc --minify</code> 本地要跑八秒出头。绝对数字不吓人，可<strong>同样的仓库上周还是两秒</strong>，中间只加了两三个功能。</p> <blockquote> <p>变慢本身不可怕，可怕的是不知道从哪一版开始慢的。</p> </blockquote> <p>先按最笨的办法：<code>git log</code> 翻最近十个提交，逐个 checkout 构建计时。</p> <table> <thead> <tr> <th>提交</th> <th>构建</th> <th>怀疑点</th> </tr> </thead> <tbody> <tr> <td>加进度条</td> <td>2.1s</td> <td>无关</td> </tr> <tr> <td>加搜索权重</td> <td>2.2s</td> <td>无关</td> </tr> <tr> <td>归档页本地化</td> <td><strong>7.9s</strong></td> <td>✓ 就是它</td> </tr> <tr> <td>之后两个</td> <td>8.0s</td> <td>沿用</td> </tr> </tbody> </table> <p><em>元凶一分钟就锁定了。</em>真正花时间的是后面——为什么一个归档页会贵六秒。</p> <h2 id=\"二三个没用的尝试\">二、三个没用的尝试</h2> <p>按直觉先后试过：</p> <ol> <li><strong>以为是图片</strong>：把 <code>resources</code> 清了重跑，没变化</li> <li><strong>以为是 <code>--gc</code></strong>：去掉参数，8.0 → 7.9，不是</li> <li><strong>以为是模板嵌套</strong>：把归档模板简化到只剩一个 <code>&lt;ul&gt;</code>，还是 7.8</li> </ol> <ul> <li><input checked disabled type=\"checkbox\"> 清缓存</li> <li><input checked disabled type=\"checkbox\"> 去 –gc</li> <li><input checked disabled type=\"checkbox\"> 简化模板</li> <li><input disabled type=\"checkbox\"> <del>准备换生成器</del>（幸好没动手）</li> </ul> <p>第三个试完我才想到：<strong>模板里那行分类查询，是不是每次循环都在跑</strong>。</p> <h2 id=\"三那行代码\">三、那行代码</h2> <p>归档页要按年月分组，原写法大概是这样：</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-go\" data-lang=\"go\"><span style=\"display:flex;\"><span>{{ <span style=\"color:#66d9ef\">range</span> .<span style=\"color:#a6e22e\">Site</span>.<span style=\"color:#a6e22e\">RegularPages</span> }} </span></span><span style=\"display:flex;\"><span> {{ <span style=\"color:#960050;background-color:#1e0010\">$</span><span style=\"color:#a6e22e\">y</span> <span style=\"color:#f92672\">:=</span> .<span style=\"color:#a6e22e\">Date</span>.<span style=\"color:#a6e22e\">Format</span> <span style=\"color:#e6db74\">\"2006\"</span> }} </span></span><span style=\"display:flex;\"><span> {{ <span style=\"color:#960050;background-color:#1e0010\">$</span><span style=\"color:#a6e22e\">posts</span> <span style=\"color:#f92672\">:=</span> <span style=\"color:#a6e22e\">where</span> (<span style=\"color:#a6e22e\">where</span> .<span style=\"color:#a6e22e\">Site</span>.<span style=\"color:#a6e22e\">RegularPages</span> <span style=\"color:#e6db74\">\"Section\"</span> <span style=\"color:#e6db74\">\"posts\"</span>) <span style=\"color:#e6db74\">\"Date\"</span> <span style=\"color:#e6db74\">\"&gt;\"</span> <span style=\"color:#f92672\">...</span> }} </span></span><span style=\"display:flex;\"><span> {{ <span style=\"color:#66d9ef\">range</span> <span style=\"color:#960050;background-color:#1e0010\">$</span><span style=\"color:#a6e22e\">posts</span> }}<span style=\"color:#960050;background-color:#1e0010\">…</span>{{ <span style=\"color:#a6e22e\">end</span> }} </span></span><span style=\"display:flex;\"><span>{{ <span style=\"color:#a6e22e\">end</span> }} </span></span></code></pre></div><p>外层 <code>range</code> 有 N 篇，里层 <code>where</code> 就<strong>对全站页面筛了 N 次</strong>。文章少的时候看不出来，加上多语言三倍页面数，复杂度一下就显出来了。</p> <p>改法一点都不聪明：把筛选<strong>提到循环外，只做一次</strong>。</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-go\" data-lang=\"go\"><span style=\"display:flex;\"><span>{{ <span style=\"color:#960050;background-color:#1e0010\">$</span><span style=\"color:#a6e22e\">all</span> <span style=\"color:#f92672\">:=</span> <span style=\"color:#a6e22e\">where</span> .<span style=\"color:#a6e22e\">Site</span>.<span style=\"color:#a6e22e\">RegularPages</span> <span style=\"color:#e6db74\">\"Section\"</span> <span style=\"color:#e6db74\">\"posts\"</span> }} </span></span><span style=\"display:flex;\"><span>{{ <span style=\"color:#960050;background-color:#1e0010\">$</span><span style=\"color:#a6e22e\">groups</span> <span style=\"color:#f92672\">:=</span> <span style=\"color:#960050;background-color:#1e0010\">$</span><span style=\"color:#a6e22e\">all</span>.<span style=\"color:#a6e22e\">GroupByDate</span> <span style=\"color:#e6db74\">\"2006-01\"</span> }} </span></span><span style=\"display:flex;\"><span>{{ <span style=\"color:#66d9ef\">range</span> <span style=\"color:#960050;background-color:#1e0010\">$</span><span style=\"color:#a6e22e\">groups</span> }}<span style=\"color:#960050;background-color:#1e0010\">…</span>{{ <span style=\"color:#a6e22e\">end</span> }} </span></span></code></pre></div><p><code>GroupByDate</code> 是 Hugo 自带的，之前居然没想起来用。</p> <h2 id=\"四数字\">四、数字</h2> <table> <thead> <tr> <th>指标</th> <th>改前</th> <th>改后</th> </tr> </thead> <tbody> <tr> <td>本地构建</td> <td>8.0s</td> <td><strong>2.1s</strong></td> </tr> <tr> <td>模板执行</td> <td>6.7s</td> <td>0.8s</td> </tr> <tr> <td>CI 总时长</td> <td>41s</td> <td>33s</td> </tr> <tr> <td>代码行数</td> <td>22</td> <td>9</td> </tr> </tbody> </table> <blockquote> <p>删掉十三行，快了六秒。<strong>这大概是本周性价比最高的一次提交。</strong></p> </blockquote> <h2 id=\"五为什么值得记\">五、为什么值得记</h2> <p>因为前三个尝试全是错的，而且都很「像」对的。清缓存、去参数、简化模板——每一步都有道理，每一步都测了，每一步都没用。</p> <p>真正有用的是<strong>先量后猜</strong>：把每个提交的构建时间列成表，慢的那一版自己就跳出来了。要是直接凭经验去优化图片，大概现在还在给根本没变的图片做 WebP。</p> <ul> <li><strong>先定位，再动手</strong></li> <li>别优化你没量过的东西</li> <li>框架自带函数先查一遍，别自己写循环</li> <li><del>八秒也能忍</del> 不能忍</li> </ul> <h2 id=\"六收尾\">六、收尾</h2> <p>现在 <code>Total in 2.1s</code>，跟加功能之前一样。归档页还是那个归档页，年月分组、三语、RSS 入口都在，只是不再把同一份页面列表数三十遍。</p> <p><strong>代码变少，站点变快，没有新增任何依赖。</strong> 这种日子值得写下来。</p>","img":[]},{"slug":"zz-s07","title":"配置文件里那行注释，救了一次线上部署","desc":"一次 netlify.toml 的分支名写错，让全站「在 GitHub 上改进本文」链接 404。复盘为什么构建全绿、测试全过，却没人发现一个写死的 main。","meta":"2026年11月5日 · 2 分钟 · 技术","cats":["技术"],"tags":["Netlify","复盘"],"body":"<h2 id=\"一全绿但链接是死的\">一、全绿，但链接是死的</h2> <p>上线后第三天偶然点了一下文章页底部的<strong>「在 GitHub 上改进本文」</strong>，跳过去 404。顺手点了另外两篇，一样。</p> <p>奇怪的是：</p> <table> <thead> <tr> <th>检查</th> <th>结果</th> </tr> </thead> <tbody> <tr> <td>本地 <code>hugo --gc --minify</code></td> <td>✅</td> </tr> <tr> <td>CI build-check</td> <td>✅</td> </tr> <tr> <td>feature-check 26 项</td> <td>✅</td> </tr> <tr> <td>Netlify 部署日志</td> <td>✅ 全绿</td> </tr> <tr> <td>那个链接</td> <td><strong>404</strong></td> </tr> </tbody> </table> <blockquote> <p>所有自动检查都在验证「页面能不能生成」，没一个在验证「生成出来的地址对不对」。</p> </blockquote> <h2 id=\"二一行-main\">二、一行 main</h2> <p>站点层的 <code>editPost</code> 配置长这样（简化）：</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-toml\" data-lang=\"toml\"><span style=\"display:flex;\"><span>[<span style=\"color:#a6e22e\">params</span>.<span style=\"color:#a6e22e\">editPost</span>] </span></span><span style=\"display:flex;\"><span> <span style=\"color:#a6e22e\">URL</span> = <span style=\"color:#e6db74\">\"https://github.com/piscon/myblog/blob/master\"</span> </span></span><span style=\"display:flex;\"><span> <span style=\"color:#a6e22e\">appendFilePath</span> = <span style=\"color:#66d9ef\">true</span> </span></span></code></pre></div><p>出事的版本里那个 <code>master</code> 写成了 <strong><code>main</code></strong>。仓库默认分支一直是 <code>master</code>，GitHub 上 <code>blob/main/...</code> 自然不存在。</p> <p><strong>错的是一个字母串，不是逻辑。</strong> Hugo 不校验这个 URL，模板只负责拼字符串，构建当然全绿。</p> <ul> <li><input checked disabled type=\"checkbox\"> 拼出来的路径格式对</li> <li><input checked disabled type=\"checkbox\"> 文件存在</li> <li><input disabled type=\"checkbox\"> <strong>分支名没人核过</strong></li> <li><input disabled type=\"checkbox\"> 也没人点过成品链接</li> </ul> <p><em>写配置的时候我大概顺手敲了更常见的那个词。</em></p> <h2 id=\"三为什么没被测出来\">三、为什么没被测出来</h2> <p>复盘时最在意的不是「写错」，是「为什么错得这么安静」。</p> <ol> <li><strong>它是纯数据</strong>，不是代码，静态检查无从下手</li> <li><strong>feature-check 断言的是 DOM 结构</strong>（有没有 <code>a.edit</code>、class 对不对），不跟外域地址</li> <li>本地点过吗？<strong>没有</strong>。开发时都在看排版</li> <li>Netlify 只管构建，不管你链到哪儿</li> </ol> <table> <thead> <tr> <th>层</th> <th>能发现吗</th> <th>原因</th> </tr> </thead> <tbody> <tr> <td>Hugo 模板</td> <td>不能</td> <td>只做字符串拼接</td> </tr> <tr> <td>构建校验</td> <td>不能</td> <td>不解析 URL</td> </tr> <tr> <td>feature-check</td> <td>不能</td> <td>断言选择器，不断言外链</td> </tr> <tr> <td>人工点一下</td> <td><strong>能</strong></td> <td>但三天后才点</td> </tr> </tbody> </table> <blockquote> <p>这类 bug 的正式名字大概叫「<strong>没人负责的那一格</strong>」。</p> </blockquote> <h2 id=\"四补的那一格\">四、补的那一格</h2> <p>修法本身一秒：改回 <code>master</code>。但补防线花了一点心思。</p> <p>给 <code>feature-check.sh</code> 加了一条断言，直接 grep 构建产物里的编辑链接，<strong>校验分支段必须等于仓库默认分支</strong>：</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-bash\" data-lang=\"bash\"><span style=\"display:flex;\"><span>check <span style=\"color:#e6db74\">\"editPost 分支与默认分支一致\"</span> <span style=\"color:#ae81ff\">\\ </span></span></span><span style=\"display:flex;\"><span> <span style=\"color:#e6db74\">\"grep -q '/blob/</span><span style=\"color:#66d9ef\">$(</span>git symbolic-ref --short refs/remotes/origin/HEAD | sed <span style=\"color:#e6db74\">'s|origin/||'</span><span style=\"color:#66d9ef\">)</span><span style=\"color:#e6db74\">/' '</span>$PAGE<span style=\"color:#e6db74\">'\"</span> </span></span></code></pre></div><p>再加一条注释写在 <code>hugo.toml</code> 旁边：</p> <div class=\"highlight\"><pre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;\"><code class=\"language-toml\" data-lang=\"toml\"><span style=\"display:flex;\"><span><span style=\"color:#75715e\"># 分支必须与仓库默认分支一致（master）——曾误写 main 致全站死链</span> </span></span></code></pre></div><table> <thead> <tr> <th>补法</th> <th>防什么</th> </tr> </thead> <tbody> <tr> <td>断言分支段</td> <td>以后再写错，CI 直接红</td> </tr> <tr> <td>配置旁注释</td> <td>人改之前先看见</td> </tr> <tr> <td>复盘写进文档</td> <td>下次别再靠「顺手点一下」</td> </tr> </tbody> </table> <ul> <li><input checked disabled type=\"checkbox\"> 改回 master</li> <li><input checked disabled type=\"checkbox\"> 加断言（现在 27 项）</li> <li><input checked disabled type=\"checkbox\"> 加注释</li> <li><input disabled type=\"checkbox\"> 顺便把其它写死的域名也扫一遍（记了 TODO）</li> </ul> <h2 id=\"五比修-bug-更值得留的\">五、比修 bug 更值得留的</h2> <p>这次之后我改了个习惯：<strong>构建绿了不算完，随手点一个成品链接</strong>。成本三秒，刚好覆盖所有「数据写错但格式合法」的坑。</p> <p>还有一个更一般的结论：<strong>自动检查擅长验证结构，不擅长验证事实</strong>。结构错了会炸，事实错了（分支名、域名、日期、ID）会安静地错很久。所以断言里要尽量混几条「事实型」的，哪怕只是 grep 一个字符串。</p> <blockquote> <p>那行注释现在还躺在配置文件里。它不执行，但每次有人想改那个 URL，都会先读到「曾误写 main 致全站死链」。</p> </blockquote> <p><strong>代码管行为，注释管记性。</strong> 这次两样都用上了。</p>","img":[]}]</script>
+
+<script type="application/json" id="i18n-data">{"zh":{"guestbook":"<p>留一句话吧——问候、建议、或者只是打个招呼。<\/p><p>评论走 GitHub Discussions（giscus）：GitHub 账号登录即可发言，支持 Markdown。没有账号也欢迎通过<a href=/zh/about/>关于页<\/a>里的方式联系。<\/p>"},"ja":{"posts":{"ai-update-blog":{"t":"AIを使ってブログを更新する方法","d":"エディタを開かずに、GitHub を AI に接続して自然言語で伝えるだけで、AI がリポジトリを読み、記事を生成し、コミットまで行います。"},"cf-auto-translate":{"t":"Cloudflare Workers AI を使ったブログ自動翻訳パイプラインの構築","d":"中国語で記事をプッシュするだけで、日本語版と英語版が数分以内に自動生成・公開される仕組みを解説します。Markdownを分割してAIに渡す理由や、コストを抑える工夫、AIの誤訳への対策など、パイプラインの仕組みを分かりやすく説明します。"},"first":{"t":"こんにちは、世界","d":"ブログの最初の記事です。HugoとPaperModによる構築、Netlifyでのデプロイ、Pages CMSによるオンライン編集など、この3言語対応の静的ブログが誕生した経緯を記録します。また、Hugo、PaperMod、Pages CMSの各オープンソースプロジェクトに感謝いたします。"},"zz-s01":{"t":"市場の中の天気予報","d":"階下の市場の店主たちは、スマホの天気アプリよりも正確です。一本のセロリ、そして「明日は雨だよ」という一言。ネットに繋がなくても機能する、ささやかな予報システムについて。"},"zz-s02":{"t":"閉まらなくなった傘を修理する","d":"半年間開きっぱなしだった折りたたみ傘を分解してみたら、原因はたった一粒の砂でした。「壊れている」と「実は壊れていない」の間にあるわずかな距離と、修理中に手が頭よりも先に答えを見つけた瞬間の記録です。"},"zz-s03":{"t":"夕暮六時のピアノの音","d":"引っ越してきてから毎日夕方六時になると、隣からいつも同じ場所で止まってしまうピアノの音が聞こえてきます。弾き終えられない半曲の旋律と、訪ねる勇気を持てないドア、そして「邪魔をしない」という優しい距離感について。"},"zz-s04":{"t":"ポストカードを紛失してしまった後","d":"友人にポストカードを送ったものの、切手の不足で戻ってきてしまいました。角が擦り切れたその一枚と、「届かなかった」という出来事、そして結局再送しなかった決断について。"},"zz-s05":{"t":"静的ブログに、邪魔にならない読書進捗バーを追加する","d":"40行足らずのCSSとわずかなJavaScriptを使って、記事ページに読書進捗バーを追加する方法を紹介します。外部ライブラリは使わず、テーマ本体も変更せず、JSが無効な場合でも自動的にフォールバックする設計です。実装における試行錯誤と、陥りやすかった2つの落とし穴についても記録しています。"},"zz-s06":{"t":"ビルド時間を8秒から2秒へ：大した技術力も要らない最適化の話","d":"Hugoのビルドが遅くなった原因は、テンプレートや画像ではなく、ループ内で繰り返し実行されていたカテゴリークエリでした。原因特定までのプロセスと、3つの失敗、そして最後に見つけた解決策を記録します。"},"zz-s07":{"t":"設定ファイルの一行のコメントが、本番デプロイの危機を救った話","d":"netlify.toml のブランチ名を書き間違えたことで、サイト内の「GitHub でこの記事を修正する」リンクがすべて 404 になってしまいました。ビルドもテストもすべてパスしていたのに、なぜハードコードされた main に誰も気づかなかったのかを振り返ります。"}},"about":"<p>こんにちは、<strong>二重奏<\/strong>です。<\/p><blockquote><p>精神と思想の二重奏、自由と独立の交響曲。<\/p><\/blockquote><p>このキャッチコピーが名前の由来です。理性的なエンジニアリングと感性的な観察を並べて、互いに声部を担わせる——それだけの意味です。<\/p><h2 id=このブログで書くこと>このブログで書くこと<a hidden class=anchor aria-hidden=true href=#このブログで書くこと>#<\/a><\/h2><ul><li><strong>AI とツールチェーン<\/strong>：モデルを実際に仕事で使うための工学ノート。このブログ自体も AI 翻訳パイプラインで動き、三言語で同時公開しています<\/li><li><strong>サイト構築と組版<\/strong>：Hugo / PaperMod のカスタマイズはすべて、再現可能な約束事として<a href=/ja/posts/>記事一覧<\/a>に記録しています<\/li><li><strong>日常<\/strong>：技術の外側の観察とエッセイ<\/li><\/ul><h2 id=連絡先>連絡先<a hidden class=anchor aria-hidden=true href=#連絡先>#<\/a><\/h2><ul><li>GitHub：<a href=https://github.com/piscon>@piscon<\/a>（このサイトのソースコードも<a href=https://github.com/piscon/myblog>こちら<\/a>）<\/li><li>Email：<a href=mailto:hello@deux.top>hello@deux.top<\/a><\/li><li>X（Twitter）：<a href=https://x.com/deux_top>@deux_top<\/a><\/li><\/ul><p>更新は <a href=/ja/index.xml>RSS<\/a> で購読できます。<\/p><h2 id=ライセンス>ライセンス<a hidden class=anchor aria-hidden=true href=#ライセンス>#<\/a><\/h2><p>特記のない限り、このサイトの内容は <a href=https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja>CC BY-NC-SA 4.0<\/a> のもとで公開しています（表示・非営利・継承）。転載の際は原文へのリンクをお願いします。<\/p>","guestbook":"<p>一言どうぞ——挨拶、ご提案、あるいはただの挨拶でも。<\/p><p>コメントは GitHub Discussions（giscus）経由です：GitHub アカウントでログインすれば誰でも書けます。アカウントのない方は<a href=/ja/about/>このサイトについて<\/a>の連絡先からどうぞ。<\/p>","bodies":{"zz-s03":"<blockquote>\n<p>本記事はAIによる自動翻訳です。表現が不自然な場合は<a href=\"/zh/posts/zz-s03/\">中国語の原文<\/a>をご参照ください。<\/p>\n<\/blockquote>\n<h2 id=\"一人間とは思えないほどの正確さ\">一、人間とは思えないほどの正確さ<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#一人間とは思えないほどの正確さ\">#<\/a><\/h2>\n<p>引っ越してきて三日目に気づきました。<strong>毎日夕方の六時ちょうど<\/strong>になると、隣からピアノの音が聞こえてくるのです。曲の全編ではなく、二分ほどの練習曲のようなもので、音階が中心で、途中に何度か試行錯誤するようなコードが挟まり、そして同じ場所で止まります。<\/p>\n<p>私はわざと一週間記録してみました。<\/p>\n<table>\n\t<thead>\n\t\t\t<tr>\n\t\t\t\t\t<th>星期<\/th>\n\t\t\t\t\t<th>開始<\/th>\n\t\t\t\t\t<th>止まる場所哪<\/th>\n\t\t\t\t\t<th>その後<\/th>\n\t\t\t<\/tr>\n\t<\/thead>\n\t<tbody>\n\t\t\t<tr>\n\t\t\t\t\t<td>一<\/td>\n\t\t\t\t\t<td>18:00<\/td>\n\t\t\t\t\t<td>第三小节<\/td>\n\t\t\t\t\t<td>静か<\/td>\n\t\t\t<\/tr>\n\t\t\t<tr>\n\t\t\t\t\t<td>三<\/td>\n\t\t\t\t\t<td>18:00<\/td>\n\t\t\t\t\t<td>第三小节<\/td>\n\t\t\t\t\t<td>静か<\/td>\n\t\t\t<\/tr>\n\t\t\t<tr>\n\t\t\t\t\t<td>五<\/td>\n\t\t\t\t\t<td>17:58<\/td>\n\t\t\t\t\t<td>第三小节<\/td>\n\t\t\t\t\t<td>一度多く試した<\/td>\n\t\t\t<\/tr>\n\t\t\t<tr>\n\t\t\t\t\t<td>日<\/td>\n\t\t\t\t\t<td>18:01<\/td>\n\t\t\t\t\t<td>第二小节<\/td>\n\t\t\t\t\t<td>静か<\/td>\n\t\t\t<\/tr>\n\t<\/tbody>\n<\/table>\n<ul>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> 七日間記録し、<\/li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> 録音ではないことを確認し、<\/li>\n<li><input disabled=\"\" type=\"checkbox\"> どの曲なのかは聞き取れず、<\/li>\n<li><input disabled=\"\" type=\"checkbox\"> ドアをノックすることもありませんでした。<\/li>\n<\/ul>\n<blockquote>\n<p>あまりに正確すぎて、弾いている人もまた、一日の中のこの時刻を待っているのではないかと疑いたくなります。<\/p>\n<\/blockquote>\n<h2 id=\"二止まるあのわずかな瞬間\">二、止まるあのわずかな瞬間<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#二止まるあのわずかな瞬間\">#<\/a><\/h2>\n<p>一番気になっているのは、実は「止まる」ことです。二分間のうち、前半はとてもスムーズなのですが、第三小節あたりで<strong>スローになり<\/strong>、二度ほど試して、それで終わります。弾き間違えた時の慌ただしい中断ではなく、<strong>とても穏やかに弾くのをやめる<\/strong>のです。<\/p>\n<p>ある日、ちょうどキッチンでコップを洗っていたのですが、水の音が半分をかき消してしまい、蛇口を閉めたときには、あちらはもう静まり返っていました。手に持ったコップからはまだ水が滴っており、私はその場に数秒間立ち尽くしました。失望というよりは、むしろ<strong>言いかけの言葉を聞き逃してしまったような<\/strong>感覚でした。<\/p>\n<p><em>それ以来、習慣ができました。六時前には水の音を少し小さくしておくことです。<\/em> 余計なことかもしれませんが、別に困るわけでもありません。<\/p>\n<h2 id=\"三ノックをするかどうかについて\">三、「ノックをするかどうか」について<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#三ノックをするかどうかについて\">#<\/a><\/h2>\n<p>何度も聞きに行こうかと考えました。理由はいくつか揃っています。<\/p>\n<ol>\n<li>曲名を聞いて、ついでに感謝を伝える<\/li>\n<li>「あのフレーズ、とても素敵ですね」と言う<\/li>\n<li><del>何を贈ればいいのでしょう<\/del>（重すぎます）<\/li>\n<li>何も言わず、ただ聴き続ける<\/li>\n<\/ol>\n<p>第4条が最後に勝ちました。人見知りというわけではなく、<strong>一度聞いてしまえば、その2分間が「誰のために聴いているのか」という話になってしまう<\/strong>と感じたからです。今のままがちょうどいいのです。弾く人は隣に誰かがいると知る必要はなく、聴く人も聴こえたという反応を示す必要はありません。<\/p>\n<blockquote>\n<p>ある種の距離感は疎遠なのではなく、音そのもののための空間なのです。<\/p>\n<\/blockquote>\n<p>下のコンビニの店員さんと雑談したとき、「6時からのあのピアノ練習ですよね？ ここで2年くらい聴いてますよ」と言われました。私は頷くだけにして、自分も一週間前から覚えているとは言いませんでした。<strong>自分以外にも<\/strong>静かに聴いている人がいるのだと思うと、とても嬉しい気持ちになりました。<\/p>\n<h2 id=\"四一度も降ることのなかった雨の中で\">四、一度も降ることのなかった雨の中で<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#四一度も降ることのなかった雨の中で\">#<\/a><\/h2>\n<p>先週の木曜日は異常に蒸し暑く、6時頃には空がすでに深い藍色に沈んでいて、ピアノの音がいつものように始まりました。3小節目を弾いているとき、ちょうど窓の外で遠くの雷が鳴り響きました。大きくはなく、誰かが机をそっと動かしたような音でした。<\/p>\n<p>ピアノが3秒ほど止まり、それから<strong>3小節目を最初からもう一度弾き直し<\/strong>、今度はスムーズに流れて4小節目へと繋がりました。4つの音を弾いて、止まりました。<\/p>\n<p>その後、4小節目以降の部分は聴けませんでした。でも、あの日は曲の半分ほどを聴き終えたことになります。<\/p>\n<p><strong>曲がようやく弾き終わったのではなく、あの日、その曲がほんの少しだけ前に進むことを許されたのです。<\/strong><\/p>\n<h2 id=\"五今朝の6時\">五、今朝の6時<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#五今朝の6時\">#<\/a><\/h2>\n<p>今日は仕事が早く終わり、6時5分前に帰宅しました。玄関にある釉薬の剥げた器に鍵を置き、蛇口も開けず、明かりもつけず、ただ窓際に座って待ちました。<\/p>\n<p>6時ちょうど、音階が上がってきました。閉め忘れた窓の隙間から風が入り込み、下の階のプラタナスの葉の香りを運んできました。<\/p>\n<p>私はあのドアを叩きませんでした。これからも、おそらく叩かないでしょう。<\/p>\n<blockquote>\n<p>毎日決まった時間に現れ、それでいて返答を求めない音。それは、新しい場所に引っ越してきて、真っ先に「ここに居てもいいんだ」と思わせてくれたものでした。<\/p>\n<\/blockquote>\n\n\n  "}},"en":{"posts":{"ai-update-blog":{"t":"How to Use AI to Update Your Blog","d":"Connect GitHub to an AI, describe what you want in natural language, and the AI will read the repo, write the posts, and commit them for you."},"cf-auto-translate":{"t":"Building an Automated Blog Translation Pipeline with Cloudflare Workers AI","d":"Learn how to build a pipeline that automatically generates Japanese and English versions of your blog posts using Cloudflare Workers AI. This guide covers protecting Markdown syntax, optimizing costs,"},"first":{"t":"Hello, World","d":"The first post of this blog, documenting the creation of this trilingual static blog using Hugo, PaperMod, Netlify, and Pages CMS. Special thanks to the open-source projects that made this possible."},"zz-s01":{"t":"Weather Forecasts in the Wet Market","d":"The vendors at the local market are more accurate than any weather app. A reflection on celery, local wisdom, and the small, offline forecasting systems that keep a community running."},"zz-s02":{"t":"Fixing an Umbrella That Refused to Close","d":"A folding umbrella that had been stuck for six months turned out to be broken by nothing more than a single grain of sand. It is a reflection on the thin line between something being broken and someth"},"zz-s03":{"t":"Piano Melodies at 6 PM","d":"Since moving in, I&#39;ve heard the same unfinished piano piece from next door every evening at six. It is a story about an incomplete melody, the door I never dared to knock on, and the gentle distan"},"zz-s04":{"t":"After a Postcard Got Lost in the Mail","d":"A postcard I sent to a friend was returned due to insufficient postage, its edges worn from the journey. I reflect on the nature of things that fail to arrive and my eventual decision not to resend it"},"zz-s05":{"t":"Adding a Non-Intrusive Reading Progress Bar to a Static Blog","d":"Add a lightweight reading progress bar to your article pages using less than 40 lines of CSS and a tiny snippet of JS. This method avoids third-party libraries, doesn&#39;t modify the theme core, and "},"zz-s06":{"t":"Reducing Build Time from 8s to 2s: A Low-Tech Optimization","d":"I investigated why my Hugo build time jumped from 2 to 8 seconds. It turned out to be a single inefficient category query inside a loop, which I fixed by moving the logic outside the loop."},"zz-s07":{"t":"How a Single Comment in a Config File Saved a Production Deployment","d":"A typo in the Netlify branch name caused all &#39;Edit this post on GitHub&#39; links to return 404 errors. This post explores why all CI builds and tests passed despite the broken links."}},"about":"<p>Hi, I write as <strong>Deux<\/strong> (二重奏, &ldquo;a duet&rdquo;).<\/p><blockquote><p>A duet of spirit and thought, a symphony of freedom and independence.<\/p><\/blockquote><p>That subtitle is the whole story behind the name: putting rational engineering and personal observation side by side, letting them play off each other.<\/p><h2 id=what-gets-written-here>What gets written here<a hidden class=anchor aria-hidden=true href=#what-gets-written-here>#<\/a><\/h2><ul><li><strong>AI & toolchains<\/strong>: engineering notes on making models do real work — this blog itself runs on an AI translation pipeline, publishing in three languages at once<\/li><li><strong>Site building & typography<\/strong>: every customization on this Hugo / PaperMod site is recorded as a reproducible convention, see <a href=/en/posts/>all posts<\/a><\/li><li><strong>Life<\/strong>: observations and essays beyond technology<\/li><\/ul><h2 id=contact>Contact<a hidden class=anchor aria-hidden=true href=#contact>#<\/a><\/h2><ul><li>GitHub: <a href=https://github.com/piscon>@piscon<\/a> (this site&rsquo;s source is <a href=https://github.com/piscon/myblog>here<\/a>)<\/li><li>Email: <a href=mailto:hello@deux.top>hello@deux.top<\/a><\/li><li>X (Twitter): <a href=https://x.com/deux_top>@deux_top<\/a><\/li><\/ul><p>You can subscribe via <a href=/en/index.xml>RSS<\/a> — every update lands in your reader.<\/p><h2 id=license>License<a hidden class=anchor aria-hidden=true href=#license>#<\/a><\/h2><p>Unless otherwise noted, everything on this site is licensed under <a href=https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en>CC BY-NC-SA 4.0<\/a>: attribution, non-commercial, share-alike. Please link back to the original when reposting.<\/p>","guestbook":"<p>Leave a note — greetings, suggestions, or simply a hello.<\/p><p>Comments run on GitHub Discussions (giscus): sign in with a GitHub account to post, Markdown supported. No account? The <a href=/en/about/>about page<\/a> lists other ways to reach me.<\/p>","bodies":{"zz-s03":"<blockquote>\n<p>This article was machine-translated by AI and may contain inaccuracies. See the <a href=\"/zh/posts/zz-s03/\">Chinese original<\/a> for the authoritative version.<\/p>\n<\/blockquote>\n<h2 id=\"i-uncannily-punctual\">I. Uncannily Punctual<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#i-uncannily-punctual\">#<\/a><\/h2>\n<p>I discovered it on my third day of moving in: **every day at exactly six o&rsquo;clock **, the sound of a piano would drift in from next door. It wasn&rsquo;t a full piece, just a segment of practice lasting about two minutes—mostly scales, interspersed with a few repeatedly tested chords, before stopping at the exact same spot.<\/p>\n<p>I made a point of recording it for a week:<\/p>\n<table>\n\t<thead>\n\t\t\t<tr>\n\t\t\t\t\t<th>Day 期<\/th>\n\t\t\t\t\t<th>Start 始<\/th>\n\t\t\t\t\t<th>Stop at 哪<\/th>\n\t\t\t\t\t<th>Afterward<\/th>\n\t\t\t<\/tr>\n\t<\/thead>\n\t<tbody>\n\t\t\t<tr>\n\t\t\t\t\t<td>一<\/td>\n\t\t\t\t\t<td>18:00<\/td>\n\t\t\t\t\t<td>Third bar 节<\/td>\n\t\t\t\t\t<td>Quiet<\/td>\n\t\t\t<\/tr>\n\t\t\t<tr>\n\t\t\t\t\t<td>三<\/td>\n\t\t\t\t\t<td>18:00<\/td>\n\t\t\t\t\t<td>Third bar 节<\/td>\n\t\t\t\t\t<td>Quiet<\/td>\n\t\t\t<\/tr>\n\t\t\t<tr>\n\t\t\t\t\t<td>五<\/td>\n\t\t\t\t\t<td>17:58<\/td>\n\t\t\t\t\t<td>Third bar 节<\/td>\n\t\t\t\t\t<td>One extra attempt<\/td>\n\t\t\t<\/tr>\n\t\t\t<tr>\n\t\t\t\t\t<td>日<\/td>\n\t\t\t\t\t<td>18:01<\/td>\n\t\t\t\t\t<td>Second bar 节<\/td>\n\t\t\t\t\t<td>Quiet<\/td>\n\t\t\t<\/tr>\n\t<\/tbody>\n<\/table>\n<ul>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Recorded for seven full days<\/li>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Confirmed it wasn&rsquo;t a recording<\/li>\n<li><input disabled=\"\" type=\"checkbox\"> Couldn&rsquo;t identify the piece<\/li>\n<li><input disabled=\"\" type=\"checkbox\"> Never went to knock on the door<\/li>\n<\/ul>\n<blockquote>\n<p>It was so punctual it made me wonder if the person playing was also waiting for this specific mark in the day.<\/p>\n<\/blockquote>\n<h2 id=\"ii-that-little-segment-where-it-stops\">II. That Little Segment Where It Stops<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#ii-that-little-segment-where-it-stops\">#<\/a><\/h2>\n<p>What I care about most is actually the &ldquo;stop.&rdquo; The first half of the two minutes is very smooth, but by the third bar, it will **slow down **, try twice, and then it&rsquo;s gone. It isn&rsquo;t a panicked break caused by a mistake; it is **a very calm cessation of playing **.<\/p>\n<p>One day, I happened to be washing a cup in the kitchen. The sound of the water muffled half of it, and by the time I turned off the tap, it had already gone quiet over there. The cup in my hand was still dripping; I stood there dazed for a few seconds, not exactly feeling disappointed, but more like **I had missed out on an unfinished sentence **.<\/p>\n<p><em>Later, I developed a habit: turning the water down a bit before six o&rsquo;clock.<\/em> It was purely meddling, but it didn&rsquo;t hurt anything.<\/p>\n<h2 id=\"iii-regarding-whether-to-knock\">III. Regarding &ldquo;Whether to Knock&rdquo;<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#iii-regarding-whether-to-knock\">#<\/a><\/h2>\n<p>I&rsquo;ve thought many times about whether I should go and ask. My reasons are neatly lined up:<\/p>\n<ol>\n<li>Ask for the name of the piece, and thank them while I&rsquo;m at it<\/li>\n<li>Say &ldquo;that part sounds lovely&rdquo;<\/li>\n<li>~~What should I send over? ~~ (It&rsquo;s too heavy)<\/li>\n<li>Say nothing, just keep listening.<\/li>\n<\/ol>\n<p>Option 4 was the ultimate winner. It wasn&rsquo;t out of shyness, but because I felt that once ** asked, those two minutes would turn into &ldquo;who is this being played for&rdquo; **. This way is just fine: the player doesn&rsquo;t need to know someone is next door, and the listener doesn&rsquo;t need to acknowledge they heard it.<\/p>\n<blockquote>\n<p>Some distance isn&rsquo;t estrangement; it&rsquo;s space left for the sound itself.<\/p>\n<\/blockquote>\n<p>A clerk at the convenience store downstairs once chatted with me, saying, &ldquo;That person practicing at six, right? I&rsquo;ve been listening from here for two years.&rdquo; I nodded, not mentioning that I&rsquo;ve also been keeping track for a week. **Knowing that I&rsquo;m not the only one ** quietly listening made me quite happy.<\/p>\n<h2 id=\"four-in-a-rain-that-never-fell\">Four: In a Rain That Never Fell<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#four-in-a-rain-that-never-fell\">#<\/a><\/h2>\n<p>Last Thursday, the weather was unusually stifling. By six o&rsquo;clock, the sky had already darkened to a deep blue, and the piano music began as usual. At the third bar, a distant roll of thunder happened to rumble outside the window—not loud, just like someone gently nudging a table.<\/p>\n<p>The piano stopped for about three seconds, and then ** played the third bar from the beginning again **; this time it flowed through, connecting to the fourth bar, played four notes, and then stopped.<\/p>\n<p>I didn&rsquo;t hear anything after the fourth bar later that day. But I suppose I finished listening to half a piece.<\/p>\n<p>**It wasn&rsquo;t that the piece was finally finished, but that on that day, it was allowed to move forward just a little bit. **<\/p>\n<h2 id=\"five-six-oclock-this-morning\">Five: Six O&rsquo;Clock This Morning<a hidden class=\"anchor\" aria-hidden=\"true\" href=\"#five-six-oclock-this-morning\">#<\/a><\/h2>\n<p>I got off work early today and arrived home at five to five. I placed my keys into the cracked ceramic bowl in the entryway, didn&rsquo;t turn on the tap, didn&rsquo;t turn on the light, and just sat by the window waiting.<\/p>\n<p>At six sharp, the scales began. The wind drifted in through the gap in the window that was never quite closed, carrying a hint of the sycamore leaves from downstairs.<\/p>\n<p>I didn&rsquo;t go knock on that door. I probably won&rsquo;t in the future, either.<\/p>\n<blockquote>\n<p>A sound that appears punctually every day, yet demands no response, was the first thing that made me feel &ldquo;I can stay here&rdquo; after moving into this new place.<\/p>\n<\/blockquote>\n\n\n  "}}}</script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ==================================================================
+     Data
+  ================================================================== */
+  var RAW = [];
+  try { RAW = JSON.parse(document.getElementById('post-data').textContent); } catch (e) { RAW = []; }
+  var I18N = { zh: {}, ja: {}, en: {} };
+  try { I18N = JSON.parse(document.getElementById('i18n-data').textContent); } catch (e) {}
+
+  var ORDER = ['zz-s03', 'zz-s01', 'zz-s02', 'zz-s04', 'zz-s05', 'zz-s06', 'zz-s07', 'cf-auto-translate', 'ai-update-blog', 'first'];
+
+  var META = {
+    'zz-s03': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: 'assets/piano-afternoon-7c1d.jpg', cap: '六点差五分，西窗的光落在琴键上。', alt: '午后阳光落在靠窗的旧钢琴上' },
+    'zz-s01': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: 'assets/market-morning-5b2f.jpg', cap: '早市，芹菜和一把旧秤。', alt: '清晨菜市场里成捆的芹菜与木箱' },
+    'zz-s02': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'zz-s04': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: 'assets/alley-dusk-3a9e.jpg', cap: '雨后的巷子，灯还亮着。', alt: '雨后傍晚的窄巷，石板上映着暖光' },
+    'zz-s05': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'zz-s06': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'zz-s07': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'cf-auto-translate': { date: '2026.11.05', iso: '2026-11-05', read: 4, img: null, cap: '', alt: '' },
+    'ai-update-blog': { date: '2026.11.01', iso: '2026-11-01', read: 1, img: 'assets/desk-window-9d4c.jpg', cap: '窗边的桌子，早上九点。', alt: '窗边木桌上的笔记本、茶杯与合上的电脑' },
+    'first': { date: '2025.11.26', iso: '2025-11-26', read: 1, img: 'assets/grass-fence-2b8d.jpg', cap: '网之外。', alt: '铁网后长出的草' }
+  };
+
+  /* UI strings — the chrome of every page, localized like the real site */
+  var STR = {
+    zh: {
+      nav_label: '主导航', nav_posts: '文章', nav_about: '关于', skip: '跳到正文',
+      search_label: '搜索（Ctrl 或 Command 加 K）', lang_label: '切换语言',
+      theme_dark: '切换到深色主题', theme_light: '切换到浅色主题',
+      menu_open: '打开菜单', menu_close: '关闭菜单',
+      masthead_cn: '写日常，也写让日常运转的代码。',
+      read_this: '读这篇', hero_time: '约 {n} 分钟', byline_cat: '日常随笔',
+      hero_figcap: '六点差五分，西窗的光落在琴键上。',
+      recent_title: '近作', all_posts: '全部文章', index_title: '目录', by_year: '按年份浏览',
+      posts_kicker: 'Archive · 目录', posts_deck: '关于日常、写作，以及让这个站点运转的技术笔记。按时间排列，新的在上面。',
+      filter_label: '按分类筛选', filter_all: '全部',
+      newest_first: '按时间倒序', count_n: '共 {n} 篇', posts_total: '共', posts_unit: '篇', pager_label: '分页', page_prev: '上一页', page_next: '下一页', top_label: '回到顶部', rss_full: 'RSS 全文',
+      archives_kicker: 'Archive · 归档', archives_title: '归档', archives_deck: '按年份收拢的全部文字。能从任何一行进入。',
+      search_kicker: 'Search · 搜索', search_title: '搜索', search_placeholder: '搜标题、摘要或标签',
+      search_hint: '输入关键词，结果即时出现。Esc 清空。', search_count_all: '共 {n} 篇', search_count_found: '找到 {n} 篇',
+      empty_title: '没有找到「{q}」', empty_hint: '换一个短一点的词，或者从这些开始。', taghub_title: '标签',
+      toc_title: '目录', toc_count: '{n} 节',
+      updated_on: '更新于', min_read: '{n} 分钟', tags_label: '标签',
+      copy_link: '复制链接', copied: '已复制', copy_fail: '复制失败，请手动复制地址栏', copy_manual: '请手动复制地址栏',
+      copy_code: '复制代码', copy_code_done: '已复制',
+      share: '分享', prev: '上一篇', next: '下一篇', first_post: '已经是第一篇', last_post: '已经是最后一篇',
+      related_title: '接着读', comments_title: '评论',
+      comments_brand: '评论 · giscus / GitHub Discussions',
+      comments_note: '真实站点在此渲染 giscus 评论区。原型保留位置与阅读顺序，不加载第三方脚本。',
+      comments_signin: '使用 GitHub 登录留言',
+      guestbook_kicker: 'Guestbook · 留言', guestbook_title: '留言板',
+      tags_title: '标签', cats_title: '分类', tags_kicker: 'Tags · 标签', cats_kicker: 'Categories · 分类',
+      tax_tags_note: '每篇文章的关键词，点进去是同标签的文章。', tax_cats_note: '两个版块：日常随笔与技术笔记。',
+      back_tags: '全部标签', back_cats: '全部分类', term_tag_kicker: 'Tag · 标签', term_cat_kicker: 'Category · 分类',
+      nf_msg: '这一页不在了，或者从来没有存在过。地址栏里的东西多半是手滑。',
+      nf_home: '回到首页', nf_posts: '看全部文章', nf_search: '搜索一下', nf_recent: '最近的文字',
+      trans_note: '这篇的译文还在路上——自动翻译流水线通常在中文发布后几分钟内完成。下面先放中文原文。',
+      foot_tagline: '精神与思想的二重奏，<br>自由与独立的交响曲。',
+      foot_note: '界面设计稿 · 交互版 · 2026',
+      audio_cap: '同一段音阶的录音（audio_file 自托管音频演示）。',
+      video_cap: '演示视频占位（bilibili_bvid 字段；原型不加载第三方播放器）。',
+      wide_cap: '宽幅图（#wide）：破出正文列，到 1200px 容器宽。',
+      full_cap: '全幅图（#full）：贴页面左右边缘。',
+      fn_text: '那粒沙子后来住在窗台的小玻璃瓶里，见第二节。'
+    },
+    ja: {
+      nav_label: 'グローバルナビ', nav_posts: '記事', nav_about: 'このブログについて', skip: '本文へスキップ',
+      search_label: '検索（Ctrl または ⌘ K）', lang_label: '言語を切り替える',
+      theme_dark: 'ダークテーマへ切り替え', theme_light: 'ライトテーマへ切り替え',
+      menu_open: 'メニューを開く', menu_close: 'メニューを閉じる',
+      masthead_cn: '日常を書き、その日常を動かすコードを書く。',
+      read_this: 'この記事を読む', hero_time: '約 {n} 分', byline_cat: '日常エッセイ',
+      hero_figcap: '六時五分前、西窓の光が鍵盤に落ちる。',
+      recent_title: '最近の記事', all_posts: 'すべての記事', index_title: '一覧', by_year: '年別で見る',
+      posts_kicker: 'Archive · 一覧', posts_deck: '日常と、このサイトを動かす技術の記録。新しいものが上。',
+      filter_label: 'カテゴリで絞り込み', filter_all: 'すべて',
+      newest_first: '新しい順', count_n: '全 {n} 件', posts_total: '全', posts_unit: '件', pager_label: 'ページ送り', page_prev: '前へ', page_next: '次へ', top_label: 'ページ上部へ', rss_full: 'RSS（全文配信）',
+      archives_kicker: 'Archive · アーカイブ', archives_title: 'アーカイブ', archives_deck: '年ごとにまとめた全記事。どの行からでも入れます。',
+      search_kicker: 'Search · 検索', search_title: '検索', search_placeholder: 'タイトル・要約・タグを検索',
+      search_hint: 'キーワードを入力すると結果が即座に表示されます。Esc でクリア。', search_count_all: '全 {n} 件', search_count_found: '{n} 件見つかりました',
+      empty_title: '「{q}」は見つかりません', empty_hint: 'もっと短い語に変えるか、ここから始めてみてください。', taghub_title: 'タグ',
+      toc_title: '目次', toc_count: '{n} セクション',
+      updated_on: '最終更新', min_read: '{n} 分', tags_label: 'タグ',
+      copy_link: 'リンクをコピー', copied: 'コピーしました', copy_fail: 'コピーできませんでした', copy_manual: 'アドレスバーから手動でコピーしてください',
+      copy_code: 'コードをコピー', copy_code_done: 'コピーしました',
+      share: '共有', prev: '前の記事', next: '次の記事', first_post: '最初の記事です', last_post: '最後の記事です',
+      related_title: '次に読む', comments_title: 'コメント',
+      comments_brand: 'コメント · giscus / GitHub Discussions',
+      comments_note: '実サイトではここに giscus の iframe が表示されます。プロトタイプは位置と読み上げ順序の確認用で、サードパーティスクリプトは読み込みません。',
+      comments_signin: 'GitHub でログインしてコメント',
+      guestbook_kicker: 'Guestbook · ゲストブック', guestbook_title: 'ゲストブック',
+      tags_title: 'タグ', cats_title: 'カテゴリ', tags_kicker: 'Tags · タグ', cats_kicker: 'Categories · カテゴリ',
+      tax_tags_note: '各記事のキーワード。クリックで同じタグの記事へ。', tax_cats_note: '日常エッセイと技術メモのふたつ。',
+      back_tags: 'すべてのタグ', back_cats: 'すべてのカテゴリ', term_tag_kicker: 'Tag · タグ', term_cat_kicker: 'Category · カテゴリ',
+      nf_msg: 'このページは存在しないか、移動しました。',
+      nf_home: 'ホームへ戻る', nf_posts: '全記事を見る', nf_search: '検索する', nf_recent: '最近の記事',
+      trans_note: 'この記事の翻訳は自動翻訳パイプラインの処理中です（通常は数分）。元の中文を表示しています。',
+      foot_tagline: '精神と思想の二重奏、<br>自由と独立の交響曲。',
+      foot_note: 'インターフェース設計稿 · インタラクティブ版 · 2026',
+      audio_cap: '同じ音階の録音（audio_file セルフホスト音声のデモ）。',
+      video_cap: 'デモ動画のプレースホルダ（bilibili_bvid フィールド。プロトタイプは第三方プレーヤーを読み込みません）。',
+      wide_cap: 'ワイド画像（#wide）：本文の列を破って 1200px コンテナ幅へ。',
+      full_cap: 'フル幅画像（#full）：ページの左右端まで。',
+      fn_text: 'あの砂はその後、窓際の小瓶に住んでいる。第 2 節参照。'
+    },
+    en: {
+      nav_label: 'Main navigation', nav_posts: 'Posts', nav_about: 'About', skip: 'Skip to content',
+      search_label: 'Search (Ctrl or Command plus K)', lang_label: 'Switch language',
+      theme_dark: 'Switch to dark theme', theme_light: 'Switch to light theme',
+      menu_open: 'Open menu', menu_close: 'Close menu',
+      masthead_cn: 'Daily life, and the code that keeps it running.',
+      read_this: 'Read this', hero_time: '{n} min read', byline_cat: 'Essays',
+      hero_figcap: 'Five to six; west-window light on the keys.',
+      recent_title: 'Recent', all_posts: 'All posts', index_title: 'Index', by_year: 'Browse by year',
+      posts_kicker: 'Archive · Posts', posts_deck: 'Essays, notes, and the plumbing that keeps this site running. Newest first.',
+      filter_label: 'Filter by category', filter_all: 'All',
+      newest_first: 'Newest first', count_n: '{n} posts', posts_total: '', posts_unit: 'posts', pager_label: 'Pagination', page_prev: 'Previous', page_next: 'Next', top_label: 'Back to top', rss_full: 'Full-text RSS',
+      archives_kicker: 'Archive · Index', archives_title: 'Archives', archives_deck: 'Everything, gathered by year. Enter from any row.',
+      search_kicker: 'Search · Search', search_title: 'Search', search_placeholder: 'Search titles, summaries, tags',
+      search_hint: 'Type to filter instantly. Esc clears.', search_count_all: '{n} posts', search_count_found: '{n} found',
+      empty_title: 'No results for “{q}”', empty_hint: 'Try a shorter term, or start from these.', taghub_title: 'Tags',
+      toc_title: 'Contents', toc_count: '{n} sections',
+      updated_on: 'Updated on', min_read: '{n} min', tags_label: 'Tags',
+      copy_link: 'Copy link', copied: 'Copied', copy_fail: 'Copy failed', copy_manual: 'Copy from the address bar instead',
+      copy_code: 'Copy code', copy_code_done: 'Copied',
+      share: 'Share', prev: 'Previous', next: 'Next', first_post: 'This is the first post', last_post: 'This is the last post',
+      related_title: 'Read next', comments_title: 'Comments',
+      comments_brand: 'Comments · giscus / GitHub Discussions',
+      comments_note: 'The live site renders the giscus iframe here. The prototype reserves the slot — layout and reading order — without loading a third-party script.',
+      comments_signin: 'Sign in with GitHub to comment',
+      guestbook_kicker: 'Guestbook · Notes', guestbook_title: 'Guestbook',
+      tags_title: 'Tags', cats_title: 'Categories', tags_kicker: 'Tags · Tags', cats_kicker: 'Categories · Categories',
+      tax_tags_note: 'Keywords per post; a click leads to posts with the same tag.', tax_cats_note: 'Two sections: everyday essays and technical notes.',
+      back_tags: 'All tags', back_cats: 'All categories', term_tag_kicker: 'Tag · Tag', term_cat_kicker: 'Category · Category',
+      nf_msg: 'This page is gone, or never existed. Whatever is in the address bar is probably a typo.',
+      nf_home: 'Back home', nf_posts: 'Browse all posts', nf_search: 'Search', nf_recent: 'Recent posts',
+      trans_note: 'The translation for this post is on its way — the pipeline usually lands it minutes after the Chinese publish. The Chinese original follows.',
+      foot_tagline: 'A duet of mind and thought,<br>a symphony of freedom and independence.',
+      foot_note: 'Interface prototype · interactive · 2026',
+      audio_cap: 'A recording of the same scale (audio_file, self-hosted audio demo).',
+      video_cap: 'Demo video placeholder (bilibili_bvid field; the prototype loads no third-party player).',
+      wide_cap: 'Wide image (#wide): breaks out of the reading column to the 1200px container.',
+      full_cap: 'Full-bleed image (#full): flush with the page edges.',
+      fn_text: 'That grain of sand now lives in a small pill bottle on the windowsill. See section two.'
+    }
+  };
+
+  var CATL10N = { '日常': { ja: '日常', en: 'Essays' }, '技术': { ja: '技術', en: 'Tech' } };
+  var HINTS = { zh: ['琴声', '散步', 'Hugo', 'AI'], ja: ['ピアノ', 'Hugo', 'AI'], en: ['piano', 'Hugo', 'AI'] };
+  var HTMLLANG = { zh: 'zh-CN', ja: 'ja', en: 'en' };
+
+  var LANG = 'zh';
+  var currentPath = '';   /* route path without lang prefix, for same-page lang links */
+
+  function t(key, vars) {
+    var s = (STR[LANG] && STR[LANG][key]) != null ? STR[LANG][key] : (STR.zh[key] != null ? STR.zh[key] : key);
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(String(vars[k])); });
+    return s;
+  }
+  function cat(name) {
+    if (LANG === 'zh') return name;
+    return (CATL10N[name] && CATL10N[name][LANG]) || name;
+  }
+  function lp(path) { return '#/' + (LANG === 'zh' ? '' : LANG + '/') + path; }
+
+  function pad2(v) { return ('0' + v).slice(-2); }
+
+  var posts = ORDER.map(function (slug) {
+    var p = null;
+    for (var i = 0; i < RAW.length; i++) { if (RAW[i].slug === slug) { p = RAW[i]; break; } }
+    if (!p) return null;
+    var m = META[slug] || {};
+    var um = (p.meta || '').match(/更新于\s*(\d{4})年(\d{1,2})月(\d{1,2})日/);
+    return {
+      slug: slug, title: p.title, desc: p.desc, body: p.body,
+      cat: (p.cats && p.cats[0]) || '日常', tags: p.tags || [],
+      date: m.date || '', iso: m.iso || '', read: m.read || 2,
+      updated: um ? um[1] + '.' + pad2(um[2]) + '.' + pad2(um[3]) : '',
+      updatedIso: um ? um[1] + '-' + pad2(um[2]) + '-' + pad2(um[3]) : '',
+      img: m.img || null, cap: m.cap || '', alt: m.alt || ''
+    };
+  }).filter(Boolean);
+
+  var bySlug = {};
+  posts.forEach(function (p) { bySlug[p.slug] = p; });
+
+  /* localized title / desc: real translations from the live build where they exist */
+  function trPost(slug, field, fallback) {
+    var d = I18N[LANG] && I18N[LANG].posts && I18N[LANG].posts[slug];
+    if (d && d[field]) return d[field];
+    return fallback;
+  }
+  function titleOf(p) { return trPost(p.slug, 't', p.title); }
+  function descOf(p) { return trPost(p.slug, 'd', p.desc); }
+  function bodyOf(p) {
+    if (LANG !== 'zh') {
+      var b = I18N[LANG] && I18N[LANG].bodies && I18N[LANG].bodies[p.slug];
+      if (b) return { html: cleanBody(b), pending: false, lang: HTMLLANG[LANG] };
+      return { html: cleanBody(p.body), pending: true, lang: 'zh-CN' };
+    }
+    return { html: cleanBody(p.body), pending: false, lang: 'zh-CN' };
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function dateCn(iso) {
+    if (!iso) return '';
+    var a = iso.split('-');
+    if (LANG === 'en') return MONTHS_EN[Number(a[1]) - 1] + ' ' + Number(a[2]) + ', ' + a[0];
+    if (LANG === 'ja') return a[0] + '年' + Number(a[1]) + '月' + Number(a[2]) + '日';
+    return a[0] + ' 年 ' + Number(a[1]) + ' 月 ' + Number(a[2]) + ' 日';
+  }
+  function timeTag(date, iso) { return '<time datetime="' + iso + '">' + date + '</time>'; }
+
+  /* cover captions localized (demo captions, translated per language) */
+  var CAPS = {
+    'zz-s03': { ja: '六時五分前、西窓の光が鍵盤に落ちる。', en: 'Five to six; west-window light on the keys.' },
+    'zz-s01': { ja: '朝市、セロリと古い秤。', en: 'Morning market: celery and an old scale.' },
+    'zz-s04': { ja: '雨上がりの路地、灯りがともる。', en: 'The alley after rain, lights on.' },
+    'ai-update-blog': { ja: '窓辺の机、午前九時。', en: 'The desk by the window, 9 a.m.' },
+    'first': { ja: '網の外。', en: 'Beyond the fence.' }
+  };
+  function coverCap(p) {
+    if (LANG === 'zh') return p.cap;
+    return (CAPS[p.slug] && CAPS[p.slug][LANG]) || p.cap;
+  }
+
+  /* ==================================================================
+     Theme
+  ================================================================== */
+  var root = document.documentElement;
+  var themeBtn = document.querySelector('.theme-btn');
+
+  function syncThemeLabel() {
+    if (!themeBtn) return;
+    var dark = root.getAttribute('data-theme') === 'dark';
+    themeBtn.setAttribute('aria-label', dark ? t('theme_light') : t('theme_dark'));
+    themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    var tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute('content', dark ? '#16140f' : '#f7f3ea');
+  }
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('duet-theme', next); } catch (e) {}
+      syncThemeLabel();
+    });
+  }
+
+  /* ==================================================================
+     Mobile menu + language menu (mutually exclusive panels)
+  ================================================================== */
+  var menuBtn = document.querySelector('.menu-btn');
+  var menu = document.getElementById('mobile-menu');
+  var langBtn = document.querySelector('.lang-btn');
+  var langMenu = document.getElementById('lang-menu');
+
+  function setMenu(open, focusFirst) {
+    if (!menu || !menuBtn) return;
+    menu.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menuBtn.setAttribute('aria-label', open ? t('menu_close') : t('menu_open'));
+    if (open) {
+      setLangMenu(false);
+      if (focusFirst) { var first = menu.querySelector('a'); if (first) first.focus(); }
+    }
+  }
+  function setLangMenu(open) {
+    if (!langBtn || !langMenu) return;
+    langMenu.hidden = !open;
+    langBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if (menuBtn) menuBtn.addEventListener('click', function (e) { setMenu(menu.hidden, e.detail === 0); });
+  if (menu) {
+    window.addEventListener('resize', function () { if (window.innerWidth > 768 && !menu.hidden) setMenu(false); });
+    menu.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
+  }
+  if (langBtn && langMenu) {
+    langBtn.addEventListener('click', function () {
+      var open = langMenu.hidden;
+      if (open) setMenu(false);
+      setLangMenu(open);
+    });
+    document.addEventListener('click', function (e) {
+      if (!langMenu.hidden && !e.target.closest('.lang-wrap')) setLangMenu(false);
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (typeof lightbox !== 'undefined' && !lightbox.el.hidden) { lightbox.close(); return; }
+    if (langMenu && !langMenu.hidden) { setLangMenu(false); langBtn.focus(); return; }
+    if (menu && !menu.hidden) { setMenu(false); menuBtn.focus(); }
+  });
+
+  /* ==================================================================
+     Language chrome — same-page switching, like the live site's
+     link[rel=alternate][hreflang] rewrite
+  ================================================================== */
+  function applyLangChrome() {
+    document.documentElement.setAttribute('lang', HTMLLANG[LANG]);
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    var tagline = document.querySelector('.foot-tag');
+    if (tagline) tagline.innerHTML = t('foot_tagline');
+    var fbSpan = document.querySelectorAll('.foot-bottom span')[1];
+    if (fbSpan) fbSpan.textContent = t('foot_note');
+    updateLangLinks();
+
+    var kickers = { 'posts-kicker': 'posts_kicker', 'archives-kicker': 'archives_kicker', 'search-kicker': 'search_kicker', 'gb-kicker': 'guestbook_kicker', 'search-total': null };
+    Object.keys(kickers).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (id === 'search-total') el.textContent = t('count_n', { n: posts.length });
+      else el.textContent = t(kickers[id]);
+    });
+    var si = document.getElementById('q');
+    if (si) si.placeholder = t('search_placeholder');
+    var sh = document.getElementById('search-hint');
+    if (sh) sh.textContent = t('search_hint');
+    if (menuBtn && menu.hidden) menuBtn.setAttribute('aria-label', t('menu_open'));
+    syncThemeLabel();
+    syncAboutLang();
+  }
+
+  /* internal links that must keep the language prefix */
+  function updateInternalLinks() {
+    var navLinks = document.querySelectorAll('.nav a[data-nav]');
+    if (navLinks[0]) navLinks[0].href = lp('posts');
+    if (navLinks[1]) navLinks[1].href = lp('about');
+    var mm = document.querySelectorAll('.mobile-menu .mm-link');
+    if (mm[0]) mm[0].href = lp('posts');
+    if (mm[1]) mm[1].href = lp('about');
+    var fl = document.querySelectorAll('.foot-icons a');
+    if (fl[0]) fl[0].href = lp('guestbook');
+    if (fl[1]) fl[1].href = 'https://deux.top/' + (LANG === 'zh' ? '' : LANG + '/') + 'index.xml';
+    var rl = document.querySelector('.read-link'); if (rl) rl.href = lp('posts/zz-s03');
+    var hf = document.querySelector('.hero-figure a'); if (hf) hf.href = lp('posts/zz-s03');
+    var nfa = document.querySelectorAll('.notfound-actions a');
+    if (nfa[0]) nfa[0].href = lp('');
+    if (nfa[1]) nfa[1].href = lp('posts');
+    if (nfa[2]) nfa[2].href = lp('search');
+  }
+
+  /* same-page language links: re-anchored on every route, mirroring the
+     live site's link[rel=alternate][hreflang] rewrite */
+  function updateLangLinks() {
+    document.querySelectorAll('[data-lang-link]').forEach(function (a) {
+      var l = a.getAttribute('data-lang-link');
+      a.href = '#/' + (l === 'zh' ? '' : l + '/') + currentPath;
+      if (l === LANG) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+  }
+
+  /* about: ja/en swap in the real translated body; zh keeps the designed page */
+  var aboutMainOriginal = null;
+  function syncAboutLang() {
+    var main = document.querySelector('#view-about .about-main');
+    if (!main) return;
+    if (aboutMainOriginal === null) aboutMainOriginal = main.innerHTML;
+    if (LANG === 'zh') {
+      main.innerHTML = aboutMainOriginal;
+    } else {
+      var html = I18N[LANG] && I18N[LANG].about;
+      if (html) main.innerHTML = html;
+      else main.innerHTML = aboutMainOriginal;
+    }
+  }
+
+  /* ==================================================================
+     Home
+  ================================================================== */
+  function renderHomeTexts() {
+    var hero = bySlug['zz-s03'];
+    if (!hero) return;
+    document.getElementById('hero-cat').textContent = cat(hero.cat);
+    document.getElementById('hero-title').textContent = titleOf(hero);
+    document.getElementById('hero-deck').textContent = descOf(hero);
+    document.getElementById('hero-time').textContent = t('hero_time', { n: hero.read });
+    document.getElementById('hero-byline').innerHTML = esc(LANG === 'en' ? 'By Deux' : '文 · 二重奏') + '<span>／</span>' + esc(t('byline_cat'));
+    document.getElementById('hero-figcap').textContent = t('hero_figcap');
+  }
+
+  function renderRecent() {
+    var grid = document.getElementById('recent-grid');
+    if (!grid) return;
+    var lead = bySlug['zz-s01'];
+    var rest = ['zz-s02', 'zz-s04', 'zz-s06'].map(function (s) { return bySlug[s]; }).filter(Boolean);
+    var html = '';
+    if (lead) {
+      html += '<a class="recent-lead" href="' + lp('posts/' + lead.slug) + '">' +
+        (lead.img ? '<img src="' + lead.img + '" width="2000" height="1333" alt="' + esc(lead.alt) + '" loading="lazy">' : '') +
+        '<h3>' + esc(titleOf(lead)) + '</h3>' +
+        '<p>' + esc(descOf(lead)) + '</p>' +
+        '<div class="recent-meta">' + timeTag(lead.date, lead.iso) + ' · ' + t('min_read', { n: lead.read }) + ' · ' + esc(cat(lead.cat)) + '</div>' +
+        '</a>';
+    }
+    html += '<div class="recent-list">';
+    rest.forEach(function (p) {
+      html += '<a class="recent-item" href="' + lp('posts/' + p.slug) + '">' +
+        '<span class="ri-date">' + timeTag(p.date, p.iso) + ' · ' + esc(cat(p.cat)) + '</span>' +
+        '<h3>' + esc(titleOf(p)) + '</h3>' +
+        '<span class="ri-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></span>' +
+        '</a>';
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+  }
+
+  function renderLedger() {
+    var list = document.getElementById('ledger-list');
+    if (!list) return;
+    var ids = ['zz-s05', 'zz-s07', 'cf-auto-translate', 'ai-update-blog', 'first'];
+    list.innerHTML = ids.map(function (s) {
+      var p = bySlug[s];
+      if (!p) return '';
+      return '<a class="ledger-row" href="' + lp('posts/' + p.slug) + '">' +
+        '<span class="l-date">' + timeTag(p.date, p.iso) + '</span>' +
+        '<span class="l-title">' + esc(titleOf(p)) + '</span>' +
+        '<span class="l-cat">' + esc(cat(p.cat)) + '</span>' +
+        '<span class="l-read">' + t('min_read', { n: p.read }) + '</span>' +
+        '</a>';
+    }).join('');
+  }
+
+  /* ==================================================================
+     List / archives / taxonomy
+  ================================================================== */
+  var CATS = ['日常', '技术'];
+  var listCat = '全部';
+  var listPage = 1;
+  /* 站点侧建议 Hugo pagerSize = 10（WordPress/Hugo 主流默认）；原型取 8，
+     让现有 10 篇语料能演示出双页分页形态 */
+  var POSTS_PER_PAGE = 8;
+
+  function countCat(c) {
+    if (c === '全部') return posts.length;
+    return posts.filter(function (p) { return p.cat === c; }).length;
+  }
+
+  function filterButtons(attr, active) {
+    var html = '<button class="filter" type="button" ' + attr + '="全部" aria-pressed="' + (active === '全部') + '">' + esc(t('filter_all')) + ' <span>' + posts.length + '</span></button>';
+    CATS.forEach(function (c) {
+      html += '<button class="filter" type="button" ' + attr + '="' + esc(c) + '" aria-pressed="' + (active === c) + '">' + esc(cat(c)) + ' <span>' + countCat(c) + '</span></button>';
+    });
+    return html;
+  }
+
+  /* Row dates inside a year group drop the year prefix: the group heading
+     already owns it, so "2026." on every row is zero information. The full
+     date stays on the <time datetime> attr and the title tooltip. */
+  function timeShort(iso, full) {
+    return '<time datetime="' + iso + '" title="' + full + '">' + iso.slice(5).replace('-', '.') + '</time>';
+  }
+
+  function yearGroupsHtml(list, opts) {
+    opts = opts || {};
+    var groups = {};
+    list.forEach(function (p) { (groups[p.iso.slice(0, 4)] = groups[p.iso.slice(0, 4)] || []).push(p); });
+    /* On a category term page every row carries the same cat as the page
+       title — pass it through as a constant column and drop it from rows. */
+    if (!opts.hideCat && list.length && list.every(function (p) { return p.cat === list[0].cat; })) opts.hideCat = true;
+    return Object.keys(groups).sort(function (a, b) { return b - a; }).map(function (year) {
+      var rows = groups[year].map(function (p) {
+        return '<a class="post-row' + (opts.hideCat ? ' no-cat' : '') + '" href="' + lp('posts/' + p.slug) + '">' +
+          '<span class="p-date">' + timeShort(p.iso, p.date) + '</span>' +
+          '<span class="p-title">' + esc(titleOf(p)) + '</span>' +
+          (opts.hideCat ? '' : '<span class="p-cat">' + esc(cat(p.cat)) + '</span>') +
+          '<span class="p-read">' + t('min_read', { n: p.read }) + '</span>' +
+          '</a>';
+      }).join('');
+      return '<section class="year-group" aria-label="' + year + '">' +
+        '<h2 class="year-label">' + year + '<small>' + groups[year].length + '</small></h2>' +
+        '<div>' + rows + '</div>' +
+        '</section>';
+    }).join('');
+  }
+
+  function pagerHtml(page, pages, cat) {
+    var q = cat && cat !== '全部' ? '?cat=' + encodeURIComponent(cat) : '';
+    function href(p) { return lp('posts') + (p > 1 ? '/page/' + p : '') + q; }
+    var items = [];
+    items.push(page > 1 ? '<a href="' + href(page - 1) + '" rel="prev">' + esc(t('page_prev')) + '</a>'
+      : '<span aria-disabled="true">' + esc(t('page_prev')) + '</span>');
+    /* 窗口式页码：永远含首尾页与当前±1，间隙折叠为省略号 */
+    var keep = [1, 2, pages - 1, pages, page - 1, page, page + 1].filter(function (n) { return n >= 1 && n <= pages; });
+    keep = keep.filter(function (n, i) { return keep.indexOf(n) === i; }).sort(function (a, b) { return a - b; });
+    keep.forEach(function (n, i) {
+      if (i && n - keep[i - 1] > 1) items.push('<span class="pg-gap">…</span>');
+      items.push(n === page ? '<span class="pg-cur" aria-current="page">' + n + '</span>' : '<a href="' + href(n) + '">' + n + '</a>');
+    });
+    items.push(page < pages ? '<a href="' + href(page + 1) + '" rel="next">' + esc(t('page_next')) + '</a>'
+      : '<span aria-disabled="true">' + esc(t('page_next')) + '</span>');
+    return items.join('');
+  }
+
+  function renderList() {
+    var box = document.getElementById('list-groups');
+    var filters = document.getElementById('list-filters');
+    if (!box) return;
+    if (filters) filters.innerHTML = filterButtons('data-cat', listCat);
+    var filtered = posts.filter(function (p) { return listCat === '全部' || p.cat === listCat; });
+    var pages = Math.max(1, Math.ceil(filtered.length / POSTS_PER_PAGE));
+    if (listPage > pages) listPage = pages;
+    if (listPage < 1) listPage = 1;
+    var lc = document.getElementById('list-count');
+    if (lc) lc.textContent = t('count_n', { n: filtered.length });
+    document.getElementById('list-foot-count').textContent = filtered.length;
+    box.innerHTML = yearGroupsHtml(filtered.slice((listPage - 1) * POSTS_PER_PAGE, listPage * POSTS_PER_PAGE));
+    var pager = document.getElementById('list-pager');
+    if (pager) {
+      pager.hidden = pages <= 1;
+      pager.innerHTML = pagerHtml(listPage, pages, listCat);
+    }
+  }
+
+  function renderArchives() {
+    var box = document.getElementById('archives-groups');
+    if (!box) return;
+    document.getElementById('archives-count').textContent = t('count_n', { n: posts.length });
+    box.innerHTML = yearGroupsHtml(posts);
+  }
+
+  function allTags() {
+    var counts = {};
+    posts.forEach(function (p) { p.tags.forEach(function (tg) { counts[tg] = (counts[tg] || 0) + 1; }); });
+    return Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b, 'zh'); }).map(function (k) { return [k, counts[k]]; });
+  }
+
+  function renderTax(kind) {
+    var isTag = kind === 'tags';
+    document.getElementById('tax-kicker').textContent = isTag ? t('tags_kicker') : t('cats_kicker');
+    document.getElementById('tax-title').textContent = isTag ? t('tags_title') : t('cats_title');
+    document.getElementById('tax-note').textContent = isTag ? t('tax_tags_note') : t('tax_cats_note');
+    var entries = isTag ? allTags() : CATS.map(function (c) { return [c, countCat(c)]; });
+    document.getElementById('tax-count').textContent = t('count_n', { n: entries.length });
+    document.getElementById('tax-cloud').innerHTML = entries.map(function (e) {
+      return '<a href="' + lp(kind + '/' + encodeURIComponent(e[0])) + '">' + esc(isTag ? e[0] : cat(e[0])) + ' <span>' + e[1] + '</span></a>';
+    }).join('');
+  }
+
+  function renderTerm(kind, term) {
+    var isTag = kind === 'tags';
+    var list = posts.filter(function (p) { return isTag ? p.tags.indexOf(term) >= 0 : p.cat === term; });
+    document.getElementById('term-back').href = lp(kind);
+    document.getElementById('term-back-label').textContent = isTag ? t('back_tags') : t('back_cats');
+    document.getElementById('term-kicker').textContent = isTag ? t('term_tag_kicker') : t('term_cat_kicker');
+    document.getElementById('term-title').textContent = isTag ? term : cat(term);
+    document.getElementById('term-count').textContent = t('count_n', { n: list.length });
+    document.getElementById('term-groups').innerHTML = list.length ? yearGroupsHtml(list) :
+      '<div class="empty-state"><h2>' + esc(t('empty_title', { q: term })) + '</h2><p>' + esc(t('empty_hint')) + '</p></div>';
+  }
+
+  /* ==================================================================
+     Search
+  ================================================================== */
+  var searchInput = document.getElementById('q');
+  var searchResults = document.getElementById('search-results');
+  var searchCount = document.getElementById('search-count');
+  var searchCat = '全部';
+
+  function plain(html) {
+    var d = document.createElement('div');
+    d.innerHTML = html || '';
+    return d.textContent || '';
+  }
+  function highlight(text, q) {
+    text = String(text || '');
+    if (!q) return esc(text);
+    var i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i < 0) return esc(text);
+    return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+  }
+
+  function renderSearch() {
+    if (!searchResults) return;
+    var q = (searchInput.value || '').trim();
+    var ql = q.toLowerCase();
+    var list = posts.filter(function (p) {
+      if (searchCat !== '全部' && p.cat !== searchCat) return false;
+      if (!q) return true;
+      var hay = (titleOf(p) + ' ' + descOf(p) + ' ' + p.title + ' ' + p.desc + ' ' + p.tags.join(' ') + ' ' + plain(p.body)).toLowerCase();
+      return hay.indexOf(ql) >= 0;
+    });
+
+    searchCount.textContent = q ? t('search_count_found', { n: list.length }) : t('search_count_all', { n: list.length });
+    document.getElementById('search-total').textContent = t('count_n', { n: list.length });
+
+    if (!list.length) {
+      searchResults.innerHTML = '<div class="empty-state">' +
+        '<h2>' + esc(t('empty_title', { q: q })) + '</h2>' +
+        '<p>' + esc(t('empty_hint')) + '</p>' +
+        '<div class="hint-links">' +
+        (HINTS[LANG] || HINTS.zh).map(function (w) { return '<button type="button" data-hint="' + esc(w) + '">' + esc(w) + '</button>'; }).join('') +
+        '</div></div>';
+      syncTagState(q);
+      return;
+    }
+
+    searchResults.innerHTML = list.map(function (p) {
+      return '<a class="result-row" href="' + lp('posts/' + p.slug) + '">' +
+        '<span class="res-date">' + timeTag(p.date, p.iso) + '<br>' + esc(cat(p.cat)) + '</span>' +
+        '<div><h3>' + highlight(titleOf(p), q) + '</h3><p>' + highlight(descOf(p), q) + '</p></div>' +
+        '</a>';
+    }).join('');
+    syncTagState(q);
+  }
+
+  function setSearchCat(c) {
+    searchCat = c;
+    document.querySelectorAll('[data-scat]').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-scat') === c ? 'true' : 'false');
+    });
+  }
+
+  function renderTagHub() {
+    var hub = document.getElementById('tag-hub');
+    var cloud = document.getElementById('tag-cloud');
+    if (!hub || !cloud) return;
+    var tags = allTags();
+    if (!tags.length) { hub.hidden = true; return; }
+    cloud.innerHTML = tags.map(function (e) {
+      return '<button type="button" data-tag="' + esc(e[0]) + '" aria-pressed="false">' + esc(e[0]) + ' <span>' + e[1] + '</span></button>';
+    }).join('');
+    hub.hidden = false;
+  }
+  function syncTagState(q) {
+    document.querySelectorAll('[data-tag]').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-tag') === q ? 'true' : 'false');
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', renderSearch);
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        if (searchInput.value) { searchInput.value = ''; renderSearch(); }
+        else searchInput.blur();
+      }
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var fb = e.target.closest('[data-cat]');
+    if (fb) {
+      /* 筛选走 URL（可分享/可回退），页码重置为 1；hash 不变时直接重绘 */
+      var c = fb.getAttribute('data-cat');
+      var target = lp('posts') + (c && c !== '全部' ? '?cat=' + encodeURIComponent(c) : '');
+      listCat = c || '全部';
+      if (location.hash === target) { listPage = 1; renderList(); }
+      else location.hash = target;
+      return;
+    }
+    var sb = e.target.closest('[data-scat]');
+    if (sb) { setSearchCat(sb.getAttribute('data-scat')); renderSearch(); return; }
+    var hint = e.target.closest('[data-hint]');
+    if (hint) { searchInput.value = hint.getAttribute('data-hint'); renderSearch(); searchInput.focus(); return; }
+    var tb = e.target.closest('[data-tag]');
+    if (tb) {
+      searchInput.value = tb.getAttribute('data-tag');
+      setSearchCat('全部');
+      renderSearch();
+      searchInput.focus();
+    }
+  });
+
+  /* ==================================================================
+     Article
+  ================================================================== */
+  function cleanBody(html) {
+    return String(html || '')
+      .replace(/\sstyle="[^"]*"/g, '')
+      .replace(/\stabindex="0"/g, '')
+      .replace(/(<p>)\*\*([^*<]{1,200})\*\*/g, '$1<strong>$2</strong>')
+      .replace(/(<p>)\*([^*<]{1,200})\*/g, '$1<em>$2</em>');
+  }
+
+  function commentsBlock(idFor) {
+    return '<h2 id="' + idFor + '">' + esc(t('comments_title')) + '</h2>' +
+      '<div class="giscus-shell">' +
+      '<span class="g-brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' + esc(t('comments_brand')) + '</span>' +
+      '<a class="giscus-signin" href="https://github.com" target="_blank" rel="noopener noreferrer">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4 1.5-4-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C7.7 2.8 6.7 3.1 6.7 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 5.3 9.5c0 4.6 2.7 5.7 5.5 6-.5.6-.5 1.2-.5 2V21"></path></svg>' +
+      esc(t('comments_signin')) + '</a>' +
+      '<span class="g-note">' + esc(t('comments_note')) + '</span>' +
+      '</div>';
+  }
+
+  function shareRowHtml(p) {
+    var url = 'https://deux.top/' + (LANG === 'zh' ? '' : LANG + '/') + 'posts/' + p.slug + '/';
+    var text = encodeURIComponent(titleOf(p));
+    var u = encodeURIComponent(url);
+    return '<div class="share-group">' +
+      '<button class="share-btn share-native" type="button" id="share-native" hidden>' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v13M7 8l5-5 5 5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>' + esc(t('share')) + '</button>' +
+      '<a class="share-x" href="https://x.com/intent/post?url=' + u + '&text=' + text + '" target="_blank" rel="noopener noreferrer">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"></path></svg>X</a>' +
+      '<a class="share-tg" href="https://t.me/share/url?url=' + u + '&text=' + text + '" target="_blank" rel="noopener noreferrer">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"></path></svg>Telegram</a>' +
+      '<button class="share-btn" type="button" id="copy-link">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"></path><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1"></path></svg>' +
+      esc(t('copy_link')) + '</button>' +
+      '</div><span class="share-note" id="copy-note" role="status" aria-live="polite"></span>';
+  }
+
+  /* demo media: one video facade, one audio, wide/full figures, one footnote.
+     Each branch is defensive: a demo enhancement must never break the render. */
+  function enhanceArticleBody(body, p) {
+    try {
+      /* code copy buttons on every pre */
+      body.querySelectorAll('pre').forEach(function (pre) {
+        if (pre.closest('.code-block')) return;
+        var wrap = document.createElement('div');
+        wrap.className = 'code-block';
+        pre.parentNode.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+        var btn = document.createElement('button');
+        btn.className = 'copy-code';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', t('copy_code'));
+        btn.textContent = t('copy_code');
+        wrap.appendChild(btn);
+      });
+    } catch (e) {}
+
+    var h2s = body.querySelectorAll('h2');
+
+    try {
+    if (p.slug === 'zz-s03') {
+      var table = body.querySelector('table');
+      if (table && !body.querySelector('.media-embed')) {
+        var fig = document.createElement('figure');
+        fig.className = 'media-embed';
+        fig.innerHTML = '<audio controls preload="none" src="assets/piano-note-8c2f.wav"></audio>' +
+          '<figcaption>' + esc(t('audio_cap')) + '</figcaption>';
+        table.insertAdjacentElement('afterend', fig);
+      }
+    }
+
+    if (p.slug === 'cf-auto-translate') {
+      var pre = body.querySelector('pre');
+      if (pre && !body.querySelector('.video-facade')) {
+        var vf = document.createElement('figure');
+        vf.className = 'media-embed';
+        vf.innerHTML = '<div class="video-facade"><button type="button" aria-label="' + esc(t('video_cap')) + '">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4l14 8-14 8z"></path></svg></button>' +
+          '<span class="vf-tag">bilibili · BV1xx411c7mD</span></div>' +
+          '<figcaption>' + esc(t('video_cap')) + '</figcaption>';
+        pre.insertAdjacentElement('afterend', vf);
+      }
+    }
+
+    if (p.slug === 'zz-s02') {
+      if (!body.querySelector('.fig--wide') && h2s.length >= 3) {
+        var fw = document.createElement('figure');
+        fw.className = 'fig--wide';
+        fw.innerHTML = '<img src="assets/alley-dusk-3a9e.jpg" width="2000" height="1333" alt="" loading="lazy">' +
+          '<figcaption>' + esc(t('wide_cap')) + '</figcaption>';
+        h2s[2].insertAdjacentElement('beforebegin', fw);
+      }
+      if (!body.querySelector('.footnotes')) {
+        var target = body.querySelectorAll('p')[1] || body.querySelector('p');
+        if (target) {
+          var sup = document.createElement('sup');
+          sup.id = 'fn-ref-1';
+          sup.innerHTML = '<a href="#fn-1" data-target="fn-1" tabindex="-1">1</a>';
+          target.appendChild(sup);
+        }
+        var fns = document.createElement('section');
+        fns.className = 'footnotes';
+        fns.innerHTML = '<h2>' + esc(LANG === 'zh' ? '注' : LANG === 'ja' ? '注' : 'Notes') + '</h2>' +
+          '<ol><li id="fn-1">' + esc(t('fn_text')) + ' <a class="backlink" href="#fn-ref-1" data-target="fn-ref-1" tabindex="-1">↩</a></li></ol>';
+        body.appendChild(fns);
+      }
+    }
+
+    if (p.slug === 'zz-s04') {
+      if (!body.querySelector('.fig--full') && h2s.length >= 2) {
+        var ff = document.createElement('figure');
+        ff.className = 'fig--full';
+        ff.innerHTML = '<img src="assets/desk-window-9d4c.jpg" width="2000" height="1333" alt="" loading="lazy">' +
+          '<figcaption>' + esc(t('full_cap')) + '</figcaption>';
+        h2s[1].insertAdjacentElement('beforebegin', ff);
+      }
+    }
+    } catch (e) {}
+  }
+
+  function renderArticle(slug) {
+    var p = bySlug[slug];
+    if (!p) { location.hash = lp('posts'); return; }
+
+    document.title = titleOf(p) + ' · 二重奏';
+
+    document.getElementById('art-kicker').innerHTML =
+      '<a class="kicker-cat" href="' + lp('categories/' + encodeURIComponent(p.cat)) + '">' + esc(cat(p.cat)) + '</a>' +
+      '<span class="sep"></span><time datetime="' + p.iso + '">' + dateCn(p.iso) + '</time>' +
+      (p.updated ? '<span class="sep"></span><span>' + esc(t('updated_on')) + ' <time datetime="' + p.updatedIso + '">' + p.updated + '</time></span>' : '') +
+      '<span class="sep"></span><span>' + t('min_read', { n: p.read }) + '</span>';
+
+    document.getElementById('art-title').textContent = titleOf(p);
+    document.getElementById('art-deck').textContent = descOf(p);
+
+    var cover = document.getElementById('art-cover');
+    if (p.img) {
+      cover.hidden = false;
+      cover.innerHTML = '<img src="' + p.img + '" width="2000" height="1333" alt="' + esc(p.alt) + '">' +
+        '<figcaption class="figcap">' + esc(coverCap(p)) + '</figcaption>';
+    } else {
+      cover.hidden = true;
+      cover.innerHTML = '';
+    }
+
+    var body = document.getElementById('art-body');
+    var b = bodyOf(p);
+    body.setAttribute('lang', b.lang);
+    body.innerHTML = (b.pending ? '<div class="trans-note" lang="' + HTMLLANG[LANG] + '">' + esc(t('trans_note')) + '</div>' : '') + b.html;
+
+    if (p.slug === 'zz-s03') {
+      try {
+        var h2s = body.querySelectorAll('h2');
+        var figure = body.querySelector('figure.fig--margin');
+        if (!figure && h2s.length >= 4 && h2s[3].parentNode) {
+          figure = document.createElement('figure');
+          figure.className = 'fig fig--margin';
+          figure.innerHTML = '<img src="assets/door-dusk-6e2b.jpg" width="2000" height="1333" alt="" loading="lazy">' +
+            '<figcaption></figcaption>';
+          h2s[3].parentNode.insertBefore(figure, h2s[3]);
+        }
+        if (figure) figure.querySelector('figcaption').textContent = LANG === 'zh' ? '走廊尽头，六点零五分。' : (LANG === 'ja' ? '廊下の突き当たり、六時五分。' : 'The end of the corridor, 6:05.');
+        var quotes = body.querySelectorAll('blockquote');
+        if (quotes.length >= 2) quotes[1].classList.add('pullquote');
+      } catch (e) { /* demo enhancement must never break the article */ }
+    }
+
+    enhanceArticleBody(body, p);
+    buildToc(p.slug);
+
+    document.getElementById('art-tags').innerHTML = '<span>' + esc(t('tags_label')) + '</span>' + p.tags.map(function (tg) {
+      return '<a href="' + lp('tags/' + encodeURIComponent(tg)) + '">' + esc(tg) + '</a>';
+    }).join('');
+
+    var idx = posts.indexOf(p);
+    var prev = idx > 0 ? posts[idx - 1] : null;
+    var next = idx < posts.length - 1 ? posts[idx + 1] : null;
+    document.getElementById('art-pager').innerHTML =
+      (prev ? '<a href="' + lp('posts/' + prev.slug) + '"><span class="pg-label">' + esc(t('prev')) + '</span><span class="pg-title">' + esc(titleOf(prev)) + '</span></a>' : '<span class="pg-empty">' + esc(t('first_post')) + '</span>') +
+      (next ? '<a class="pg-next" href="' + lp('posts/' + next.slug) + '"><span class="pg-label">' + esc(t('next')) + '</span><span class="pg-title">' + esc(titleOf(next)) + '</span></a>' : '<span class="pg-empty pg-next">' + esc(t('last_post')) + '</span>');
+
+    var related = posts.filter(function (x) { return x.slug !== p.slug && x.cat === p.cat; }).slice(0, 3);
+    document.getElementById('related-title').textContent = t('related_title');
+    document.getElementById('art-related').innerHTML = related.map(function (x) {
+        return '<a class="related-row" href="' + lp('posts/' + x.slug) + '">' +
+          '<span class="r-title">' + esc(titleOf(x)) + '</span>' +
+          '<span class="r-date">' + timeTag(x.date, x.iso) + '</span>' +
+          '</a>';
+      }).join('');
+
+    /* share row (native on touch, X/Telegram + copy on desktop) */
+    var shareHost = document.getElementById('share-host');
+    if (shareHost) shareHost.innerHTML = shareRowHtml(p);
+    var nativeBtn = document.getElementById('share-native');
+    if (nativeBtn) {
+      var canNative = !!(navigator.share && window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+      nativeBtn.hidden = !canNative;
+      /* site parity: on touch, native share replaces the X/Telegram intents */
+      document.querySelectorAll('.share-x, .share-tg').forEach(function (a) { a.style.display = canNative ? 'none' : ''; });
+    }
+
+    /* comments after related (the giscus slot the live site renders) */
+    var comments = document.getElementById('art-comments');
+    if (comments) comments.innerHTML = commentsBlock('art-comments-title');
+
+    document.getElementById('copy-note').textContent = '';
+    updateReadbar();
+  }
+
+  /* copy link + native share + code copy: one delegated listener */
+  document.addEventListener('click', function (e) {
+    var copy = e.target.closest('#copy-link');
+    if (copy) {
+      var note = document.getElementById('copy-note');
+      var done = function () { note.textContent = t('copied'); setTimeout(function () { note.textContent = ''; }, 2000); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(location.href).then(done, function () { note.textContent = t('copy_fail'); });
+      } else note.textContent = t('copy_manual');
+      return;
+    }
+    var native = e.target.closest('#share-native');
+    if (native) {
+      var p = bySlug[parseRoute().slug];
+      var payload = { title: document.title, url: location.href };
+      if (p) payload.text = descOf(p);
+      if (navigator.share) navigator.share(payload).catch(function () {});
+      return;
+    }
+    var cc = e.target.closest('.copy-code');
+    if (cc) {
+      var pre = cc.closest('.code-block').querySelector('pre');
+      var label = cc.getAttribute('aria-label');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(pre.textContent).then(function () {
+          cc.textContent = t('copy_code_done');
+          cc.classList.add('done');
+          setTimeout(function () { cc.textContent = t('copy_code'); cc.classList.remove('done'); }, 2000);
+        });
+      }
+      return;
+    }
+  });
+
+  /* ==================================================================
+     Article TOC
+  ================================================================== */
+  var tocIo = null;
+
+  function buildToc(slug) {
+    var body = document.getElementById('art-body');
+    var inline = document.getElementById('toc-inline');
+    var float = document.getElementById('toc-float');
+    var count = document.getElementById('toc-count');
+    var il = document.getElementById('toc-inline-list');
+    var fl = document.getElementById('toc-float-list');
+    if (!body || !inline || !float || !il || !fl) return;
+    if (tocIo) { tocIo.disconnect(); tocIo = null; }
+
+    var heads = [].slice.call(body.querySelectorAll('h2[id]'));
+    if (heads.length < 2) {
+      inline.hidden = true; float.hidden = true; float.dataset.enabled = '0';
+      il.innerHTML = ''; fl.innerHTML = ''; count.textContent = '';
+      return;
+    }
+
+    var items = heads.map(function (h) {
+      h.setAttribute('tabindex', '-1');
+      return '<li><a class="toc-link" href="' + lp('posts/' + slug) + '" data-target="' + h.id + '">' + esc(h.textContent.trim()) + '</a></li>';
+    }).join('');
+    il.innerHTML = items;
+    fl.innerHTML = items;
+    count.textContent = t('toc_count', { n: heads.length });
+    inline.hidden = false;
+    float.hidden = true;
+    float.dataset.enabled = '1';
+
+    if ('IntersectionObserver' in window) {
+      tocIo = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) setTocActive(en.target.id); });
+      }, { rootMargin: '-12% 0px -72% 0px', threshold: 0 });
+      heads.forEach(function (h) { tocIo.observe(h); });
+    }
+    setTocActive(heads[0].id);
+  }
+
+  function setTocActive(id) {
+    document.querySelectorAll('.toc-link').forEach(function (a) {
+      if (a.getAttribute('data-target') === id) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+  }
+
+  function scrollToArticleTarget(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    el.focus({ preventScroll: true });
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-target]');
+    if (!a) return;
+    e.preventDefault();
+    scrollToArticleTarget(a.getAttribute('data-target'));
+    var det = a.closest('details');
+    if (det) det.open = false;
+  });
+
+  function updateTocFloat() {
+    var float = document.getElementById('toc-float');
+    if (!float) return;
+    var view = document.getElementById('view-article');
+    if (!view || view.hidden || float.dataset.enabled !== '1' || window.innerWidth < 1200) {
+      float.hidden = true;
+      return;
+    }
+    var cover = document.getElementById('art-cover');
+    var past = cover && !cover.hidden ? cover.getBoundingClientRect().bottom < 130 : window.scrollY > 260;
+    float.hidden = !past;
+  }
+
+  /* ==================================================================
+     Reading progress
+  ================================================================== */
+  var readbar = document.getElementById('readbar');
+  function updateReadbar() {
+    if (!readbar) return;
+    var articleView = document.getElementById('view-article');
+    if (!articleView || articleView.hidden) {
+      readbar.hidden = true;
+      updateTocFloat();
+      return;
+    }
+    readbar.hidden = false;
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    readbar.style.width = (pct * 100).toFixed(2) + '%';
+    updateTocFloat();
+  }
+  window.addEventListener('scroll', updateReadbar, { passive: true });
+  window.addEventListener('resize', updateReadbar);
+
+  /* ==================================================================
+     Lightbox (scroll-locked, Esc/backdrop close, focus restored)
+  ================================================================== */
+  var lightbox = (function () {
+    var el = document.getElementById('lightbox');
+    var img = document.getElementById('lb-img');
+    var cap = document.getElementById('lb-cap');
+    var closeBtn = document.getElementById('lb-close');
+    var lastFocus = null;
+    if (!el) return { el: null, open: function () {}, close: function () {} };
+
+    function open(node) {
+      var fig = node.closest('figure');
+      var figcap = fig ? fig.querySelector('figcaption') : null;
+      lastFocus = node;
+      img.src = node.currentSrc || node.src;
+      img.alt = node.alt || '';
+      cap.textContent = figcap ? figcap.textContent : '';
+      el.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+    function close() {
+      if (el.hidden) return;
+      el.hidden = true;
+      document.body.style.overflow = '';
+      img.src = '';
+      if (lastFocus) { lastFocus.focus({ preventScroll: true }); lastFocus = null; }
+    }
+    closeBtn.addEventListener('click', close);
+    el.addEventListener('click', function (e) { if (e.target === el) close(); });
+    return { el: el, open: open, close: close };
+  })();
+
+  document.addEventListener('click', function (e) {
+    var im = e.target.closest('.article-body img, .article-cover img');
+    if (!im || im.closest('.media-embed')) return;
+    e.preventDefault();
+    lightbox.open(im);
+  });
+
+  /* ==================================================================
+     Router
+  ================================================================== */
+  var views = {
+    home: document.getElementById('view-home'),
+    posts: document.getElementById('view-posts'),
+    archives: document.getElementById('view-archives'),
+    article: document.getElementById('view-article'),
+    search: document.getElementById('view-search'),
+    about: document.getElementById('view-about'),
+    tax: document.getElementById('view-tax'),
+    term: document.getElementById('view-term'),
+    guestbook: document.getElementById('view-guestbook'),
+    '404': document.getElementById('view-404')
+  };
+
+  function parseRoute() {
+    var h = location.hash.replace(/^#\/?/, '');
+    var qi = h.indexOf('?');
+    var query = {};
+    if (qi >= 0) {
+      var params = new URLSearchParams(h.slice(qi + 1));
+      params.forEach(function (v, k) { query[k] = v; });
+      h = h.slice(0, qi);
+    }
+    var parts = h.split('/').filter(Boolean);
+    var lang = 'zh';
+    if (parts.length && (parts[0] === 'ja' || parts[0] === 'en')) {
+      lang = parts.shift();
+    }
+    var r = { lang: lang, query: query, kind: null, term: null, slug: null };
+    currentPath = parts.join('/');
+    if (!parts.length) return Object.assign(r, { name: 'home' });
+    if (parts[0] === 'posts' && parts[1] === 'page' && parts[2] && /^\d+$/.test(parts[2])) return Object.assign(r, { name: 'posts', page: parseInt(parts[2], 10) });
+    if (parts[0] === 'posts' && parts[1]) return Object.assign(r, { name: 'article', slug: decodeURIComponent(parts[1]) });
+    if (parts[0] === 'posts') return Object.assign(r, { name: 'posts' });
+    if (parts[0] === 'archives') return Object.assign(r, { name: 'archives' });
+    if (parts[0] === 'search') return Object.assign(r, { name: 'search' });
+    if (parts[0] === 'about') return Object.assign(r, { name: 'about' });
+    if (parts[0] === 'guestbook') return Object.assign(r, { name: 'guestbook' });
+    if (parts[0] === '404') return Object.assign(r, { name: '404' });
+    if (parts[0] === 'tags' || parts[0] === 'categories') {
+      if (parts[1]) return Object.assign(r, { name: 'term', kind: parts[0], term: decodeURIComponent(parts[1]) });
+      return Object.assign(r, { name: 'tax', kind: parts[0] });
+    }
+    return Object.assign(r, { name: '404' }); /* unknown paths 404, like the real site */
+  }
+
+  function showView(name) {
+    Object.keys(views).forEach(function (k) {
+      if (!views[k]) return;
+      views[k].hidden = k !== name;
+      views[k].classList.toggle('view-enter', k === name);
+    });
+  }
+
+  function syncNav(name, kind) {
+    var map = { posts: 'posts', article: 'posts', archives: 'posts', tax: kind === 'categories' ? null : 'posts', term: 'posts' };
+    document.querySelectorAll('[data-nav]').forEach(function (a) {
+      if (map[name] && a.getAttribute('data-nav') === map[name]) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    var searchLink = document.getElementById('search-link');
+    if (searchLink) {
+      if (name === 'search') searchLink.setAttribute('aria-current', 'page');
+      else searchLink.removeAttribute('aria-current');
+    }
+  }
+
+  var currentKey = null;
+
+  /* 回顶：滚过一屏后出现（与线上站 #top-link 同构），尊重 reduced-motion */
+  var topBtn = document.getElementById('top-btn');
+  if (topBtn) {
+    var topTick = false;
+    window.addEventListener('scroll', function () {
+      if (topTick) return;
+      topTick = true;
+      requestAnimationFrame(function () {
+        topBtn.hidden = !(window.scrollY > window.innerHeight);
+        topTick = false;
+      });
+    }, { passive: true });
+    topBtn.addEventListener('click', function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      topBtn.hidden = true;
+    });
+  }
+
+
+  function route() {
+    var r = parseRoute();
+    if (r.lang !== LANG) {
+      LANG = r.lang;
+      applyLangChrome();
+      updateInternalLinks();
+      renderHomeTexts();
+      renderRecent();
+      renderLedger();
+      renderTagHub();
+    } else {
+      updateLangLinks();
+    }
+
+    showView(r.name);
+    syncNav(r.name, r.kind);
+
+    if (r.name === 'home') { document.title = '二重奏'; renderHomeTexts(); }
+    if (r.name === 'posts') { listPage = r.page || 1; document.title = t('nav_posts') + ((r.page || 1) > 1 ? ' · ' + r.page : '') + ' · 二重奏'; renderList(); }
+    if (r.name === 'archives') { document.title = t('archives_title') + ' · 二重奏'; renderArchives(); }
+    if (r.name === 'search') { document.title = t('search_title') + ' · 二重奏'; }
+    if (r.name === 'about') { document.title = t('nav_about') + ' · 二重奏'; syncAboutLang(); }
+    if (r.name === 'guestbook') {
+      document.title = t('guestbook_title') + ' · 二重奏';
+      document.getElementById('gb-title').textContent = t('guestbook_title');
+      document.getElementById('gb-intro').innerHTML = (I18N[LANG] && I18N[LANG].guestbook) || I18N.zh.guestbook || '';
+      document.getElementById('gb-comments').innerHTML = commentsBlock('gb-comments-title');
+    }
+    if (r.name === 'tax') { document.title = (r.kind === 'tags' ? t('tags_title') : t('cats_title')) + ' · 二重奏'; renderTax(r.kind); }
+    if (r.name === 'term') { document.title = (r.kind === 'tags' ? r.term : cat(r.term)) + ' · 二重奏'; renderTerm(r.kind, r.term); }
+    if (r.name === '404') {
+      document.title = '404 · 二重奏';
+      document.getElementById('nf-msg').textContent = t('nf_msg');
+      document.getElementById('nf-home-label').textContent = t('nf_home');
+      document.getElementById('nf-posts-label').textContent = t('nf_posts');
+      document.getElementById('nf-search-label').textContent = t('nf_search');
+      document.getElementById('nf-recent-title').textContent = t('nf_recent');
+      document.getElementById('nf-recent').innerHTML = posts.slice(0, 3).map(function (x) {
+        return '<a class="related-row" href="' + lp('posts/' + x.slug) + '">' +
+          '<span class="r-title">' + esc(titleOf(x)) + '</span>' +
+          '<span class="r-date">' + timeTag(x.date, x.iso) + '</span></a>';
+      }).join('');
+    }
+
+    if (r.name === 'article') renderArticle(r.slug);
+    if (r.name === 'search') {
+      if (typeof r.query.q === 'string' && r.query.q !== searchInput.value) searchInput.value = r.query.q;
+      if (r.query.cat && ['全部'].concat(CATS).indexOf(r.query.cat) >= 0) searchCat = r.query.cat;
+      else searchCat = '全部';
+      var sf = document.getElementById('search-filters');
+      if (sf) sf.innerHTML = filterButtons('data-scat', searchCat);
+      renderSearch();
+    }
+    if (r.name === 'posts') {
+      listCat = (r.query.cat && ['全部'].concat(CATS).indexOf(r.query.cat) >= 0) ? r.query.cat : '全部';
+      renderList();
+    }
+
+    var key = r.lang + '/' + r.name + '/' + (r.slug || r.term || r.kind || '');
+    if (key !== currentKey) {
+      var html = document.documentElement;
+      var prevBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      html.style.scrollBehavior = prevBehavior;
+      var main = document.getElementById('main');
+      if (main) main.focus({ preventScroll: true });
+    }
+    currentKey = key;
+    updateReadbar();
+    observeReveals();
+  }
+
+  window.addEventListener('hashchange', route);
+
+  /* ==================================================================
+     Reveal
+  ================================================================== */
+  var io = null;
+  if ('IntersectionObserver' in window && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+  }
+  function observeReveals() {
+    if (!io) {
+      document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    document.querySelectorAll('.reveal').forEach(function (el) {
+      if (views.home && !views.home.hidden && !el.classList.contains('in')) io.observe(el);
+    });
+  }
+
+  /* ==================================================================
+     Shortcuts: Ctrl/⌘+K and Alt+/ both open search (site parity)
+  ================================================================== */
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target.tagName || '').toLowerCase();
+    var typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (location.hash !== lp('search')) location.hash = lp('search');
+      setTimeout(function () { searchInput.focus(); searchInput.select(); }, 60);
+      return;
+    }
+    if (e.altKey && e.key === '/') {
+      e.preventDefault();
+      if (location.hash !== lp('search')) location.hash = lp('search');
+      setTimeout(function () { searchInput.focus(); }, 60);
+      return;
+    }
+    if (e.key === '/' && !typing) {
+      e.preventDefault();
+      if (location.hash !== lp('search')) location.hash = lp('search');
+      setTimeout(function () { searchInput.focus(); }, 60);
+    }
+  });
+
+  /* ==================================================================
+     Boot
+  ================================================================== */
+  applyLangChrome();
+  renderRecent();
+  renderLedger();
+  renderTagHub();
+  route();
+})();
+</script>
+</body>
+</html>

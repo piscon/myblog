@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>头部四个图标：顺序与位置</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f7f3ea; --paper-2: #f0eadd; --ink: #1a1712; --ink-2: #3b3529;
+    --muted: #6b6455; --rule: #dfd6c4; --rule-strong: #c8bda6; --accent: #8a5d15;
+    --display: "Iowan Old Style", "Palatino Linotype", "Songti SC", "Noto Serif SC", SimSun, serif;
+    --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --mono: "SFMono-Regular", Consolas, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.8 var(--sans); }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 28px 96px; }
+  header { padding: 56px 0 26px; border-bottom: 1px solid var(--rule); }
+  .kicker { font: 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 4vw, 40px); line-height: 1.25; margin: 0 0 14px; }
+  .lede { margin: 0; max-width: 42em; color: var(--ink-2); }
+  .meta { margin: 20px 0 0; font: 12px/1.9 var(--mono); color: var(--muted); letter-spacing: .04em; }
+  section { padding: 40px 0 0; }
+  h2 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0 0 4px; }
+  h2 .num { font: 12px/1 var(--mono); color: var(--accent); letter-spacing: .1em; margin-right: 10px; vertical-align: 2px; }
+  .sub { margin: 0 0 18px; font-size: 14px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .strip { display: flex; align-items: center; gap: 26px; padding: 22px 24px; margin: 14px 0 0; background: var(--paper-2); border-left: 2px solid var(--accent); }
+  .strip .item { font-family: var(--display); font-size: 19px; }
+  .strip .arrow { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .strip .note { margin-left: auto; font: 11px/1.5 var(--mono); color: var(--muted); letter-spacing: .06em; text-align: right; border: 0; padding: 0; background: none; }
+  .item2 { padding: 16px 0; border-top: 1px solid var(--rule); }
+  .item2:first-of-type { border-top: 0; padding-top: 4px; }
+  .item2 h3 { font-size: 16px; font-weight: 500; margin: 0 0 6px; }
+  .item2 p { margin: 4px 0; }
+  .item2 .q { font: 11px/1 var(--mono); letter-spacing: .08em; color: var(--muted); margin-right: 9px; }
+  .item2 .call { color: var(--accent); }
+  code { font: .88em/1.6 var(--mono); background: var(--paper-2); padding: 1px 5px; }
+  .ok { color: #4a6b3f; }
+  .note { margin-top: 24px; padding: 16px 18px; background: var(--paper-2); border-left: 2px solid var(--rule-strong); font-size: 14px; color: var(--ink-2); }
+  .note p { margin: 0 0 8px; }
+  .note p:last-child { margin: 0; }
+  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule); font: 12px/1.9 var(--mono); color: var(--muted); letter-spacing: .04em; }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 20px 72px; } body { font-size: 16px; }
+    .strip { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .strip .arrow { display: none; }
+    .strip .item { line-height: 1.5; }
+    .strip .note { margin: 8px 0 0; text-align: left; }
+    table, thead, tbody, tr, th, td { display: block; }
+    thead { display: none; }
+    tr { padding: 12px 0; border-bottom: 1px solid var(--rule); }
+    td { padding: 0 0 5px; border: 0; }
+    td.n { white-space: normal; }
+  }
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="kicker">Header Controls · Evidence</p>
+  <h1>四个图标，凭什么这样排</h1>
+  <p class="lede">顺序不是审美：右组里每个格子的位置都有出处——汉堡的「最右」来自 17 家真实站点的实测，语言的位置来自 W3C 的明文建议，搜索来自 Apple/Material 的动作区定义，主题是唯一没有规范归属的那个，所以放到最外格。</p>
+  <p class="meta">2026-11-07 · 17 站真实 Chromium 测量（1280 / 390）· HIG / Material / W3C / NN-g 原文核对</p>
+</header>
+
+<section>
+  <h2><span class="num">01</span>结论</h2>
+  <p class="sub">手机与桌面同一顺序，桌面把菜单换成一排导航文字。</p>
+  <div class="strip">
+    <span class="item">主题</span><span class="arrow">→</span>
+    <span class="item">搜索</span><span class="arrow">→</span>
+    <span class="item">语言</span><span class="arrow">→</span>
+    <span class="item">菜单</span>
+    <span class="note">右端最贵<br>左端最轻</span>
+  </div>
+  <p class="sub" style="margin-top:14px">倒过来读就是决策链：必须最右的是菜单（它是溢出），最需要被「看不懂页面的人」一眼看到的是语言，其次是高频的内容动作搜索，最后是没有规范归属的主题。</p>
+</section>
+
+<section>
+  <h2><span class="num">02</span>六条硬证据</h2>
+  <table>
+    <thead><tr><th>事实</th><th>数字 / 原文</th><th>推出什么</th></tr></thead>
+    <tbody>
+      <tr><td><b>汉堡在最右</b></td><td>有汉堡的 10 家里 <b>9 家</b>最右；唯一例外是 sspai（登录按钮最右，菜单次右）</td><td>☰ 占最右格，别的控件不抢</td></tr>
+      <tr><td><b>工具控件不在左半区</b></td><td>17 家全部 0 例；主题/语言/搜索都在右侧</td><td>四个图标全部留在右簇（也包括主题）</td></tr>
+      <tr><td><b>语言贴最右</b></td><td>有语言切换的 2 家（MDN、diygod）都在最右；两者同站时顺序恒为 主题 → 语言</td><td>语言紧邻汉堡，主题在语言左侧</td></tr>
+      <tr><td><b>W3C 的语言位置</b></td><td>「you'll find them at the <b>top right corner</b>… <b>Such information should not be hidden</b>… The easier it is to discover those links, the better.」</td><td>语言不能被塞进菜单，且要靠右上</td></tr>
+      <tr><td><b>Apple 的动作区</b></td><td>trailing 边缘放「important items… an optional search field, and the More menu」</td><td>搜索属于动作区，不是导航区</td></tr>
+      <tr><td><b>Material 的分工</b></td><td>「navigationIcon… appears on the <b>left</b>」「actions… appear on the <b>right</b>」</td><td>左=导航、右=动作，与上一条同向</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">03</span>被否掉的三个方案</h2>
+  <div class="item2">
+    <h3><span class="q">A</span>把主题挪到 logo 侧（站点现行做法）</h3>
+    <p>规范里主题开关根本没有位置（Apple 明说「Avoid offering an app-specific appearance setting」），而样本里 <b>0 家</b>把工具控件放左半区。挪过去等于用一个没有出处的分区，去换掉一条有 17 站支撑的惯例。<span class="call">否掉</span>，全部留在右簇。</p>
+  </div>
+  <div class="item2">
+    <h3><span class="q">B</span>手机上取消汉堡，导航直接展开</h3>
+    <p>NN/g 的阈值确实站在这一边：「4 个以内的顶层链接应直接显示，而不是藏进汉堡」。但实测 320px 放不下：品牌 70 + 导航约 90 + 两个图标 88 + 沟槽 72 ≈ 320，正好顶死，任何字号放大都会溢出。<span class="call">保留汉堡</span>，但把它明确定义为「更多/溢出」而不是「主导航」——这是它待在右边的唯一合法身份。</p>
+  </div>
+  <div class="item2">
+    <h3><span class="q">C</span>语言放最左、搜索贴边</h3>
+    <p>理由听起来成立（搜索更高频、贴边更快），但它踩了两条：W3C 点名语言要在右上，且样本里语言恒在最右。频率论还有一层问题——NN/g 引用的研究显示，屏幕边缘对触摸<b>没有</b>优势，反而是边角目标要 12mm 才好点（Fitts 的边缘优势只对鼠标成立）。<span class="call">否掉</span>。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>复验（真实 Chrome）</h2>
+  <table>
+    <thead><tr><th>视口</th><th>实测坐标（左→右）</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td class="n">320</td><td class="n">主题 118–162 · 搜索 164–208 · 语言 210–254 · 菜单 256–300</td><td class="ok">品牌右缘 94，余 24px，零溢出</td></tr>
+      <tr><td class="n">390</td><td class="n">主题 184–228 · 搜索 230–274 · 语言 276–320 · 菜单 322–366</td><td class="ok">右缘对齐 24px 沟槽</td></tr>
+      <tr><td class="n">1440</td><td class="n">文章 关于 · 主题 1127–1171 · 搜索 1173–1217 · 语言 1219–1263</td><td class="ok">语言下拉 1067–1263，与按钮右缘对齐</td></tr>
+    </tbody>
+  </table>
+  <p class="sub" style="margin-top:16px">Tab 序与视觉序一致：品牌 → 主题 → 搜索 → 语言 → 菜单（x 坐标 24 → 184 → 230 → 276 → 322）。</p>
+</section>
+
+<section>
+  <h2><span class="num">05</span>顺带查的交互</h2>
+  <table>
+    <thead><tr><th>项</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>两个面板互斥 / Esc 归位 / 外点关闭</td><td class="ok">通过（开一方自动关另一方，焦点回到触发按钮）</td></tr>
+      <tr><td>面板是否锁页面滚动</td><td class="ok">不锁（下拉不是模态），面板自身可滚</td></tr>
+      <tr><td>搜索框可访问名</td><td class="ok">真 <code>&lt;label for=q&gt;</code>「搜索文章」+ placeholder + <code>aria-describedby</code></td></tr>
+      <tr><td>Ctrl/⌘+K</td><td class="ok">生效；输入框内 Esc 先清空再失焦</td></tr>
+      <tr><td>筛选按钮状态</td><td class="ok"><code>aria-pressed</code> 同步，计数跟着变（共 5 篇）</td></tr>
+      <tr><td>目录</td><td class="ok">原生 <code>&lt;details&gt;</code>，无需自造 aria-expanded</td></tr>
+      <tr><td>复制链接</td><td class="ok">真鼠标点击 500ms 显示「已复制」，2.7s 自动清除；无剪贴板权限时给手动提示</td></tr>
+      <tr><td>语言面板展开时的焦点</td><td class="ok">停在按钮上（disclosure 模式），下一个 Tab 进列表；不抢焦点</td></tr>
+      <tr><td>hash 路由后退</td><td>滚动位置不恢复——演示层限制，落地为多页导航后天然消失</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">06</span>对线上站点的连带发现</h2>
+  <div class="note">
+    <p>站点现在把 🌓 和 🌍 放在 <b>logo 侧（左）</b>，并把「☰ 恒占最右缘」写成「移动端拇指易达的绝对规范」。样本侧：<b>17 家没有一家</b>把工具控件放左半区；规范侧：W3C 点名语言放右上；而「右边缘拇指更易点」所依托的那张拇指热区图，作者本人在 2017 年已称其为 <i>incorrect</i>（实测用户更偏好在<b>中部</b>触摸，边角目标要 12mm）。</p>
+    <p>所以这条「绝对规范」应降级为「网页惯例」，并建议站点把语言迁到右簇——否则同一个站点的手机端与桌面原型会是两套位置。</p>
+  </div>
+</section>
+
+<footer>
+  头部控件顺序取证 · 17 站 + 平台规范 · 2026-11-07<br>
+  样本：joshwcomeau · css-tricks · smashingmagazine · sspai · MDN · Ghost Casper · diygod · 阮一峰 · maggieappleton · craigmod · leerob · jvns · tonsky · sive · jim-nielsen · muan
+</footer>
+</div>
+</body>
+</html>

@@ -4,3 +4,11 @@
 /.zcode/plans/
 node_modules/
 /.hugo_build.lock
+
+/.zcode/audit/*.png
+/.zcode/audit/*.jpg
+
+/.zcode/audit/*.png
+/.zcode/audit/**/*.png
+/.zcode/audit/*.jpg
+/.zcode/audit/**/*.jpg

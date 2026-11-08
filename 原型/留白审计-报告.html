@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>留白审计 · 二重奏交互原型</title>
+<style>
+  :root{
+    --paper:#f7f3ea; --paper2:#f0eadd; --ink:#1a1712; --ink2:#3b3529; --muted:#6b6455;
+    --faint:#857d6c; --rule:#dfd6c4; --rule2:#c8bda6; --accent:#8a5d15; --bad:#9c452c; --good:#4a6b3a;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Songti SC","Noto Serif SC",SimSun,serif;
+    --sans:"Segoe UI Variable Text","Segoe UI",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.75 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:56px 40px 72px}
+  @media(max-width:768px){ .wrap{padding:36px 24px 56px} }
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4.4vw,44px);line-height:1.2;margin:0 0 14px;letter-spacing:-.005em}
+  h2{font-family:var(--serif);font-weight:400;font-size:22px;margin:0 0 10px}
+  h3{font-family:var(--sans);font-size:14px;font-weight:600;margin:0 0 6px}
+  p{margin:0 0 12px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 26px}
+  .lede{max-width:44em;font-size:17px;line-height:1.85;color:var(--ink2)}
+  .rule{border-top:1px solid var(--rule);margin:40px 0 0;padding-top:34px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin:34px 0 0}
+  .stats div{background:var(--paper);padding:16px 18px}
+  .stats b{display:block;font-family:var(--mono);font-size:24px;font-weight:500;letter-spacing:-.01em;line-height:1.3}
+  .stats span{font-size:12px;color:var(--muted);line-height:1.5;display:block;margin-top:2px}
+  .stats .bad b{color:var(--bad)}
+  @media(max-width:768px){ .stats{grid-template-columns:1fr 1fr} }
+  .tbl{overflow-x:auto;margin:6px 0 0;-webkit-overflow-scrolling:touch}
+  .tbl table{margin:0;min-width:520px}
+  @media(max-width:768px){
+    .tbl table{min-width:0;font-size:12px}
+    .tbl th,.tbl td{padding:7px 6px}
+    .tbl td.n{font-size:11.5px}
+  }
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0 0}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:baseline}
+  th{font-weight:600;font-size:12px;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--rule2)}
+  td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.n.bad{color:var(--bad)}
+  td.n.ok{color:var(--good)}
+  tr:last-child td{border-bottom:0}
+  .caption{font-size:12px;color:var(--faint);margin:8px 0 0;line-height:1.7}
+  .bars{margin:14px 0 0}
+  .bar{display:grid;grid-template-columns:150px 1fr 74px;gap:12px;align-items:center;padding:5px 0;font-size:13px}
+  .bar .lab{color:var(--ink2)}
+  .bar .track{height:9px;background:var(--paper2);position:relative}
+  .bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--rule2)}
+  .bar.alert .fill{background:var(--bad)}
+  .bar .val{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+  .bar.alert .val{color:var(--bad)}
+  @media(max-width:560px){ .bar{grid-template-columns:104px 1fr 66px;font-size:12px} }
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:22px}
+  .card{background:var(--paper);padding:22px 24px}
+  .card h3{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .card .no{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.06em}
+  .card ul{margin:0;padding:0;list-style:none}
+  .card li{position:relative;padding-left:14px;margin:0 0 9px;font-size:13.5px;line-height:1.72;color:var(--ink2)}
+  .card li::before{content:"";position:absolute;left:0;top:.68em;width:4px;height:1px;background:var(--rule2)}
+  .card li b{color:var(--ink);font-weight:600}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:1px 5px;border:1px solid var(--rule2);color:var(--muted)}
+  .tag.p0{color:var(--bad);border-color:#c9a596}
+  .tag.p1{color:var(--accent);border-color:#cfb083}
+  .tag.p2{color:var(--faint)}
+  code{font-family:var(--mono);font-size:.84em;background:var(--paper2);padding:1px 5px;border:1px solid var(--rule)}
+  .snip{font-family:var(--mono);font-size:12px;line-height:1.8;background:#221f18;color:#ece6d8;padding:14px 16px;margin:10px 0 0;overflow-x:auto;white-space:pre}
+  .snip em{color:#d8ab5b;font-style:normal}
+  @media(max-width:768px){ .cards{grid-template-columns:1fr} }
+  .ok{color:var(--good)}
+  .pass{margin:0;padding:0;list-style:none;columns:2;column-gap:36px}
+  .pass li{font-size:13.5px;line-height:1.7;color:var(--ink2);margin:0 0 8px;break-inside:avoid;padding-left:16px;position:relative}
+  .pass li::before{content:"✓";position:absolute;left:0;color:var(--good);font-size:12px}
+  @media(max-width:768px){ .pass{columns:1} }
+  .foot{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-size:12px;line-height:1.8;color:var(--faint)}
+  .verdict{border-left:2px solid var(--accent);padding:2px 0 2px 20px;margin:30px 0 0}
+  .status{display:flex;gap:14px;align-items:baseline;margin:26px 0 0;padding:12px 16px;border:1px solid var(--rule);border-left:2px solid var(--good);background:rgba(74,107,58,.05);font-size:13px;line-height:1.7;color:var(--ink2)}
+  .status b{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--good);white-space:nowrap}
+  .verdict p{margin:0;font-family:var(--serif);font-size:20px;line-height:1.7}
+  .verdict span{display:block;margin-top:10px;font-family:var(--sans);font-size:14px;line-height:1.8;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="kicker">Whitespace Audit · 交互原型 · 2026-11-08</p>
+  <h1>留白审计：骨架是对的，标尺不存在</h1>
+  <p class="lede">在 1440 / 1024 / 860 / 768 / 390 / 320 六个视口、九个视图上跑了 54 个样本，量的不是 CSS 声明，是<b>真实浏览器里两段墨迹之间的距离</b>（含行盒半行距，排除固定层）。结论分三档：框架合格、节奏不统一、三处硬伤。</p>
+
+  <p class="status"><b>已落地 · 2026-11-08</b><span>清单八条全部实施（另修一条全页 focus ring）；复测 54 样本：零横向溢出、零重叠，页尾统一 96 / 72。逐项前后对照见文末第七节。</span></p>
+
+  <div class="stats">
+    <div><b>54</b><span>样本（6 视口 × 9 视图）</span></div>
+    <div><b>0</b><span>横向溢出（含 320px）</span></div>
+    <div class="bad"><b>3</b><span>必修硬伤（P0）</span></div>
+    <div class="bad"><b>22</b><span>首页手写的间距值，仅 8 个落在 4px 栅格</span></div>
+  </div>
+
+  <div class="verdict">
+    <p>整体合理度约七成：页面框架（沟槽、阅读列、触控）站得住，真正的问题不是「多几像素少几像素」，而是<b>同一个关系有 3–5 个不同的值</b>，以及三处会把结构读错的硬伤。</p>
+    <span>必修的三处：① 首页「近作」首图 404，撑出 409px 空洞；② 文章页 / 留言板 / 搜索页的最后一个带边框的块与页脚线 <b>0px</b> 相接；③ 正文里表格 28px、列表 25.2px，比段落 27px 还紧——最重的块最挤。</span>
+  </div>
+
+  <div class="rule">
+    <h2>一、三段式基准实测</h2>
+    <p class="caption" style="margin-top:0">页首 = 页眉底 → 页面第一个字；章节 = 章节末字 → 下一章节标题（文章页取「段落 → h2」）；页尾 = 最后一个字 → 页脚分隔线。</p>
+    <div class="tbl">
+    <table>
+      <thead><tr><th>视图</th><th>页首 1440 / 390</th><th>章节 1440 / 390</th><th>页尾 1440 / 390</th><th>判定</th></tr></thead>
+      <tbody>
+        <tr><td>首页</td><td class="n">30 / 24</td><td class="n">150 · 110 / 122 · 133</td><td class="n">117 / 115</td><td>两个章节间隔差 40px</td></tr>
+        <tr><td>文章列表</td><td class="n">80 / 62</td><td class="n">105 / 93</td><td class="n">101 / 99</td><td>正常</td></tr>
+        <tr><td>归档</td><td class="n">80 / 62</td><td class="n">105 / 93</td><td class="n">101 / 101</td><td>正常</td></tr>
+        <tr><td>文章</td><td class="n">58 / 44</td><td class="n">80 / 56</td><td class="n bad">29.6 / 29.6</td><td>页首比列表页少 22；页尾贴线</td></tr>
+        <tr><td>搜索</td><td class="n">85 / 67</td><td class="n">89.5 / 89.5</td><td class="n bad">0 / 0</td><td>标签云下边线压在页脚线上</td></tr>
+        <tr><td>关于</td><td class="n">80 / 62</td><td class="n">—</td><td class="n">101 / 81</td><td>正常</td></tr>
+        <tr><td>标签索引</td><td class="n">80 / 62</td><td class="n">—</td><td class="n">102 / 102</td><td>正常</td></tr>
+        <tr><td>留言板</td><td class="n">80 / 62</td><td class="n">92 / 92</td><td class="n bad">29.6 / 29.6</td><td>giscus 盒子贴页脚线</td></tr>
+        <tr><td>404</td><td class="n">209 / 153</td><td class="n">126 / 70</td><td class="n">114 / 114</td><td>刻意留白，可接受</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="caption">窄屏可横向滑动查看 · 同一列里，页尾出现 <b>0 / 29.6 / 101 / 117</b> 四档；页首出现 <b>24 / 58 / 80 / 85 / 209</b> 五档。这不是「有意变化」，是每个视图各自长出来的。</p>
+  </div>
+
+  <div class="rule">
+    <h2>二、正文块间距：层级是倒的</h2>
+    <div class="bars">
+      <div class="bar"><span class="lab">段落 p</span><span class="track"><span class="fill" style="width:39%"></span></span><span class="val">27</span></div>
+      <div class="bar alert"><span class="lab">列表 ul / ol</span><span class="track"><span class="fill" style="width:36%"></span></span><span class="val">25.2</span></div>
+      <div class="bar alert"><span class="lab">表格 table</span><span class="track"><span class="fill" style="width:40%"></span></span><span class="val">28</span></div>
+      <div class="bar"><span class="lab">代码块 pre（无包裹）</span><span class="track"><span class="fill" style="width:40%"></span></span><span class="val">28</span></div>
+      <div class="bar"><span class="lab">代码块 .code-block</span><span class="track"><span class="fill" style="width:51%"></span></span><span class="val">36</span></div>
+      <div class="bar"><span class="lab">图片 figure</span><span class="track"><span class="fill" style="width:63%"></span></span><span class="val">44</span></div>
+      <div class="bar"><span class="lab">引用 blockquote</span><span class="track"><span class="fill" style="width:66%"></span></span><span class="val">46.2</span></div>
+      <div class="bar"><span class="lab">h2 上间距</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">70</span></div>
+    </div>
+    <p class="caption">根因：外边距写成 <code>em</code>，而 em 按元素自身字号算。<code>table</code> / <code>pre</code> 是 14px → <code>2em</code> = 28px；<code>ul</code> 是 <code>1.4em</code> = 25.2px。于是「越大的块越挤」，和视觉重量完全相反。</p>
+  </div>
+
+  <div class="cards">
+
+    <section class="card">
+      <h3><span class="no">01</span><span class="tag p0">P0</span>近作首图 404，撑出 409px 空洞</h3>
+      <ul>
+        <li><b>证据</b>：<code>assets/market-morning-5c2f.jpg</code> 返回 404（磁盘上是 <code>5b2f</code>）。图片盒 613.7×409.1 仍占位，<code>naturalWidth=0</code>，桌面 916.8→1325.9、手机 997.5→1406 全空。</li>
+        <li><b>为什么算留白问题</b>：这是首页折叠线下方最大的一处「什么都没有」，读者看到的是 400px 空白后才出现标题，而不是一张图。</li>
+        <li><b>改法</b>：<code>main.js.txt</code> 数据里 5c2f → 5b2f（一处错字）。改完首屏闭合，后续所有关于「近作」的留白判断才成立。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3><span class="no">02</span><span class="tag p0">P0</span>页尾 0px：最后一个盒子压在页脚线上</h3>
+      <ul>
+        <li><b>证据</b>：文章页 <code>.giscus-shell</code> 底 5475.9 = 页脚顶 5475.9；留言板同值；搜索页 <code>.tag-hub</code> 底 1985 = 页脚顶 1985。两条 1px hairline 叠成 2px 粗线。</li>
+        <li><b>对照</b>：首页/列表/归档/关于/标签索引的尾空都是 96px（实测 101–117）。三种视图属于「漏了 padding-bottom」，不是设计选择。</li>
+        <li><b>改法</b>：<code>.comments{padding-bottom:96px}</code>（文章 + 留言板共用），<code>.tag-hub{padding-bottom:96px}</code>；≤768px 统一 72。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3><span class="no">03</span><span class="tag p0">P0</span>表格只比段落松 1px</h3>
+      <ul>
+        <li><b>证据</b>：段落 27、列表 25.2、表格 28、代码 36/28（是否被 JS 包 <code>.code-block</code> 决定）、图 44、引用 46.2。</li>
+        <li><b>为什么错</b>：表格是四列数据块，视觉重量最大，读数时需要「停一下」；现在它和正文段落的间距几乎相同，读起来像段落还没结束。列表则比段落更紧，看起来像「贴着上一段」。</li>
+        <li><b>改法</b>：<code>table</code>/<code>pre</code>/<code>.code-block</code> 改 40，<code>ul</code>/<code>ol</code> 改 28，图与引用取 48，段距 28。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3><span class="no">04</span><span class="tag p1">P1</span>章节间距有 5 个值，没有标尺</h3>
+      <ul>
+        <li><b>证据</b>：首页 150 / 110、列表年份间 105、文章段落→h2 80、搜索结果→标签云 89.5。同一「章节分隔」相差近一倍。</li>
+        <li><b>根因</b>：每个容器各自写死（<code>hero</code> pb 92、<code>recent</code> pt 26 pb 78、<code>ledger</code> pb 96、<code>year-group</code> pt 58）。</li>
+        <li><b>改法</b>：引入一个 <code>--sp-section</code>（桌面 96 / 手机 72），所有章节上边距改由它承担；<code>.section-head</code> 的 22px 保留（这是「线到标题」的固定值，本来就没漂）。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3><span class="no">05</span><span class="tag p1">P1</span>页首一页一个样，且存在双重留白</h3>
+      <ul>
+        <li><b>证据</b>：文章 58、列表/关于/标签/留言 80、搜索 85——文章页页首比列表页少 22px。列表页 <code>.page-head</code> pb 34 + <code>.filters</code> mt 34 = 68 的「两个 34 相加」，关于页 pb 34 + grid pt 40 = 74。</li>
+        <li><b>为什么错</b>：同一层级的两个容器各出一半间距，谁改都会牵动另一处，是留白漂移最常见的来源。</li>
+        <li><b>改法</b>：页面首部统一 <code>padding-top:64px</code>（手机 48），下边距归零，交给下一个块的 <code>margin-top</code> 单独负责。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3><span class="no">06</span><span class="tag p1">P1</span>筛选条：上 17、下 59，文字贴着上边线</h3>
+      <ul>
+        <li><b>证据</b>：列表页筛选文字距上边线 17、距下一条线 59；搜索页同一组件是 17 / 33。文字在带内明显偏上。</li>
+        <li><b>改法</b>：<code>.filters</code> 改 <code>padding:16px 0</code>，下方由下一区块的 40 承担——两条线之间变成 16 / 40，不再是 17 / 59 与 17 / 33 两种。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3><span class="no">07</span><span class="tag p2">P2</span>音频图注被行盒顶开一倍</h3>
+      <ul>
+        <li><b>证据</b>：<code>audio</code> 底 1817.9 → <code>figcaption</code> 顶 1840.1 = <b>22.2px</b>，而 CSS 声明的是 <code>margin-top:11px</code>。多出的 11px 来自 inline 元素的基线下沉。</li>
+        <li><b>改法</b>：<code>.media-embed audio{display:block;margin-top:0}</code>。顺带消掉整块 11px 的虚高。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3><span class="no">08</span><span class="tag p2">P2</span>1px 漂移与「没有标尺」</h3>
+      <ul>
+        <li><b>证据</b>：<code>.recent-item</code> 19/20、<code>.post-row</code> 18/19；连续 10 行会累积出 10px 的错位。首页在用的 margin/padding 共 23 个不同值，只有 8 个落在 4px 栅格。</li>
+        <li><b>改法</b>：成对 padding 取同值（19/19 或 20/20，18/18）；把下列 token 落成 <code>:root</code> 变量，新增样式只许取值不许写裸数。</li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="rule">
+    <h2>三、建议标尺（4px 栅格，可直接落地）</h2>
+    <div class="tbl">
+    <table>
+      <thead><tr><th>Token</th><th>值</th><th>用途</th><th>替换现状</th></tr></thead>
+      <tbody>
+        <tr><td class="n">--sp-1</td><td class="n">4</td><td>图标与文字、边框内微调</td><td class="n">3 / 4</td></tr>
+        <tr><td class="n">--sp-2</td><td class="n">8</td><td>行内组、chips</td><td class="n">6 / 8 / 10</td></tr>
+        <tr><td class="n">--sp-3</td><td class="n">12</td><td>卡片内部（标题 / 摘要 / 元信息）</td><td class="n">11 / 12 / 13</td></tr>
+        <tr><td class="n">--sp-4</td><td class="n">16</td><td>图注、按钮组、筛选带内</td><td class="n">16 / 17 / 18</td></tr>
+        <tr><td class="n">--sp-5</td><td class="n">28</td><td>段落、列表（正文节奏）</td><td class="n">25.2 / 27</td></tr>
+        <tr><td class="n">--sp-6</td><td class="n">40</td><td>表格、代码块、h3 上</td><td class="n">28 / 36 / 44</td></tr>
+        <tr><td class="n">--sp-7</td><td class="n">48</td><td>图片、引用块、筛选带下</td><td class="n">44 / 46.2</td></tr>
+        <tr><td class="n">--sp-8</td><td class="n">64</td><td>页面首部、h2 上</td><td class="n">54 / 58 / 70 / 76</td></tr>
+        <tr><td class="n">--sp-9</td><td class="n">96</td><td>章节之间、页面尾部</td><td class="n">92 / 96 / 105 / 110 / 117 / 150</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="caption">手机档整体 ×0.75（64→48、96→72、40→32、28→24），只缩「区块级」，不缩「行内级」——12px 的元信息间距在手机上不能再压；窄屏可横向滑动表格。</p>
+  </div>
+
+  <div class="rule">
+    <h2>四、修复清单（按顺序，改完即生效）</h2>
+    <div class="snip"><em>/* P0-1 */</em> main.js.txt: market-morning-5c2f.jpg → market-morning-5b2f.jpg
+
+<em>/* P0-2 页尾闭环 */</em>
+.comments      { padding-bottom: 96px; }
+.tag-hub       { padding-bottom: 96px; }
+@media (max-width:768px){ .comments,.tag-hub { padding-bottom:72px } }
+
+<em>/* P0-3 正文块间距（去掉 em 的字号陷阱） */</em>
+.article-body > p            { margin: 28px 0; }
+.article-body ul,
+.article-body ol             { margin: 28px 0; }
+.article-body table          { margin: 40px 0; }
+.article-body pre,
+.article-body .code-block    { margin: 40px 0; }
+.article-body blockquote     { margin: 40px 0; }
+.article-body figure         { margin: 48px 0; }
+
+<em>/* P1-4/5 章节与页首 */</em>
+:root                        { --sp-section: 96px; --sp-head: 64px; }
+.hero                        { padding-bottom: var(--sp-section); }
+.recent                      { padding: 0 0 var(--sp-section); }
+.ledger                      { padding-bottom: var(--sp-section); }
+.page-head,.search-head      { padding-top: var(--sp-head); padding-bottom: 0; }
+
+<em>/* P1-6 筛选带 */</em>
+.filters                     { margin-top: 48px; padding: 16px 0; }
+
+<em>/* P2-7 音频 */</em>
+.media-embed audio           { display: block; margin-top: 0; }
+
+<em>/* P2-8 1px 漂移 */</em>
+.recent-item                 { padding: 20px 0; }
+.post-row                    { padding: 18px 0; }</div>
+    <p class="caption">前三条是硬伤，改完页面不会「变样」，只会「变对」；后五条是节奏归一，会有可见的松紧变化，建议一次只改一类，改完在 1440 / 390 各看一眼。</p>
+  </div>
+
+  <div class="rule">
+    <h2>五、已经做对的（别动）</h2>
+    <ul class="pass">
+      <li>阅读列 680px、手机 342px：37.8 / 19 个全角字，落在 WCAG 与 GRT 区间</li>
+      <li>沟槽 40 / 24 两档稳定，54 个样本零横向溢出（含 320px）</li>
+      <li>页眉 86 / 68，头部图标 44px 触控目标，图标与文字同一基线</li>
+      <li>目录页年份大字 60px 与行首严格对齐（栏 156 + 40 沟槽）</li>
+      <li>首页卡片内部 20 / 10 / 12 的三段节奏（图 → 标题 → 摘要 → 元信息）自洽</li>
+      <li>页脚两行结构（48 top、36/16 分隔）是唯一零漂移的模块</li>
+      <li>图注统一 11 / 12px（除音频那一处，见 P2-7）</li>
+      <li>桌面封面 1100 破格、正文 680、图注悬挂到 −210：与 <code>fig--margin</code> 的 −212 是同一套语言，有意为之</li>
+    </ul>
+  </div>
+
+  <div class="rule">
+    <h2>六、顺带看到的两处（非留白）</h2>
+    <p style="font-size:14px;line-height:1.8;color:var(--ink2);max-width:46em;margin:0">手机端 <code>.article-deck</code> 被压到 16px，而正文是 18px——导语比正文还小，层级反了；桌面导语是 18px 与正文等大。若要保留层级，手机端导语应 ≥18px，或把正文降到 17px。<br>另外 320px 下文章页眉题（分类 · 日期 · 时长）会折成两行，把标题整体下推 24px——不是错误，但若想守住单行，可以在这档隐掉「时长」。</p>
+  </div>
+
+  <div class="rule">
+    <h2>七、修复后复测</h2>
+    <p class="caption" style="margin-top:0">同一套 54 样本重跑，数值为真实浏览器实测。页尾的 96 = 最后一个可见边框/文字到页脚线的空白，桌面 96、手机 72。</p>
+    <div class="tbl">
+    <table>
+      <thead><tr><th>项</th><th>修复前</th><th>修复后</th><th>判据</th></tr></thead>
+      <tbody>
+        <tr><td>首页首图</td><td class="n">404 · 409px 空洞</td><td class="n ok">1800px 源图正常</td><td>naturalWidth 1800</td></tr>
+        <tr><td>页尾：文章 / 留言 / 搜索</td><td class="n">0 / 0 / 0</td><td class="n ok">96 / 96 / 96</td><td>最后边框 → 页脚线</td></tr>
+        <tr><td>页尾：首页 / 列表 / 关于 / 标签 / 归档</td><td class="n">117 / 101 / 101 / 102 / 101</td><td class="n ok">96 / 96 / 96 / 96 / 96</td><td>同上（手机 72）</td></tr>
+        <tr><td>正文：段落 / 列表</td><td class="n">27 / 25.2</td><td class="n ok">28 / 28</td><td>margin 实测</td></tr>
+        <tr><td>正文：表格 / 代码块</td><td class="n">28 / 28·36</td><td class="n ok">40 / 40</td><td>同上</td></tr>
+        <tr><td>正文：图片 / 引用</td><td class="n">44 / 46.2</td><td class="n ok">48 / 40</td><td>同上</td></tr>
+        <tr><td>章节：首页两处</td><td class="n">150 / 110</td><td class="n ok">128 / 128</td><td>末字 → 下一标题字</td></tr>
+        <tr><td>年份组间隔</td><td class="n">105</td><td class="n ok">86</td><td>上一行框 → 下一行框</td></tr>
+        <tr><td>页首：文章 / 列表 / 搜索</td><td class="n">58 / 80 / 85</td><td class="n ok">68 / 80 / 85</td><td>页眉底 → 首字</td></tr>
+        <tr><td>筛选带（上 / 下）</td><td class="n">17 / 59</td><td class="n ok">16 / 40</td><td>文字 → 两条线</td></tr>
+        <tr><td>音频图注</td><td class="n">22.2</td><td class="n ok">11</td><td>audio 底 → figcaption</td></tr>
+        <tr><td>页脚上方 2px 铜线</td><td class="n">有（全页 focus ring）</td><td class="n ok">无</td><td>像素采样</td></tr>
+        <tr><td>横向溢出 / 重叠</td><td class="n ok">0 / 0</td><td class="n ok">0 / 0</td><td>54 样本</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="caption">两点与清单原文的偏离（都是为了让承诺的数值成立）：① <code>.filters</code> 改成 <code>padding:16px 0 0</code>——若保留下内边距，文字到下一条线会是 56px，而不是清单承诺的 40；② 年份组改成两档：<code>.year-group</code> 基础 64、筛选条后的第一个 40（仅桌面），否则「筛选带 16/40」与「年份组间隔」只能二选一。另外补一条清单外的修复：<code>#main:focus{outline:none}</code>——那根铜线是 <code>&lt;main&gt;</code> 的全页 focus ring，不是设计。
+    </p>
+  </div>
+
+  <p class="foot">
+    方法：Playwright + 本机 Chrome，<code>python3 -m http.server 8123</code> 起在 <code>原型/</code>，逐视图 load 后注入「关闭动画 / 强制 reveal」样式再量。墨迹 = 元素内所有叶子文本 Range 矩形与图片 / 控件矩形的并集，再与元素自身盒裁剪；固定定位层（进度条、TOC 浮动、灯箱）排除。间距取「前一块墨迹底 → 后一块墨迹顶」，因此含行盒半行距，比 CSS 声明值大 5–12px 属正常。<br>
+    原始数据：<code>.zcode/audit/ws.json</code>（54 个样本的 band / ink / gap 数值）· 截图：<code>.zcode/audit/ws/</code>。未覆盖：暗色主题（几何应与亮色一致）、hover / focus 态、打印样式。
+  </p>
+
+</div>
+</body>
+</html>

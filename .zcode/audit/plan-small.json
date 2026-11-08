@@ -1,0 +1,8 @@
+{
+  "out": "r-small.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html#/posts/zz-s03", "settle": 1400 },
+    { "eval": "(() => [...document.querySelectorAll('a[href], button, summary, input')].map(el => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return { tag: el.tagName, cls: (el.className || '') + '', txt: (el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 16), w: Math.round(r.width), h: Math.round(r.height), fs: cs.fontSize, disp: cs.display }; }).filter(o => o.disp !== 'none' && (o.w < 24 || o.h < 24)))()", "label": "small-targets" }
+  ]
+}

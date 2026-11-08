@@ -1,0 +1,16 @@
+{
+  "out": "r-realclick.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html#/posts/zz-s03", "settle": 1600 },
+    { "scrollTo": 3800 },
+    { "realClick": ".share-btn", "settle": 700 },
+    { "eval": "(() => ({ note: document.getElementById('copy-note')?.textContent?.trim(), noteVisible: (()=>{const n=document.getElementById('copy-note'); const s=getComputedStyle(n); return s.display!=='none'&&s.visibility!=='hidden';})() }))()", "label": "copy-after-real-click" },
+
+    { "hash": "#/search", "settle": 800 },
+    { "eval": "(() => { const i=document.getElementById('q'); const lab=document.querySelector('label[for=\"q\"]'); return { hasLabel: !!lab, labelText: lab?lab.textContent.trim():null, placeholder: i.getAttribute('placeholder'), aria: i.getAttribute('aria-label'), describedBy: i.getAttribute('aria-describedby') }; })()", "label": "search-label" },
+
+    { "hash": "#/posts", "settle": 800 },
+    { "eval": "(() => { const s=document.querySelector('.search-input'); return { exists: !!s }; })()", "label": "noop" }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "out": "r-fix.json",
+  "steps": [
+    { "viewport": { "width": 320, "height": 720, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1500 },
+    { "evalFile": "measure-layout.js", "label": "w320" },
+
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w390" },
+    { "shot": "f390-home.png" },
+
+    { "click": ".lang-btn", "settle": 500 },
+    { "eval": "(() => { const m=document.getElementById('lang-menu'); const r=m.getBoundingClientRect(); const b=document.querySelector('.lang-btn'); return {hidden:m.hidden, x:r.x, right:r.right, w:r.width, y:r.y, bottom:r.bottom, vw:innerWidth, expanded:b.getAttribute('aria-expanded'), current:[...m.querySelectorAll('a[aria-current]')].map(a=>a.textContent.trim())}; })()", "label": "lang-open-390" },
+    { "shot": "f390-lang.png" },
+
+    { "click": ".menu-btn", "settle": 500 },
+    { "eval": "(() => { const lm=document.getElementById('lang-menu'); const mm=document.getElementById('mobile-menu'); return {langHidden:lm.hidden, menuOpen:!mm.hidden, langExpanded:document.querySelector('.lang-btn').getAttribute('aria-expanded'), menuExpanded:document.querySelector('.menu-btn').getAttribute('aria-expanded'), bodyOverflow:document.body.style.overflow, menuH:Math.round(mm.getBoundingClientRect().height)}; })()", "label": "menu-after-lang" },
+    { "shot": "f390-menu.png" },
+
+    { "click": ".lang-btn", "settle": 500 },
+    { "eval": "(() => { const lm=document.getElementById('lang-menu'); const mm=document.getElementById('mobile-menu'); return {langOpen:!lm.hidden, menuClosed:mm.hidden, menuExpanded:document.querySelector('.menu-btn').getAttribute('aria-expanded')}; })()", "label": "lang-after-menu" },
+
+    { "key": "Escape", "settle": 400 },
+    { "eval": "(() => ({ langHidden: document.getElementById('lang-menu').hidden, focus: document.activeElement.className }))()", "label": "lang-esc" },
+
+    { "viewport": { "width": 860, "height": 900, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w860" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "evalFile": "measure-layout.js", "label": "w1440" },
+    { "click": ".lang-btn", "settle": 400 },
+    { "eval": "(() => { const m=document.getElementById('lang-menu'); const r=m.getBoundingClientRect(); return {hidden:m.hidden, x:r.x, right:r.right, y:r.y}; })()", "label": "lang-open-1440" },
+    { "shot": "f1440-lang.png" }
+  ]
+}

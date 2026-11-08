@@ -1,0 +1,12 @@
+{
+  "out": "r-content.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html#/posts/zz-s04", "settle": 1500 },
+    { "eval": "(async () => { const out=[]; for (const slug of ['zz-s04','zz-s01','cf-auto-translate','zz-s07']) { location.hash='#/posts/'+slug; await new Promise(r=>setTimeout(r,600)); const b=document.getElementById('art-body'); const t=b.innerText; out.push({slug, stars:(t.match(/\\*/g)||[]).length, strong:b.querySelectorAll('strong').length, em:b.querySelectorAll('em').length, text:t.slice(-70)}); } return out; })()", "label": "content-fixed" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "hash": "#/posts/zz-s04", "settle": 900 },
+    { "shot": "f1440-article.png" }
+  ]
+}

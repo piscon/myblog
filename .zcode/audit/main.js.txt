@@ -1,0 +1,1234 @@
+(function () {
+  'use strict';
+
+  /* ==================================================================
+     Data
+  ================================================================== */
+  var RAW = [];
+  try { RAW = JSON.parse(document.getElementById('post-data').textContent); } catch (e) { RAW = []; }
+  var I18N = { zh: {}, ja: {}, en: {} };
+  try { I18N = JSON.parse(document.getElementById('i18n-data').textContent); } catch (e) {}
+
+  var ORDER = ['zz-s03', 'zz-s01', 'zz-s02', 'zz-s04', 'zz-s05', 'zz-s06', 'zz-s07', 'cf-auto-translate', 'ai-update-blog', 'first'];
+
+  var META = {
+    'zz-s03': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: 'assets/piano-afternoon-7c1d.jpg', cap: '六点差五分，西窗的光落在琴键上。', alt: '午后阳光落在靠窗的旧钢琴上' },
+    'zz-s01': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: 'assets/market-morning-5b2f.jpg', cap: '早市，芹菜和一把旧秤。', alt: '清晨菜市场里成捆的芹菜与木箱' },
+    'zz-s02': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'zz-s04': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: 'assets/alley-dusk-3a9e.jpg', cap: '雨后的巷子，灯还亮着。', alt: '雨后傍晚的窄巷，石板上映着暖光' },
+    'zz-s05': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'zz-s06': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'zz-s07': { date: '2026.11.05', iso: '2026-11-05', read: 2, img: null, cap: '', alt: '' },
+    'cf-auto-translate': { date: '2026.11.05', iso: '2026-11-05', read: 4, img: null, cap: '', alt: '' },
+    'ai-update-blog': { date: '2026.11.01', iso: '2026-11-01', read: 1, img: 'assets/desk-window-9d4c.jpg', cap: '窗边的桌子，早上九点。', alt: '窗边木桌上的笔记本、茶杯与合上的电脑' },
+    'first': { date: '2025.11.26', iso: '2025-11-26', read: 1, img: 'assets/grass-fence-2b8d.jpg', cap: '网之外。', alt: '铁网后长出的草' }
+  };
+
+  /* UI strings — the chrome of every page, localized like the real site */
+  var STR = {
+    zh: {
+      nav_label: '主导航', nav_posts: '文章', nav_about: '关于', skip: '跳到正文',
+      search_label: '搜索（Ctrl 或 Command 加 K）', lang_label: '切换语言',
+      theme_dark: '切换到深色主题', theme_light: '切换到浅色主题',
+      menu_open: '打开菜单', menu_close: '关闭菜单',
+      masthead_cn: '写日常，也写让日常运转的代码。',
+      read_this: '读这篇', hero_time: '约 {n} 分钟', byline_cat: '日常随笔',
+      hero_figcap: '六点差五分，西窗的光落在琴键上。',
+      recent_title: '近作', all_posts: '全部文章', index_title: '目录', by_year: '按年份浏览',
+      posts_kicker: 'Archive · 目录', posts_deck: '关于日常、写作，以及让这个站点运转的技术笔记。按时间排列，新的在上面。',
+      filter_label: '按分类筛选', filter_all: '全部',
+      newest_first: '按时间倒序', count_n: '共 {n} 篇', rss_full: 'RSS 全文',
+      archives_kicker: 'Archive · 归档', archives_title: '归档', archives_deck: '按年份收拢的全部文字。能从任何一行进入。',
+      search_kicker: 'Search · 搜索', search_title: '搜索', search_placeholder: '搜标题、摘要或标签',
+      search_hint: '输入关键词，结果即时出现。Esc 清空。', search_count_all: '共 {n} 篇', search_count_found: '找到 {n} 篇',
+      empty_title: '没有找到「{q}」', empty_hint: '换一个短一点的词，或者从这些开始。', taghub_title: '标签',
+      toc_title: '目录', toc_count: '{n} 节',
+      updated_on: '更新于', min_read: '{n} 分钟', tags_label: '标签',
+      copy_link: '复制链接', copied: '已复制', copy_fail: '复制失败，请手动复制地址栏', copy_manual: '请手动复制地址栏',
+      copy_code: '复制代码', copy_code_done: '已复制',
+      share: '分享', prev: '上一篇', next: '下一篇', first_post: '已经是第一篇', last_post: '已经是最后一篇',
+      related_title: '接着读', comments_title: '评论',
+      comments_brand: '评论 · giscus / GitHub Discussions',
+      comments_note: '真实站点在此渲染 giscus 评论区。原型保留位置与阅读顺序，不加载第三方脚本。',
+      comments_signin: '使用 GitHub 登录留言',
+      guestbook_kicker: 'Guestbook · 留言', guestbook_title: '留言板',
+      tags_title: '标签', cats_title: '分类', tags_kicker: 'Tags · 标签', cats_kicker: 'Categories · 分类',
+      tax_tags_note: '每篇文章的关键词，点进去是同标签的文章。', tax_cats_note: '两个版块：日常随笔与技术笔记。',
+      back_tags: '全部标签', back_cats: '全部分类', term_tag_kicker: 'Tag · 标签', term_cat_kicker: 'Category · 分类',
+      nf_msg: '这一页不在了，或者从来没有存在过。地址栏里的东西多半是手滑。',
+      nf_home: '回到首页', nf_posts: '看全部文章', nf_search: '搜索一下', nf_recent: '最近的文字',
+      trans_note: '这篇的译文还在路上——自动翻译流水线通常在中文发布后几分钟内完成。下面先放中文原文。',
+      foot_tagline: '精神与思想的二重奏，<br>自由与独立的交响曲。',
+      foot_note: '界面设计稿 · 交互版 · 2026',
+      audio_cap: '同一段音阶的录音（audio_file 自托管音频演示）。',
+      video_cap: '演示视频占位（bilibili_bvid 字段；原型不加载第三方播放器）。',
+      wide_cap: '宽幅图（#wide）：破出正文列，到 1200px 容器宽。',
+      full_cap: '全幅图（#full）：贴页面左右边缘。',
+      fn_text: '那粒沙子后来住在窗台的小玻璃瓶里，见第二节。'
+    },
+    ja: {
+      nav_label: 'グローバルナビ', nav_posts: '記事', nav_about: 'このブログについて', skip: '本文へスキップ',
+      search_label: '検索（Ctrl または ⌘ K）', lang_label: '言語を切り替える',
+      theme_dark: 'ダークテーマへ切り替え', theme_light: 'ライトテーマへ切り替え',
+      menu_open: 'メニューを開く', menu_close: 'メニューを閉じる',
+      masthead_cn: '日常を書き、その日常を動かすコードを書く。',
+      read_this: 'この記事を読む', hero_time: '約 {n} 分', byline_cat: '日常エッセイ',
+      hero_figcap: '六時五分前、西窓の光が鍵盤に落ちる。',
+      recent_title: '最近の記事', all_posts: 'すべての記事', index_title: '一覧', by_year: '年別で見る',
+      posts_kicker: 'Archive · 一覧', posts_deck: '日常と、このサイトを動かす技術の記録。新しいものが上。',
+      filter_label: 'カテゴリで絞り込み', filter_all: 'すべて',
+      newest_first: '新しい順', count_n: '全 {n} 件', rss_full: 'RSS（全文配信）',
+      archives_kicker: 'Archive · アーカイブ', archives_title: 'アーカイブ', archives_deck: '年ごとにまとめた全記事。どの行からでも入れます。',
+      search_kicker: 'Search · 検索', search_title: '検索', search_placeholder: 'タイトル・要約・タグを検索',
+      search_hint: 'キーワードを入力すると結果が即座に表示されます。Esc でクリア。', search_count_all: '全 {n} 件', search_count_found: '{n} 件見つかりました',
+      empty_title: '「{q}」は見つかりません', empty_hint: 'もっと短い語に変えるか、ここから始めてみてください。', taghub_title: 'タグ',
+      toc_title: '目次', toc_count: '{n} セクション',
+      updated_on: '最終更新', min_read: '{n} 分', tags_label: 'タグ',
+      copy_link: 'リンクをコピー', copied: 'コピーしました', copy_fail: 'コピーできませんでした', copy_manual: 'アドレスバーから手動でコピーしてください',
+      copy_code: 'コードをコピー', copy_code_done: 'コピーしました',
+      share: '共有', prev: '前の記事', next: '次の記事', first_post: '最初の記事です', last_post: '最後の記事です',
+      related_title: '次に読む', comments_title: 'コメント',
+      comments_brand: 'コメント · giscus / GitHub Discussions',
+      comments_note: '実サイトではここに giscus の iframe が表示されます。プロトタイプは位置と読み上げ順序の確認用で、サードパーティスクリプトは読み込みません。',
+      comments_signin: 'GitHub でログインしてコメント',
+      guestbook_kicker: 'Guestbook · ゲストブック', guestbook_title: 'ゲストブック',
+      tags_title: 'タグ', cats_title: 'カテゴリ', tags_kicker: 'Tags · タグ', cats_kicker: 'Categories · カテゴリ',
+      tax_tags_note: '各記事のキーワード。クリックで同じタグの記事へ。', tax_cats_note: '日常エッセイと技術メモのふたつ。',
+      back_tags: 'すべてのタグ', back_cats: 'すべてのカテゴリ', term_tag_kicker: 'Tag · タグ', term_cat_kicker: 'Category · カテゴリ',
+      nf_msg: 'このページは存在しないか、移動しました。',
+      nf_home: 'ホームへ戻る', nf_posts: '全記事を見る', nf_search: '検索する', nf_recent: '最近の記事',
+      trans_note: 'この記事の翻訳は自動翻訳パイプラインの処理中です（通常は数分）。元の中文を表示しています。',
+      foot_tagline: '精神と思想の二重奏、<br>自由と独立の交響曲。',
+      foot_note: 'インターフェース設計稿 · インタラクティブ版 · 2026',
+      audio_cap: '同じ音階の録音（audio_file セルフホスト音声のデモ）。',
+      video_cap: 'デモ動画のプレースホルダ（bilibili_bvid フィールド。プロトタイプは第三方プレーヤーを読み込みません）。',
+      wide_cap: 'ワイド画像（#wide）：本文の列を破って 1200px コンテナ幅へ。',
+      full_cap: 'フル幅画像（#full）：ページの左右端まで。',
+      fn_text: 'あの砂はその後、窓際の小瓶に住んでいる。第 2 節参照。'
+    },
+    en: {
+      nav_label: 'Main navigation', nav_posts: 'Posts', nav_about: 'About', skip: 'Skip to content',
+      search_label: 'Search (Ctrl or Command plus K)', lang_label: 'Switch language',
+      theme_dark: 'Switch to dark theme', theme_light: 'Switch to light theme',
+      menu_open: 'Open menu', menu_close: 'Close menu',
+      masthead_cn: 'Daily life, and the code that keeps it running.',
+      read_this: 'Read this', hero_time: '{n} min read', byline_cat: 'Essays',
+      hero_figcap: 'Five to six; west-window light on the keys.',
+      recent_title: 'Recent', all_posts: 'All posts', index_title: 'Index', by_year: 'Browse by year',
+      posts_kicker: 'Archive · Posts', posts_deck: 'Essays, notes, and the plumbing that keeps this site running. Newest first.',
+      filter_label: 'Filter by category', filter_all: 'All',
+      newest_first: 'Newest first', count_n: '{n} posts', rss_full: 'Full-text RSS',
+      archives_kicker: 'Archive · Index', archives_title: 'Archives', archives_deck: 'Everything, gathered by year. Enter from any row.',
+      search_kicker: 'Search · Search', search_title: 'Search', search_placeholder: 'Search titles, summaries, tags',
+      search_hint: 'Type to filter instantly. Esc clears.', search_count_all: '{n} posts', search_count_found: '{n} found',
+      empty_title: 'No results for “{q}”', empty_hint: 'Try a shorter term, or start from these.', taghub_title: 'Tags',
+      toc_title: 'Contents', toc_count: '{n} sections',
+      updated_on: 'Updated on', min_read: '{n} min', tags_label: 'Tags',
+      copy_link: 'Copy link', copied: 'Copied', copy_fail: 'Copy failed', copy_manual: 'Copy from the address bar instead',
+      copy_code: 'Copy code', copy_code_done: 'Copied',
+      share: 'Share', prev: 'Previous', next: 'Next', first_post: 'This is the first post', last_post: 'This is the last post',
+      related_title: 'Read next', comments_title: 'Comments',
+      comments_brand: 'Comments · giscus / GitHub Discussions',
+      comments_note: 'The live site renders the giscus iframe here. The prototype reserves the slot — layout and reading order — without loading a third-party script.',
+      comments_signin: 'Sign in with GitHub to comment',
+      guestbook_kicker: 'Guestbook · Notes', guestbook_title: 'Guestbook',
+      tags_title: 'Tags', cats_title: 'Categories', tags_kicker: 'Tags · Tags', cats_kicker: 'Categories · Categories',
+      tax_tags_note: 'Keywords per post; a click leads to posts with the same tag.', tax_cats_note: 'Two sections: everyday essays and technical notes.',
+      back_tags: 'All tags', back_cats: 'All categories', term_tag_kicker: 'Tag · Tag', term_cat_kicker: 'Category · Category',
+      nf_msg: 'This page is gone, or never existed. Whatever is in the address bar is probably a typo.',
+      nf_home: 'Back home', nf_posts: 'Browse all posts', nf_search: 'Search', nf_recent: 'Recent posts',
+      trans_note: 'The translation for this post is on its way — the pipeline usually lands it minutes after the Chinese publish. The Chinese original follows.',
+      foot_tagline: 'A duet of mind and thought,<br>a symphony of freedom and independence.',
+      foot_note: 'Interface prototype · interactive · 2026',
+      audio_cap: 'A recording of the same scale (audio_file, self-hosted audio demo).',
+      video_cap: 'Demo video placeholder (bilibili_bvid field; the prototype loads no third-party player).',
+      wide_cap: 'Wide image (#wide): breaks out of the reading column to the 1200px container.',
+      full_cap: 'Full-bleed image (#full): flush with the page edges.',
+      fn_text: 'That grain of sand now lives in a small pill bottle on the windowsill. See section two.'
+    }
+  };
+
+  var CATL10N = { '日常': { ja: '日常', en: 'Essays' }, '技术': { ja: '技術', en: 'Tech' } };
+  var HINTS = { zh: ['琴声', '散步', 'Hugo', 'AI'], ja: ['ピアノ', 'Hugo', 'AI'], en: ['piano', 'Hugo', 'AI'] };
+  var HTMLLANG = { zh: 'zh-CN', ja: 'ja', en: 'en' };
+
+  var LANG = 'zh';
+  var currentPath = '';   /* route path without lang prefix, for same-page lang links */
+
+  function t(key, vars) {
+    var s = (STR[LANG] && STR[LANG][key]) != null ? STR[LANG][key] : (STR.zh[key] != null ? STR.zh[key] : key);
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(String(vars[k])); });
+    return s;
+  }
+  function cat(name) {
+    if (LANG === 'zh') return name;
+    return (CATL10N[name] && CATL10N[name][LANG]) || name;
+  }
+  function lp(path) { return '#/' + (LANG === 'zh' ? '' : LANG + '/') + path; }
+
+  function pad2(v) { return ('0' + v).slice(-2); }
+
+  var posts = ORDER.map(function (slug) {
+    var p = null;
+    for (var i = 0; i < RAW.length; i++) { if (RAW[i].slug === slug) { p = RAW[i]; break; } }
+    if (!p) return null;
+    var m = META[slug] || {};
+    var um = (p.meta || '').match(/更新于\s*(\d{4})年(\d{1,2})月(\d{1,2})日/);
+    return {
+      slug: slug, title: p.title, desc: p.desc, body: p.body,
+      cat: (p.cats && p.cats[0]) || '日常', tags: p.tags || [],
+      date: m.date || '', iso: m.iso || '', read: m.read || 2,
+      updated: um ? um[1] + '.' + pad2(um[2]) + '.' + pad2(um[3]) : '',
+      updatedIso: um ? um[1] + '-' + pad2(um[2]) + '-' + pad2(um[3]) : '',
+      img: m.img || null, cap: m.cap || '', alt: m.alt || ''
+    };
+  }).filter(Boolean);
+
+  var bySlug = {};
+  posts.forEach(function (p) { bySlug[p.slug] = p; });
+
+  /* localized title / desc: real translations from the live build where they exist */
+  function trPost(slug, field, fallback) {
+    var d = I18N[LANG] && I18N[LANG].posts && I18N[LANG].posts[slug];
+    if (d && d[field]) return d[field];
+    return fallback;
+  }
+  function titleOf(p) { return trPost(p.slug, 't', p.title); }
+  function descOf(p) { return trPost(p.slug, 'd', p.desc); }
+  function bodyOf(p) {
+    if (LANG !== 'zh') {
+      var b = I18N[LANG] && I18N[LANG].bodies && I18N[LANG].bodies[p.slug];
+      if (b) return { html: cleanBody(b), pending: false, lang: HTMLLANG[LANG] };
+      return { html: cleanBody(p.body), pending: true, lang: 'zh-CN' };
+    }
+    return { html: cleanBody(p.body), pending: false, lang: 'zh-CN' };
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function dateCn(iso) {
+    if (!iso) return '';
+    var a = iso.split('-');
+    if (LANG === 'en') return MONTHS_EN[Number(a[1]) - 1] + ' ' + Number(a[2]) + ', ' + a[0];
+    if (LANG === 'ja') return a[0] + '年' + Number(a[1]) + '月' + Number(a[2]) + '日';
+    return a[0] + ' 年 ' + Number(a[1]) + ' 月 ' + Number(a[2]) + ' 日';
+  }
+  function timeTag(date, iso) { return '<time datetime="' + iso + '">' + date + '</time>'; }
+
+  /* cover captions localized (demo captions, translated per language) */
+  var CAPS = {
+    'zz-s03': { ja: '六時五分前、西窓の光が鍵盤に落ちる。', en: 'Five to six; west-window light on the keys.' },
+    'zz-s01': { ja: '朝市、セロリと古い秤。', en: 'Morning market: celery and an old scale.' },
+    'zz-s04': { ja: '雨上がりの路地、灯りがともる。', en: 'The alley after rain, lights on.' },
+    'ai-update-blog': { ja: '窓辺の机、午前九時。', en: 'The desk by the window, 9 a.m.' },
+    'first': { ja: '網の外。', en: 'Beyond the fence.' }
+  };
+  function coverCap(p) {
+    if (LANG === 'zh') return p.cap;
+    return (CAPS[p.slug] && CAPS[p.slug][LANG]) || p.cap;
+  }
+
+  /* ==================================================================
+     Theme
+  ================================================================== */
+  var root = document.documentElement;
+  var themeBtn = document.querySelector('.theme-btn');
+
+  function syncThemeLabel() {
+    if (!themeBtn) return;
+    var dark = root.getAttribute('data-theme') === 'dark';
+    themeBtn.setAttribute('aria-label', dark ? t('theme_light') : t('theme_dark'));
+    themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    var tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute('content', dark ? '#16140f' : '#f7f3ea');
+  }
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('duet-theme', next); } catch (e) {}
+      syncThemeLabel();
+    });
+  }
+
+  /* ==================================================================
+     Mobile menu + language menu (mutually exclusive panels)
+  ================================================================== */
+  var menuBtn = document.querySelector('.menu-btn');
+  var menu = document.getElementById('mobile-menu');
+  var langBtn = document.querySelector('.lang-btn');
+  var langMenu = document.getElementById('lang-menu');
+
+  function setMenu(open, focusFirst) {
+    if (!menu || !menuBtn) return;
+    menu.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menuBtn.setAttribute('aria-label', open ? t('menu_close') : t('menu_open'));
+    if (open) {
+      setLangMenu(false);
+      if (focusFirst) { var first = menu.querySelector('a'); if (first) first.focus(); }
+    }
+  }
+  function setLangMenu(open) {
+    if (!langBtn || !langMenu) return;
+    langMenu.hidden = !open;
+    langBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if (menuBtn) menuBtn.addEventListener('click', function (e) { setMenu(menu.hidden, e.detail === 0); });
+  if (menu) {
+    window.addEventListener('resize', function () { if (window.innerWidth > 768 && !menu.hidden) setMenu(false); });
+    menu.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
+  }
+  if (langBtn && langMenu) {
+    langBtn.addEventListener('click', function () {
+      var open = langMenu.hidden;
+      if (open) setMenu(false);
+      setLangMenu(open);
+    });
+    document.addEventListener('click', function (e) {
+      if (!langMenu.hidden && !e.target.closest('.lang-wrap')) setLangMenu(false);
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (typeof lightbox !== 'undefined' && !lightbox.el.hidden) { lightbox.close(); return; }
+    if (langMenu && !langMenu.hidden) { setLangMenu(false); langBtn.focus(); return; }
+    if (menu && !menu.hidden) { setMenu(false); menuBtn.focus(); }
+  });
+
+  /* ==================================================================
+     Language chrome — same-page switching, like the live site's
+     link[rel=alternate][hreflang] rewrite
+  ================================================================== */
+  function applyLangChrome() {
+    document.documentElement.setAttribute('lang', HTMLLANG[LANG]);
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    var tagline = document.querySelector('.foot-tag');
+    if (tagline) tagline.innerHTML = t('foot_tagline');
+    var fbSpan = document.querySelectorAll('.foot-bottom span')[1];
+    if (fbSpan) fbSpan.textContent = t('foot_note');
+    updateLangLinks();
+
+    var kickers = { 'posts-kicker': 'posts_kicker', 'archives-kicker': 'archives_kicker', 'search-kicker': 'search_kicker', 'gb-kicker': 'guestbook_kicker', 'search-total': null };
+    Object.keys(kickers).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (id === 'search-total') el.textContent = t('count_n', { n: posts.length });
+      else el.textContent = t(kickers[id]);
+    });
+    var si = document.getElementById('q');
+    if (si) si.placeholder = t('search_placeholder');
+    var sh = document.getElementById('search-hint');
+    if (sh) sh.textContent = t('search_hint');
+    if (menuBtn && menu.hidden) menuBtn.setAttribute('aria-label', t('menu_open'));
+    syncThemeLabel();
+    syncAboutLang();
+  }
+
+  /* internal links that must keep the language prefix */
+  function updateInternalLinks() {
+    var navLinks = document.querySelectorAll('.nav a[data-nav]');
+    if (navLinks[0]) navLinks[0].href = lp('posts');
+    if (navLinks[1]) navLinks[1].href = lp('about');
+    var mm = document.querySelectorAll('.mobile-menu .mm-link');
+    if (mm[0]) mm[0].href = lp('posts');
+    if (mm[1]) mm[1].href = lp('about');
+    var fl = document.querySelectorAll('.foot-links a');
+    if (fl[0]) fl[0].href = lp('posts');
+    if (fl[1]) fl[1].href = lp('about');
+    if (fl[2]) fl[2].href = lp('guestbook');
+    if (fl[3]) fl[3].href = lp('search');
+    if (fl[4]) fl[4].href = 'https://deux.top/' + (LANG === 'zh' ? '' : LANG + '/') + 'index.xml';
+    var rl = document.querySelector('.read-link'); if (rl) rl.href = lp('posts/zz-s03');
+    var hf = document.querySelector('.hero-figure a'); if (hf) hf.href = lp('posts/zz-s03');
+    var nfa = document.querySelectorAll('.notfound-actions a');
+    if (nfa[0]) nfa[0].href = lp('');
+    if (nfa[1]) nfa[1].href = lp('posts');
+    if (nfa[2]) nfa[2].href = lp('search');
+  }
+
+  /* same-page language links: re-anchored on every route, mirroring the
+     live site's link[rel=alternate][hreflang] rewrite */
+  function updateLangLinks() {
+    document.querySelectorAll('[data-lang-link]').forEach(function (a) {
+      var l = a.getAttribute('data-lang-link');
+      a.href = '#/' + (l === 'zh' ? '' : l + '/') + currentPath;
+      if (l === LANG) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+  }
+
+  /* about: ja/en swap in the real translated body; zh keeps the designed page */
+  var aboutMainOriginal = null;
+  function syncAboutLang() {
+    var main = document.querySelector('#view-about .about-main');
+    if (!main) return;
+    if (aboutMainOriginal === null) aboutMainOriginal = main.innerHTML;
+    if (LANG === 'zh') {
+      main.innerHTML = aboutMainOriginal;
+    } else {
+      var html = I18N[LANG] && I18N[LANG].about;
+      if (html) main.innerHTML = html;
+      else main.innerHTML = aboutMainOriginal;
+    }
+  }
+
+  /* ==================================================================
+     Home
+  ================================================================== */
+  function renderHomeTexts() {
+    var hero = bySlug['zz-s03'];
+    if (!hero) return;
+    document.getElementById('hero-cat').textContent = cat(hero.cat);
+    document.getElementById('hero-title').textContent = titleOf(hero);
+    document.getElementById('hero-deck').textContent = descOf(hero);
+    document.getElementById('hero-time').textContent = t('hero_time', { n: hero.read });
+    document.getElementById('hero-byline').innerHTML = esc(LANG === 'en' ? 'By Deux' : '文 · 二重奏') + '<span>／</span>' + esc(t('byline_cat'));
+    document.getElementById('hero-figcap').textContent = t('hero_figcap');
+  }
+
+  function renderRecent() {
+    var grid = document.getElementById('recent-grid');
+    if (!grid) return;
+    var lead = bySlug['zz-s01'];
+    var rest = ['zz-s02', 'zz-s04', 'zz-s06'].map(function (s) { return bySlug[s]; }).filter(Boolean);
+    var html = '';
+    if (lead) {
+      html += '<a class="recent-lead" href="' + lp('posts/' + lead.slug) + '">' +
+        (lead.img ? '<img src="' + lead.img + '" width="2000" height="1333" alt="' + esc(lead.alt) + '" loading="lazy">' : '') +
+        '<h3>' + esc(titleOf(lead)) + '</h3>' +
+        '<p>' + esc(descOf(lead)) + '</p>' +
+        '<div class="recent-meta">' + timeTag(lead.date, lead.iso) + ' · ' + t('min_read', { n: lead.read }) + ' · ' + esc(cat(lead.cat)) + '</div>' +
+        '</a>';
+    }
+    html += '<div class="recent-list">';
+    rest.forEach(function (p) {
+      html += '<a class="recent-item" href="' + lp('posts/' + p.slug) + '">' +
+        '<span class="ri-date">' + timeTag(p.date, p.iso) + ' · ' + esc(cat(p.cat)) + '</span>' +
+        '<h3>' + esc(titleOf(p)) + '</h3>' +
+        '<span class="ri-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></span>' +
+        '</a>';
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+  }
+
+  function renderLedger() {
+    var list = document.getElementById('ledger-list');
+    if (!list) return;
+    var ids = ['zz-s05', 'zz-s07', 'cf-auto-translate', 'ai-update-blog', 'first'];
+    list.innerHTML = ids.map(function (s) {
+      var p = bySlug[s];
+      if (!p) return '';
+      return '<a class="ledger-row" href="' + lp('posts/' + p.slug) + '">' +
+        '<span class="l-date">' + timeTag(p.date, p.iso) + '</span>' +
+        '<span class="l-title">' + esc(titleOf(p)) + '</span>' +
+        '<span class="l-cat">' + esc(cat(p.cat)) + '</span>' +
+        '<span class="l-read">' + t('min_read', { n: p.read }) + '</span>' +
+        '</a>';
+    }).join('');
+  }
+
+  /* ==================================================================
+     List / archives / taxonomy
+  ================================================================== */
+  var CATS = ['日常', '技术'];
+  var listCat = '全部';
+
+  function countCat(c) {
+    if (c === '全部') return posts.length;
+    return posts.filter(function (p) { return p.cat === c; }).length;
+  }
+
+  function filterButtons(attr, active) {
+    var html = '<button class="filter" type="button" ' + attr + '="全部" aria-pressed="' + (active === '全部') + '">' + esc(t('filter_all')) + ' <span>' + posts.length + '</span></button>';
+    CATS.forEach(function (c) {
+      html += '<button class="filter" type="button" ' + attr + '="' + esc(c) + '" aria-pressed="' + (active === c) + '">' + esc(cat(c)) + ' <span>' + countCat(c) + '</span></button>';
+    });
+    return html;
+  }
+
+  /* Row dates inside a year group drop the year prefix: the group heading
+     already owns it, so "2026." on every row is zero information. The full
+     date stays on the <time datetime> attr and the title tooltip. */
+  function timeShort(iso, full) {
+    return '<time datetime="' + iso + '" title="' + full + '">' + iso.slice(5).replace('-', '.') + '</time>';
+  }
+
+  function yearGroupsHtml(list, opts) {
+    opts = opts || {};
+    var groups = {};
+    list.forEach(function (p) { (groups[p.iso.slice(0, 4)] = groups[p.iso.slice(0, 4)] || []).push(p); });
+    /* On a category term page every row carries the same cat as the page
+       title — pass it through as a constant column and drop it from rows. */
+    if (!opts.hideCat && list.length && list.every(function (p) { return p.cat === list[0].cat; })) opts.hideCat = true;
+    return Object.keys(groups).sort(function (a, b) { return b - a; }).map(function (year) {
+      var rows = groups[year].map(function (p) {
+        return '<a class="post-row' + (opts.hideCat ? ' no-cat' : '') + '" href="' + lp('posts/' + p.slug) + '">' +
+          '<span class="p-date">' + timeShort(p.iso, p.date) + '</span>' +
+          '<span class="p-title">' + esc(titleOf(p)) + '</span>' +
+          (opts.hideCat ? '' : '<span class="p-cat">' + esc(cat(p.cat)) + '</span>') +
+          '<span class="p-read">' + t('min_read', { n: p.read }) + '</span>' +
+          '</a>';
+      }).join('');
+      return '<section class="year-group" aria-label="' + year + '">' +
+        '<h2 class="year-label">' + year + '<small>' + groups[year].length + '</small></h2>' +
+        '<div>' + rows + '</div>' +
+        '</section>';
+    }).join('');
+  }
+
+  function renderList() {
+    var box = document.getElementById('list-groups');
+    var filters = document.getElementById('list-filters');
+    if (!box) return;
+    if (filters) filters.innerHTML = filterButtons('data-cat', listCat);
+    var filtered = posts.filter(function (p) { return listCat === '全部' || p.cat === listCat; });
+    document.getElementById('list-count').textContent = t('count_n', { n: filtered.length });
+    document.getElementById('list-foot-count').textContent = filtered.length;
+    box.innerHTML = yearGroupsHtml(filtered);
+  }
+
+  function renderArchives() {
+    var box = document.getElementById('archives-groups');
+    if (!box) return;
+    document.getElementById('archives-count').textContent = t('count_n', { n: posts.length });
+    box.innerHTML = yearGroupsHtml(posts);
+  }
+
+  function allTags() {
+    var counts = {};
+    posts.forEach(function (p) { p.tags.forEach(function (tg) { counts[tg] = (counts[tg] || 0) + 1; }); });
+    return Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b, 'zh'); }).map(function (k) { return [k, counts[k]]; });
+  }
+
+  function renderTax(kind) {
+    var isTag = kind === 'tags';
+    document.getElementById('tax-kicker').textContent = isTag ? t('tags_kicker') : t('cats_kicker');
+    document.getElementById('tax-title').textContent = isTag ? t('tags_title') : t('cats_title');
+    document.getElementById('tax-note').textContent = isTag ? t('tax_tags_note') : t('tax_cats_note');
+    var entries = isTag ? allTags() : CATS.map(function (c) { return [c, countCat(c)]; });
+    document.getElementById('tax-count').textContent = t('count_n', { n: entries.length });
+    document.getElementById('tax-cloud').innerHTML = entries.map(function (e) {
+      return '<a href="' + lp(kind + '/' + encodeURIComponent(e[0])) + '">' + esc(isTag ? e[0] : cat(e[0])) + ' <span>' + e[1] + '</span></a>';
+    }).join('');
+  }
+
+  function renderTerm(kind, term) {
+    var isTag = kind === 'tags';
+    var list = posts.filter(function (p) { return isTag ? p.tags.indexOf(term) >= 0 : p.cat === term; });
+    document.getElementById('term-back').href = lp(kind);
+    document.getElementById('term-back-label').textContent = isTag ? t('back_tags') : t('back_cats');
+    document.getElementById('term-kicker').textContent = isTag ? t('term_tag_kicker') : t('term_cat_kicker');
+    document.getElementById('term-title').textContent = isTag ? term : cat(term);
+    document.getElementById('term-count').textContent = t('count_n', { n: list.length });
+    document.getElementById('term-groups').innerHTML = list.length ? yearGroupsHtml(list) :
+      '<div class="empty-state"><h2>' + esc(t('empty_title', { q: term })) + '</h2><p>' + esc(t('empty_hint')) + '</p></div>';
+  }
+
+  /* ==================================================================
+     Search
+  ================================================================== */
+  var searchInput = document.getElementById('q');
+  var searchResults = document.getElementById('search-results');
+  var searchCount = document.getElementById('search-count');
+  var searchCat = '全部';
+
+  function plain(html) {
+    var d = document.createElement('div');
+    d.innerHTML = html || '';
+    return d.textContent || '';
+  }
+  function highlight(text, q) {
+    text = String(text || '');
+    if (!q) return esc(text);
+    var i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i < 0) return esc(text);
+    return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+  }
+
+  function renderSearch() {
+    if (!searchResults) return;
+    var q = (searchInput.value || '').trim();
+    var ql = q.toLowerCase();
+    var list = posts.filter(function (p) {
+      if (searchCat !== '全部' && p.cat !== searchCat) return false;
+      if (!q) return true;
+      var hay = (titleOf(p) + ' ' + descOf(p) + ' ' + p.title + ' ' + p.desc + ' ' + p.tags.join(' ') + ' ' + plain(p.body)).toLowerCase();
+      return hay.indexOf(ql) >= 0;
+    });
+
+    searchCount.textContent = q ? t('search_count_found', { n: list.length }) : t('search_count_all', { n: list.length });
+    document.getElementById('search-total').textContent = t('count_n', { n: list.length });
+
+    if (!list.length) {
+      searchResults.innerHTML = '<div class="empty-state">' +
+        '<h2>' + esc(t('empty_title', { q: q })) + '</h2>' +
+        '<p>' + esc(t('empty_hint')) + '</p>' +
+        '<div class="hint-links">' +
+        (HINTS[LANG] || HINTS.zh).map(function (w) { return '<button type="button" data-hint="' + esc(w) + '">' + esc(w) + '</button>'; }).join('') +
+        '</div></div>';
+      syncTagState(q);
+      return;
+    }
+
+    searchResults.innerHTML = list.map(function (p) {
+      return '<a class="result-row" href="' + lp('posts/' + p.slug) + '">' +
+        '<span class="res-date">' + timeTag(p.date, p.iso) + '<br>' + esc(cat(p.cat)) + '</span>' +
+        '<div><h3>' + highlight(titleOf(p), q) + '</h3><p>' + highlight(descOf(p), q) + '</p></div>' +
+        '</a>';
+    }).join('');
+    syncTagState(q);
+  }
+
+  function setSearchCat(c) {
+    searchCat = c;
+    document.querySelectorAll('[data-scat]').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-scat') === c ? 'true' : 'false');
+    });
+  }
+
+  function renderTagHub() {
+    var hub = document.getElementById('tag-hub');
+    var cloud = document.getElementById('tag-cloud');
+    if (!hub || !cloud) return;
+    var tags = allTags();
+    if (!tags.length) { hub.hidden = true; return; }
+    cloud.innerHTML = tags.map(function (e) {
+      return '<button type="button" data-tag="' + esc(e[0]) + '" aria-pressed="false">' + esc(e[0]) + ' <span>' + e[1] + '</span></button>';
+    }).join('');
+    hub.hidden = false;
+  }
+  function syncTagState(q) {
+    document.querySelectorAll('[data-tag]').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-tag') === q ? 'true' : 'false');
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', renderSearch);
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        if (searchInput.value) { searchInput.value = ''; renderSearch(); }
+        else searchInput.blur();
+      }
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var fb = e.target.closest('[data-cat]');
+    if (fb) {
+      listCat = fb.getAttribute('data-cat');
+      renderList();
+      return;
+    }
+    var sb = e.target.closest('[data-scat]');
+    if (sb) { setSearchCat(sb.getAttribute('data-scat')); renderSearch(); return; }
+    var hint = e.target.closest('[data-hint]');
+    if (hint) { searchInput.value = hint.getAttribute('data-hint'); renderSearch(); searchInput.focus(); return; }
+    var tb = e.target.closest('[data-tag]');
+    if (tb) {
+      searchInput.value = tb.getAttribute('data-tag');
+      setSearchCat('全部');
+      renderSearch();
+      searchInput.focus();
+    }
+  });
+
+  /* ==================================================================
+     Article
+  ================================================================== */
+  function cleanBody(html) {
+    return String(html || '')
+      .replace(/\sstyle="[^"]*"/g, '')
+      .replace(/\stabindex="0"/g, '')
+      .replace(/(<p>)\*\*([^*<]{1,200})\*\*/g, '$1<strong>$2</strong>')
+      .replace(/(<p>)\*([^*<]{1,200})\*/g, '$1<em>$2</em>');
+  }
+
+  function commentsBlock(idFor) {
+    return '<h2 id="' + idFor + '">' + esc(t('comments_title')) + '</h2>' +
+      '<div class="giscus-shell">' +
+      '<span class="g-brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' + esc(t('comments_brand')) + '</span>' +
+      '<a class="giscus-signin" href="https://github.com" target="_blank" rel="noopener noreferrer">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4 1.5-4-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C7.7 2.8 6.7 3.1 6.7 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 5.3 9.5c0 4.6 2.7 5.7 5.5 6-.5.6-.5 1.2-.5 2V21"></path></svg>' +
+      esc(t('comments_signin')) + '</a>' +
+      '<span class="g-note">' + esc(t('comments_note')) + '</span>' +
+      '</div>';
+  }
+
+  function shareRowHtml(p) {
+    var url = 'https://deux.top/' + (LANG === 'zh' ? '' : LANG + '/') + 'posts/' + p.slug + '/';
+    var text = encodeURIComponent(titleOf(p));
+    var u = encodeURIComponent(url);
+    return '<div class="share-group">' +
+      '<button class="share-btn share-native" type="button" id="share-native" hidden>' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v13M7 8l5-5 5 5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg>' + esc(t('share')) + '</button>' +
+      '<a class="share-x" href="https://x.com/intent/post?url=' + u + '&text=' + text + '" target="_blank" rel="noopener noreferrer">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"></path></svg>X</a>' +
+      '<a class="share-tg" href="https://t.me/share/url?url=' + u + '&text=' + text + '" target="_blank" rel="noopener noreferrer">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"></path></svg>Telegram</a>' +
+      '<button class="share-btn" type="button" id="copy-link">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"></path><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1"></path></svg>' +
+      esc(t('copy_link')) + '</button>' +
+      '</div><span class="share-note" id="copy-note" role="status" aria-live="polite"></span>';
+  }
+
+  /* demo media: one video facade, one audio, wide/full figures, one footnote.
+     Each branch is defensive: a demo enhancement must never break the render. */
+  function enhanceArticleBody(body, p) {
+    try {
+      /* code copy buttons on every pre */
+      body.querySelectorAll('pre').forEach(function (pre) {
+        if (pre.closest('.code-block')) return;
+        var wrap = document.createElement('div');
+        wrap.className = 'code-block';
+        pre.parentNode.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+        var btn = document.createElement('button');
+        btn.className = 'copy-code';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', t('copy_code'));
+        btn.textContent = t('copy_code');
+        wrap.appendChild(btn);
+      });
+    } catch (e) {}
+
+    var h2s = body.querySelectorAll('h2');
+
+    try {
+    if (p.slug === 'zz-s03') {
+      var table = body.querySelector('table');
+      if (table && !body.querySelector('.media-embed')) {
+        var fig = document.createElement('figure');
+        fig.className = 'media-embed';
+        fig.innerHTML = '<audio controls preload="none" src="assets/piano-note-8c2f.wav"></audio>' +
+          '<figcaption>' + esc(t('audio_cap')) + '</figcaption>';
+        table.insertAdjacentElement('afterend', fig);
+      }
+    }
+
+    if (p.slug === 'cf-auto-translate') {
+      var pre = body.querySelector('pre');
+      if (pre && !body.querySelector('.video-facade')) {
+        var vf = document.createElement('figure');
+        vf.className = 'media-embed';
+        vf.innerHTML = '<div class="video-facade"><button type="button" aria-label="' + esc(t('video_cap')) + '">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4l14 8-14 8z"></path></svg></button>' +
+          '<span class="vf-tag">bilibili · BV1xx411c7mD</span></div>' +
+          '<figcaption>' + esc(t('video_cap')) + '</figcaption>';
+        pre.insertAdjacentElement('afterend', vf);
+      }
+    }
+
+    if (p.slug === 'zz-s02') {
+      if (!body.querySelector('.fig--wide') && h2s.length >= 3) {
+        var fw = document.createElement('figure');
+        fw.className = 'fig--wide';
+        fw.innerHTML = '<img src="assets/alley-dusk-3a9e.jpg" width="2000" height="1333" alt="" loading="lazy">' +
+          '<figcaption>' + esc(t('wide_cap')) + '</figcaption>';
+        h2s[2].insertAdjacentElement('beforebegin', fw);
+      }
+      if (!body.querySelector('.footnotes')) {
+        var target = body.querySelectorAll('p')[1] || body.querySelector('p');
+        if (target) {
+          var sup = document.createElement('sup');
+          sup.id = 'fn-ref-1';
+          sup.innerHTML = '<a href="#fn-1" data-target="fn-1" tabindex="-1">1</a>';
+          target.appendChild(sup);
+        }
+        var fns = document.createElement('section');
+        fns.className = 'footnotes';
+        fns.innerHTML = '<h2>' + esc(LANG === 'zh' ? '注' : LANG === 'ja' ? '注' : 'Notes') + '</h2>' +
+          '<ol><li id="fn-1">' + esc(t('fn_text')) + ' <a class="backlink" href="#fn-ref-1" data-target="fn-ref-1" tabindex="-1">↩</a></li></ol>';
+        body.appendChild(fns);
+      }
+    }
+
+    if (p.slug === 'zz-s04') {
+      if (!body.querySelector('.fig--full') && h2s.length >= 2) {
+        var ff = document.createElement('figure');
+        ff.className = 'fig--full';
+        ff.innerHTML = '<img src="assets/desk-window-9d4c.jpg" width="2000" height="1333" alt="" loading="lazy">' +
+          '<figcaption>' + esc(t('full_cap')) + '</figcaption>';
+        h2s[1].insertAdjacentElement('beforebegin', ff);
+      }
+    }
+    } catch (e) {}
+  }
+
+  function renderArticle(slug) {
+    var p = bySlug[slug];
+    if (!p) { location.hash = lp('posts'); return; }
+
+    document.title = titleOf(p) + ' · 二重奏';
+
+    document.getElementById('art-kicker').innerHTML =
+      '<a class="kicker-cat" href="' + lp('categories/' + encodeURIComponent(p.cat)) + '">' + esc(cat(p.cat)) + '</a>' +
+      '<span class="sep"></span><time datetime="' + p.iso + '">' + dateCn(p.iso) + '</time>' +
+      (p.updated ? '<span class="sep"></span><span>' + esc(t('updated_on')) + ' <time datetime="' + p.updatedIso + '">' + p.updated + '</time></span>' : '') +
+      '<span class="sep"></span><span>' + t('min_read', { n: p.read }) + '</span>';
+
+    document.getElementById('art-title').textContent = titleOf(p);
+    document.getElementById('art-deck').textContent = descOf(p);
+
+    var cover = document.getElementById('art-cover');
+    if (p.img) {
+      cover.hidden = false;
+      cover.innerHTML = '<img src="' + p.img + '" width="2000" height="1333" alt="' + esc(p.alt) + '">' +
+        '<figcaption class="figcap">' + esc(coverCap(p)) + '</figcaption>';
+    } else {
+      cover.hidden = true;
+      cover.innerHTML = '';
+    }
+
+    var body = document.getElementById('art-body');
+    var b = bodyOf(p);
+    body.setAttribute('lang', b.lang);
+    body.innerHTML = (b.pending ? '<div class="trans-note" lang="' + HTMLLANG[LANG] + '">' + esc(t('trans_note')) + '</div>' : '') + b.html;
+
+    if (p.slug === 'zz-s03') {
+      try {
+        var h2s = body.querySelectorAll('h2');
+        var figure = body.querySelector('figure.fig--margin');
+        if (!figure && h2s.length >= 4 && h2s[3].parentNode) {
+          figure = document.createElement('figure');
+          figure.className = 'fig fig--margin';
+          figure.innerHTML = '<img src="assets/door-dusk-6e2b.jpg" width="2000" height="1333" alt="" loading="lazy">' +
+            '<figcaption></figcaption>';
+          h2s[3].parentNode.insertBefore(figure, h2s[3]);
+        }
+        if (figure) figure.querySelector('figcaption').textContent = LANG === 'zh' ? '走廊尽头，六点零五分。' : (LANG === 'ja' ? '廊下の突き当たり、六時五分。' : 'The end of the corridor, 6:05.');
+        var quotes = body.querySelectorAll('blockquote');
+        if (quotes.length >= 2) quotes[1].classList.add('pullquote');
+      } catch (e) { /* demo enhancement must never break the article */ }
+    }
+
+    enhanceArticleBody(body, p);
+    buildToc(p.slug);
+
+    document.getElementById('art-tags').innerHTML = '<span>' + esc(t('tags_label')) + '</span>' + p.tags.map(function (tg) {
+      return '<a href="' + lp('tags/' + encodeURIComponent(tg)) + '">' + esc(tg) + '</a>';
+    }).join('');
+
+    var idx = posts.indexOf(p);
+    var prev = idx > 0 ? posts[idx - 1] : null;
+    var next = idx < posts.length - 1 ? posts[idx + 1] : null;
+    document.getElementById('art-pager').innerHTML =
+      (prev ? '<a href="' + lp('posts/' + prev.slug) + '"><span class="pg-label">' + esc(t('prev')) + '</span><span class="pg-title">' + esc(titleOf(prev)) + '</span></a>' : '<span class="pg-empty">' + esc(t('first_post')) + '</span>') +
+      (next ? '<a class="pg-next" href="' + lp('posts/' + next.slug) + '"><span class="pg-label">' + esc(t('next')) + '</span><span class="pg-title">' + esc(titleOf(next)) + '</span></a>' : '<span class="pg-empty pg-next">' + esc(t('last_post')) + '</span>');
+
+    var related = posts.filter(function (x) { return x.slug !== p.slug && x.cat === p.cat; }).slice(0, 3);
+    document.getElementById('related-title').textContent = t('related_title');
+    document.getElementById('art-related').innerHTML = related.map(function (x) {
+        return '<a class="related-row" href="' + lp('posts/' + x.slug) + '">' +
+          '<span class="r-title">' + esc(titleOf(x)) + '</span>' +
+          '<span class="r-date">' + timeTag(x.date, x.iso) + '</span>' +
+          '</a>';
+      }).join('');
+
+    /* share row (native on touch, X/Telegram + copy on desktop) */
+    var shareHost = document.getElementById('share-host');
+    if (shareHost) shareHost.innerHTML = shareRowHtml(p);
+    var nativeBtn = document.getElementById('share-native');
+    if (nativeBtn) {
+      var canNative = !!(navigator.share && window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+      nativeBtn.hidden = !canNative;
+      /* site parity: on touch, native share replaces the X/Telegram intents */
+      document.querySelectorAll('.share-x, .share-tg').forEach(function (a) { a.style.display = canNative ? 'none' : ''; });
+    }
+
+    /* comments after related (the giscus slot the live site renders) */
+    var comments = document.getElementById('art-comments');
+    if (comments) comments.innerHTML = commentsBlock('art-comments-title');
+
+    document.getElementById('copy-note').textContent = '';
+    updateReadbar();
+  }
+
+  /* copy link + native share + code copy: one delegated listener */
+  document.addEventListener('click', function (e) {
+    var copy = e.target.closest('#copy-link');
+    if (copy) {
+      var note = document.getElementById('copy-note');
+      var done = function () { note.textContent = t('copied'); setTimeout(function () { note.textContent = ''; }, 2000); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(location.href).then(done, function () { note.textContent = t('copy_fail'); });
+      } else note.textContent = t('copy_manual');
+      return;
+    }
+    var native = e.target.closest('#share-native');
+    if (native) {
+      var p = bySlug[parseRoute().slug];
+      var payload = { title: document.title, url: location.href };
+      if (p) payload.text = descOf(p);
+      if (navigator.share) navigator.share(payload).catch(function () {});
+      return;
+    }
+    var cc = e.target.closest('.copy-code');
+    if (cc) {
+      var pre = cc.closest('.code-block').querySelector('pre');
+      var label = cc.getAttribute('aria-label');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(pre.textContent).then(function () {
+          cc.textContent = t('copy_code_done');
+          cc.classList.add('done');
+          setTimeout(function () { cc.textContent = t('copy_code'); cc.classList.remove('done'); }, 2000);
+        });
+      }
+      return;
+    }
+  });
+
+  /* ==================================================================
+     Article TOC
+  ================================================================== */
+  var tocIo = null;
+
+  function buildToc(slug) {
+    var body = document.getElementById('art-body');
+    var inline = document.getElementById('toc-inline');
+    var float = document.getElementById('toc-float');
+    var count = document.getElementById('toc-count');
+    var il = document.getElementById('toc-inline-list');
+    var fl = document.getElementById('toc-float-list');
+    if (!body || !inline || !float || !il || !fl) return;
+    if (tocIo) { tocIo.disconnect(); tocIo = null; }
+
+    var heads = [].slice.call(body.querySelectorAll('h2[id]'));
+    if (heads.length < 2) {
+      inline.hidden = true; float.hidden = true; float.dataset.enabled = '0';
+      il.innerHTML = ''; fl.innerHTML = ''; count.textContent = '';
+      return;
+    }
+
+    var items = heads.map(function (h) {
+      h.setAttribute('tabindex', '-1');
+      return '<li><a class="toc-link" href="' + lp('posts/' + slug) + '" data-target="' + h.id + '">' + esc(h.textContent.trim()) + '</a></li>';
+    }).join('');
+    il.innerHTML = items;
+    fl.innerHTML = items;
+    count.textContent = t('toc_count', { n: heads.length });
+    inline.hidden = false;
+    float.hidden = true;
+    float.dataset.enabled = '1';
+
+    if ('IntersectionObserver' in window) {
+      tocIo = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) setTocActive(en.target.id); });
+      }, { rootMargin: '-12% 0px -72% 0px', threshold: 0 });
+      heads.forEach(function (h) { tocIo.observe(h); });
+    }
+    setTocActive(heads[0].id);
+  }
+
+  function setTocActive(id) {
+    document.querySelectorAll('.toc-link').forEach(function (a) {
+      if (a.getAttribute('data-target') === id) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+  }
+
+  function scrollToArticleTarget(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    el.focus({ preventScroll: true });
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-target]');
+    if (!a) return;
+    e.preventDefault();
+    scrollToArticleTarget(a.getAttribute('data-target'));
+    var det = a.closest('details');
+    if (det) det.open = false;
+  });
+
+  function updateTocFloat() {
+    var float = document.getElementById('toc-float');
+    if (!float) return;
+    var view = document.getElementById('view-article');
+    if (!view || view.hidden || float.dataset.enabled !== '1' || window.innerWidth < 1200) {
+      float.hidden = true;
+      return;
+    }
+    var cover = document.getElementById('art-cover');
+    var past = cover && !cover.hidden ? cover.getBoundingClientRect().bottom < 130 : window.scrollY > 260;
+    float.hidden = !past;
+  }
+
+  /* ==================================================================
+     Reading progress
+  ================================================================== */
+  var readbar = document.getElementById('readbar');
+  function updateReadbar() {
+    if (!readbar) return;
+    var articleView = document.getElementById('view-article');
+    if (!articleView || articleView.hidden) {
+      readbar.hidden = true;
+      updateTocFloat();
+      return;
+    }
+    readbar.hidden = false;
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    readbar.style.width = (pct * 100).toFixed(2) + '%';
+    updateTocFloat();
+  }
+  window.addEventListener('scroll', updateReadbar, { passive: true });
+  window.addEventListener('resize', updateReadbar);
+
+  /* ==================================================================
+     Lightbox (scroll-locked, Esc/backdrop close, focus restored)
+  ================================================================== */
+  var lightbox = (function () {
+    var el = document.getElementById('lightbox');
+    var img = document.getElementById('lb-img');
+    var cap = document.getElementById('lb-cap');
+    var closeBtn = document.getElementById('lb-close');
+    var lastFocus = null;
+    if (!el) return { el: null, open: function () {}, close: function () {} };
+
+    function open(node) {
+      var fig = node.closest('figure');
+      var figcap = fig ? fig.querySelector('figcaption') : null;
+      lastFocus = node;
+      img.src = node.currentSrc || node.src;
+      img.alt = node.alt || '';
+      cap.textContent = figcap ? figcap.textContent : '';
+      el.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+    function close() {
+      if (el.hidden) return;
+      el.hidden = true;
+      document.body.style.overflow = '';
+      img.src = '';
+      if (lastFocus) { lastFocus.focus({ preventScroll: true }); lastFocus = null; }
+    }
+    closeBtn.addEventListener('click', close);
+    el.addEventListener('click', function (e) { if (e.target === el) close(); });
+    return { el: el, open: open, close: close };
+  })();
+
+  document.addEventListener('click', function (e) {
+    var im = e.target.closest('.article-body img, .article-cover img');
+    if (!im || im.closest('.media-embed')) return;
+    e.preventDefault();
+    lightbox.open(im);
+  });
+
+  /* ==================================================================
+     Router
+  ================================================================== */
+  var views = {
+    home: document.getElementById('view-home'),
+    posts: document.getElementById('view-posts'),
+    archives: document.getElementById('view-archives'),
+    article: document.getElementById('view-article'),
+    search: document.getElementById('view-search'),
+    about: document.getElementById('view-about'),
+    tax: document.getElementById('view-tax'),
+    term: document.getElementById('view-term'),
+    guestbook: document.getElementById('view-guestbook'),
+    '404': document.getElementById('view-404')
+  };
+
+  function parseRoute() {
+    var h = location.hash.replace(/^#\/?/, '');
+    var qi = h.indexOf('?');
+    var query = {};
+    if (qi >= 0) {
+      var params = new URLSearchParams(h.slice(qi + 1));
+      params.forEach(function (v, k) { query[k] = v; });
+      h = h.slice(0, qi);
+    }
+    var parts = h.split('/').filter(Boolean);
+    var lang = 'zh';
+    if (parts.length && (parts[0] === 'ja' || parts[0] === 'en')) {
+      lang = parts.shift();
+    }
+    var r = { lang: lang, query: query, kind: null, term: null, slug: null };
+    currentPath = parts.join('/');
+    if (!parts.length) return Object.assign(r, { name: 'home' });
+    if (parts[0] === 'posts' && parts[1]) return Object.assign(r, { name: 'article', slug: decodeURIComponent(parts[1]) });
+    if (parts[0] === 'posts') return Object.assign(r, { name: 'posts' });
+    if (parts[0] === 'archives') return Object.assign(r, { name: 'archives' });
+    if (parts[0] === 'search') return Object.assign(r, { name: 'search' });
+    if (parts[0] === 'about') return Object.assign(r, { name: 'about' });
+    if (parts[0] === 'guestbook') return Object.assign(r, { name: 'guestbook' });
+    if (parts[0] === '404') return Object.assign(r, { name: '404' });
+    if (parts[0] === 'tags' || parts[0] === 'categories') {
+      if (parts[1]) return Object.assign(r, { name: 'term', kind: parts[0], term: decodeURIComponent(parts[1]) });
+      return Object.assign(r, { name: 'tax', kind: parts[0] });
+    }
+    return Object.assign(r, { name: '404' }); /* unknown paths 404, like the real site */
+  }
+
+  function showView(name) {
+    Object.keys(views).forEach(function (k) {
+      if (!views[k]) return;
+      views[k].hidden = k !== name;
+      views[k].classList.toggle('view-enter', k === name);
+    });
+  }
+
+  function syncNav(name, kind) {
+    var map = { posts: 'posts', article: 'posts', archives: 'posts', tax: kind === 'categories' ? null : 'posts', term: 'posts' };
+    document.querySelectorAll('[data-nav]').forEach(function (a) {
+      if (map[name] && a.getAttribute('data-nav') === map[name]) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    var searchLink = document.getElementById('search-link');
+    if (searchLink) {
+      if (name === 'search') searchLink.setAttribute('aria-current', 'page');
+      else searchLink.removeAttribute('aria-current');
+    }
+  }
+
+  var currentKey = null;
+
+  function route() {
+    var r = parseRoute();
+    if (r.lang !== LANG) {
+      LANG = r.lang;
+      applyLangChrome();
+      updateInternalLinks();
+      renderHomeTexts();
+      renderRecent();
+      renderLedger();
+      renderTagHub();
+    } else {
+      updateLangLinks();
+    }
+
+    showView(r.name);
+    syncNav(r.name, r.kind);
+
+    if (r.name === 'home') { document.title = '二重奏'; renderHomeTexts(); }
+    if (r.name === 'posts') { document.title = t('nav_posts') + ' · 二重奏'; renderList(); }
+    if (r.name === 'archives') { document.title = t('archives_title') + ' · 二重奏'; renderArchives(); }
+    if (r.name === 'search') { document.title = t('search_title') + ' · 二重奏'; }
+    if (r.name === 'about') { document.title = t('nav_about') + ' · 二重奏'; syncAboutLang(); }
+    if (r.name === 'guestbook') {
+      document.title = t('guestbook_title') + ' · 二重奏';
+      document.getElementById('gb-title').textContent = t('guestbook_title');
+      document.getElementById('gb-intro').innerHTML = (I18N[LANG] && I18N[LANG].guestbook) || I18N.zh.guestbook || '';
+      document.getElementById('gb-comments').innerHTML = commentsBlock('gb-comments-title');
+    }
+    if (r.name === 'tax') { document.title = (r.kind === 'tags' ? t('tags_title') : t('cats_title')) + ' · 二重奏'; renderTax(r.kind); }
+    if (r.name === 'term') { document.title = (r.kind === 'tags' ? r.term : cat(r.term)) + ' · 二重奏'; renderTerm(r.kind, r.term); }
+    if (r.name === '404') {
+      document.title = '404 · 二重奏';
+      document.getElementById('nf-msg').textContent = t('nf_msg');
+      document.getElementById('nf-home-label').textContent = t('nf_home');
+      document.getElementById('nf-posts-label').textContent = t('nf_posts');
+      document.getElementById('nf-search-label').textContent = t('nf_search');
+      document.getElementById('nf-recent-title').textContent = t('nf_recent');
+      document.getElementById('nf-recent').innerHTML = posts.slice(0, 3).map(function (x) {
+        return '<a class="related-row" href="' + lp('posts/' + x.slug) + '">' +
+          '<span class="r-title">' + esc(titleOf(x)) + '</span>' +
+          '<span class="r-date">' + timeTag(x.date, x.iso) + '</span></a>';
+      }).join('');
+    }
+
+    if (r.name === 'article') renderArticle(r.slug);
+    if (r.name === 'search') {
+      if (typeof r.query.q === 'string' && r.query.q !== searchInput.value) searchInput.value = r.query.q;
+      if (r.query.cat && ['全部'].concat(CATS).indexOf(r.query.cat) >= 0) searchCat = r.query.cat;
+      else searchCat = '全部';
+      var sf = document.getElementById('search-filters');
+      if (sf) sf.innerHTML = filterButtons('data-scat', searchCat);
+      renderSearch();
+    }
+    if (r.name === 'posts') {
+      listCat = (r.query.cat && ['全部'].concat(CATS).indexOf(r.query.cat) >= 0) ? r.query.cat : '全部';
+      renderList();
+    }
+
+    var key = r.lang + '/' + r.name + '/' + (r.slug || r.term || r.kind || '');
+    if (key !== currentKey) {
+      var html = document.documentElement;
+      var prevBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      html.style.scrollBehavior = prevBehavior;
+      var main = document.getElementById('main');
+      if (main) main.focus({ preventScroll: true });
+    }
+    currentKey = key;
+    updateReadbar();
+    observeReveals();
+  }
+
+  window.addEventListener('hashchange', route);
+
+  /* ==================================================================
+     Reveal
+  ================================================================== */
+  var io = null;
+  if ('IntersectionObserver' in window && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+  }
+  function observeReveals() {
+    if (!io) {
+      document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    document.querySelectorAll('.reveal').forEach(function (el) {
+      if (views.home && !views.home.hidden && !el.classList.contains('in')) io.observe(el);
+    });
+  }
+
+  /* ==================================================================
+     Shortcuts: Ctrl/⌘+K and Alt+/ both open search (site parity)
+  ================================================================== */
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target.tagName || '').toLowerCase();
+    var typing = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (location.hash !== lp('search')) location.hash = lp('search');
+      setTimeout(function () { searchInput.focus(); searchInput.select(); }, 60);
+      return;
+    }
+    if (e.altKey && e.key === '/') {
+      e.preventDefault();
+      if (location.hash !== lp('search')) location.hash = lp('search');
+      setTimeout(function () { searchInput.focus(); }, 60);
+      return;
+    }
+    if (e.key === '/' && !typing) {
+      e.preventDefault();
+      if (location.hash !== lp('search')) location.hash = lp('search');
+      setTimeout(function () { searchInput.focus(); }, 60);
+    }
+  });
+
+  /* ==================================================================
+     Boot
+  ================================================================== */
+  applyLangChrome();
+  renderRecent();
+  renderLedger();
+  renderTagHub();
+  route();
+})();

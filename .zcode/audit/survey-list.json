@@ -1,0 +1,366 @@
+[
+ {
+  "site": "jvns.ca",
+  "url": "https://jvns.ca/",
+  "list": {
+   "clusters": 3,
+   "clusterSig": "ARTICLE|hentry",
+   "n": 660,
+   "withCoverImg": 0,
+   "titleFs": 16,
+   "itemH": 17027,
+   "itemW": 650,
+   "imgRatio": null,
+   "excerptChars": 58392,
+   "sample": [
+    "weekly digest of these blog posts",
+    "Wizard Zines",
+    "Replacing the old battery on rechargeable bike lights"
+   ]
+  },
+  "comments": {
+   "article": "https://jvns.ca/newsletter",
+   "giscus": false,
+   "utterances": false,
+   "disqus": false,
+   "other": false,
+   "guestbookHint": false
+  },
+  "notFound": {
+   "status": 404,
+   "title": "404",
+   "bodyLen": 3391,
+   "hasHomeLink": true,
+   "h1": "Julia Evans"
+  },
+  "err": null
+ },
+ {
+  "site": "danluu.com",
+  "url": "https://danluu.com/",
+  "list": {
+   "clusters": 2,
+   "clusterSig": "LI|",
+   "n": 206,
+   "withCoverImg": 0,
+   "titleFs": 16,
+   "itemH": 19,
+   "itemW": 1264,
+   "imgRatio": null,
+   "excerptChars": 18,
+   "sample": [
+    "Patreon posts",
+    "Test and verification technique effectiveness with GPT-6 Ast",
+    "“We should be more ambitious with the software we build”"
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": null,
+   "title": "danluu.com",
+   "bodyLen": 1382,
+   "hasHomeLink": false,
+   "h1": "\n            This danluu.com page can’t be found\n          "
+  },
+  "err": null
+ },
+ {
+  "site": "leerob.com",
+  "url": "https://leerob.com/",
+  "list": {
+   "clusters": 2,
+   "clusterSig": "ARTICLE|content-frame",
+   "n": 11,
+   "withCoverImg": 0,
+   "titleFs": 42,
+   "itemH": 1177,
+   "itemW": 600,
+   "imgRatio": null,
+   "excerptChars": 988,
+   "sample": [
+    "@leerob",
+    "Cursor",
+    "Vercel"
+   ]
+  },
+  "comments": {
+   "err": "Error: page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE at https://x.com/leerob\nCa"
+  },
+  "notFound": {
+   "status": null,
+   "title": "Lee Robinson",
+   "bodyLen": 10778,
+   "hasHomeLink": false,
+   "h1": "404"
+  },
+  "err": null
+ },
+ {
+  "site": "overreacted.io",
+  "url": "https://overreacted.io/",
+  "list": {
+   "clusters": 1,
+   "clusterSig": "DIV|relative -top-[10px] flex flex-col gap-8",
+   "n": 59,
+   "withCoverImg": 0,
+   "titleFs": 16,
+   "itemH": 8867,
+   "itemW": 632,
+   "imgRatio": null,
+   "excerptChars": 4422,
+   "sample": [
+    "How I Vibed a Proof of Conway’s ConjectureSeptember 18, 2026",
+    "There Are No Instances in atprotoJune 19, 2026Like RSS and G",
+    "A Social FilesystemJanuary 18, 2026Formats over apps."
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "",
+   "bodyLen": 8888,
+   "hasHomeLink": true,
+   "h1": "Not found"
+  },
+  "err": null
+ },
+ {
+  "site": "maggieappleton.com",
+  "url": "https://maggieappleton.com/essays",
+  "list": {
+   "clusters": 4,
+   "clusterSig": "DIV|grid-item",
+   "n": 18,
+   "withCoverImg": 18,
+   "titleFs": 16,
+   "itemH": 556,
+   "itemW": 371,
+   "imgRatio": "1.00",
+   "excerptChars": 180,
+   "sample": [
+    "A Treatise on AI Chatbots Undermining the Enlightenment On c",
+    "Growing a Human: The First 30 Weeks Reflections on the stran",
+    "Why You Own an iPad and Still Can't Draw The failure of draw"
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "404: NOT_FOUND",
+   "bodyLen": 1491,
+   "hasHomeLink": false,
+   "h1": "This page doesn’t exist"
+  },
+  "err": null
+ },
+ {
+  "site": "craigmod.com",
+  "url": "https://craigmod.com/essays/",
+  "list": {
+   "clusters": 6,
+   "clusterSig": "LI|satellite h-entry",
+   "n": 91,
+   "withCoverImg": 0,
+   "titleFs": 18,
+   "itemH": 92,
+   "itemW": 647,
+   "imgRatio": null,
+   "excerptChars": 99,
+   "sample": [
+    "August 2026\n                A Swarm of Blood Robots\n        ",
+    "April 2026\n                MacBook Neo and How the iPad Coul",
+    "March 2026\n                Software Bonkers\n                "
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "404 Page not found",
+   "bodyLen": 1340,
+   "hasHomeLink": true,
+   "h1": ""
+  },
+  "err": null
+ },
+ {
+  "site": "tonsky.me",
+  "url": "https://tonsky.me/",
+  "list": {
+   "clusters": 2,
+   "clusterSig": "P|",
+   "n": 92,
+   "withCoverImg": 0,
+   "titleFs": 15,
+   "itemH": 22,
+   "itemW": 573,
+   "imgRatio": null,
+   "excerptChars": 64,
+   "sample": [
+    "Subscribe",
+    "Github",
+    "niki@tonsky.me"
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "",
+   "bodyLen": 54,
+   "hasHomeLink": false,
+   "h1": ""
+  },
+  "err": null
+ },
+ {
+  "site": "sive.rs",
+  "url": "https://sive.rs/",
+  "list": {
+   "clusters": 5,
+   "clusterSig": "LI|",
+   "n": 23,
+   "withCoverImg": 0,
+   "titleFs": 20,
+   "itemH": 52,
+   "itemW": 723,
+   "imgRatio": null,
+   "excerptChars": 40,
+   "sample": [
+    "Bangalore India hospital flow",
+    "Building without predicting",
+    "Prepare your “no” and keep it handy"
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "404 Not Found",
+   "bodyLen": 26,
+   "hasHomeLink": false,
+   "h1": "404 Not Found"
+  },
+  "err": null
+ },
+ {
+  "site": "blog.jim-nielsen.com",
+  "url": "https://blog.jim-nielsen.com/",
+  "list": {
+   "clusters": 2,
+   "clusterSig": "LI|",
+   "n": 9,
+   "withCoverImg": 0,
+   "titleFs": 18,
+   "itemH": 70,
+   "itemW": 576,
+   "imgRatio": null,
+   "excerptChars": 51,
+   "sample": [
+    "“It Gives Great Demo”\n                  Nov 4, 2026",
+    "Celebrating SIM Cards\n                  Oct 29, 2026",
+    "Why My Dad Didn’t Have a Cell Phone\n                  Oct 25"
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "404: Page Not Found - Jim Nielsen’s Blog",
+   "bodyLen": 464,
+   "hasHomeLink": true,
+   "h1": "404: Page Not Found"
+  },
+  "err": null
+ },
+ {
+  "site": "ruanyifeng.com/blog",
+  "url": "https://www.ruanyifeng.com/blog/",
+  "list": {
+   "clusters": 2,
+   "clusterSig": "LI|module-list-item",
+   "n": 16,
+   "withCoverImg": 0,
+   "titleFs": 16,
+   "itemH": 35,
+   "itemW": 630,
+   "imgRatio": null,
+   "excerptChars": 41,
+   "sample": [
+    "科技爱好者周刊（第 417 期）：不要让 AI 代表你",
+    "科技爱好者周刊（第 416 期）：编程已经面目全非",
+    "科技爱好者周刊（第 415 期）：3D 版《看不见的城市》"
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "404 Not Found",
+   "bodyLen": 118,
+   "hasHomeLink": false,
+   "h1": "Not Found"
+  },
+  "err": null
+ },
+ {
+  "site": "diygod.cc",
+  "url": "https://diygod.cc/",
+  "list": {
+   "clusters": 6,
+   "clusterSig": "DIV|grid items-stretch w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-7 mt",
+   "n": 9,
+   "withCoverImg": 9,
+   "titleFs": 16,
+   "itemH": 740,
+   "itemW": 896,
+   "imgRatio": "1.78",
+   "excerptChars": 510,
+   "sample": [
+    "Folo   This AI RSS reader reads the internet for you",
+    "xLog   An open-source creative community written on the bloc",
+    "RSSHub Radar   Simplifies subscribing RSS and RSSHub"
+   ]
+  },
+  "comments": null,
+  "notFound": {
+   "status": 404,
+   "title": "Page not found · GitHub Pages",
+   "bodyLen": 517,
+   "hasHomeLink": true,
+   "h1": "404"
+  },
+  "err": null
+ },
+ {
+  "site": "joshwcomeau.com",
+  "url": "https://www.joshwcomeau.com/blog/",
+  "list": {
+   "clusters": 4,
+   "clusterSig": "LI|",
+   "n": 14,
+   "withCoverImg": 0,
+   "titleFs": 14,
+   "itemH": 25,
+   "itemW": 76,
+   "imgRatio": null,
+   "excerptChars": 3,
+   "sample": [
+    "CSS",
+    "React",
+    "Animation"
+   ]
+  },
+  "comments": {
+   "article": "https://www.joshwcomeau.com/blog/the-post-developer-era/",
+   "giscus": false,
+   "utterances": false,
+   "disqus": false,
+   "other": false,
+   "guestbookHint": false
+  },
+  "notFound": {
+   "status": 404,
+   "title": "Not found • Josh W. Comeau",
+   "bodyLen": 15301,
+   "hasHomeLink": true,
+   "h1": "Not Found"
+  },
+  "err": null
+ }
+]

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设计审计 · 二重奏博客界面</title>
+<meta name="description" content="二重奏个人博客界面设计稿审计：视觉结论、P1 阻断项、P2/P3 改进与落地决策清单。">
+<meta name="color-scheme" content="light">
+<style>
+:root {
+  --paper: #f7f3ea;
+  --paper2: #f0eadd;
+  --ink: #1a1712;
+  --ink2: #3b3529;
+  --muted: #6b6455;
+  --rule: #ddd3bf;
+  --rule-strong: #c8bda6;
+  --accent: #8a5d15;
+  --p1: #9c3b2c;
+  --p2: #8a5d15;
+  --p3: #5f5a4e;
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", SimSun, serif;
+  --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: inherit; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+::selection { background: rgba(138, 93, 21, .14); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip {
+  position: fixed; left: 16px; top: -80px; z-index: 100;
+  background: var(--ink); color: var(--paper); padding: 10px 16px;
+  font-size: 13px; text-decoration: none;
+}
+.skip:focus { top: 12px; }
+.shell { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+
+/* header */
+.masthead { padding: 56px 0 30px; border-bottom: 1px solid var(--rule); }
+.kicker {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+  color: var(--accent); text-transform: uppercase;
+}
+h1 {
+  margin: 14px 0 0; font-family: var(--display); font-weight: 400;
+  font-size: clamp(32px, 4.4vw, 48px); line-height: 1.18; letter-spacing: -.005em;
+}
+.deck { margin: 16px 0 0; max-width: 46em; font-size: 17px; line-height: 1.8; color: var(--ink2); }
+.meta {
+  display: grid; grid-template-columns: 1.1fr 1.4fr .9fr .8fr;
+  gap: 18px 24px; margin: 28px 0 0; padding-top: 16px; border-top: 1px solid var(--rule);
+}
+.meta div { min-width: 0; }
+.meta dt {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  color: var(--muted); text-transform: uppercase;
+}
+.meta dd {
+  margin: 4px 0 0; font-family: var(--mono); font-size: 11.5px;
+  line-height: 1.7; color: var(--ink2); overflow-wrap: anywhere;
+}
+.meta dd a { text-decoration: underline; text-underline-offset: .2em; text-decoration-color: var(--rule-strong); }
+.meta dd a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+/* layout */
+.layout { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 56px; padding: 42px 0 80px; }
+.side { align-self: start; position: sticky; top: 24px; }
+.verdict { border-top: 2px solid var(--ink); padding-top: 14px; }
+.verdict strong {
+  display: block; font-family: var(--display); font-weight: 400;
+  font-size: 22px; line-height: 1.45;
+}
+.verdict p { margin: 8px 0 0; font-size: 13px; line-height: 1.75; color: var(--muted); }
+.total {
+  display: flex; align-items: baseline; gap: 8px; margin-top: 12px;
+  font-family: var(--mono); color: var(--ink2);
+}
+.total b { font-size: 28px; font-weight: 400; letter-spacing: -.03em; }
+.total span { font-size: 10.5px; letter-spacing: .06em; color: var(--muted); }
+.scores { margin-top: 18px; }
+.score { padding: 8px 0 9px; border-top: 1px solid var(--rule); }
+.score .row { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.score span { font-size: 12.5px; color: var(--ink2); }
+.score b { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--muted); }
+.bar { height: 3px; margin-top: 7px; background: var(--rule); }
+.bar i { display: block; height: 3px; background: var(--accent); }
+.toc { margin-top: 24px; border-top: 1px solid var(--rule); }
+.toc h2 {
+  margin: 12px 0 2px; font-family: var(--mono); font-weight: 400;
+  font-size: 10px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase;
+}
+.toc a {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--rule);
+  font-size: 13px; color: var(--ink2); text-decoration: none;
+}
+.toc a:hover { color: var(--accent); }
+.toc a em { font-family: var(--mono); font-style: normal; font-size: 10px; color: var(--muted); }
+.side-note {
+  margin: 22px 0 0; font-family: var(--mono); font-size: 10.5px;
+  line-height: 1.9; color: var(--muted);
+}
+
+/* sections */
+main { min-width: 0; }
+.section { margin-bottom: 58px; scroll-margin-top: 24px; }
+.section > h2 {
+  display: flex; align-items: baseline; gap: 12px;
+  margin: 0 0 16px; padding-top: 16px; border-top: 1px solid var(--rule);
+  font-family: var(--display); font-weight: 400; font-size: 27px; line-height: 1.35;
+}
+.section > h2 em {
+  font-family: var(--mono); font-style: normal; font-size: 10px;
+  letter-spacing: .1em; color: var(--accent);
+}
+.section > p { margin: 0 0 14px; font-size: 15px; line-height: 1.85; color: var(--ink2); }
+.section > p strong { color: var(--ink); font-weight: 600; }
+h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 20px; line-height: 1.5; }
+
+/* good list */
+.good { margin: 0; padding: 0; list-style: none; }
+.good li {
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+  font-size: 14.5px; line-height: 1.8; color: var(--ink2);
+}
+.good li b { color: var(--ink); font-weight: 600; }
+
+/* findings */
+.finding { padding: 22px 0 24px; border-top: 1px solid var(--rule); }
+.finding:first-of-type { border-top: 0; padding-top: 0; }
+.find-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.badge {
+  display: inline-block; flex: none;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+  padding: 3px 7px; border: 1px solid currentColor; line-height: 1.3;
+}
+.badge.p1 { color: var(--p1); background: rgba(156, 59, 44, .06); }
+.badge.p2 { color: var(--p2); background: rgba(138, 93, 21, .07); }
+.badge.p3 { color: var(--p3); background: rgba(95, 90, 78, .06); }
+.finding p { margin: 10px 0 0; font-size: 14.5px; line-height: 1.85; color: var(--ink2); }
+.finding p b { color: var(--ink); font-weight: 600; }
+.evidence {
+  margin-top: 10px; padding: 10px 14px;
+  background: var(--paper2); border-left: 2px solid var(--rule-strong);
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.9;
+  color: var(--ink2); overflow-wrap: anywhere;
+}
+.evidence b {
+  font-family: var(--sans); font-size: 10px; letter-spacing: .1em;
+  color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 2px;
+}
+.fix {
+  margin-top: 12px !important; padding-left: 13px;
+  border-left: 2px solid var(--accent);
+}
+
+/* tables */
+.table-wrap { width: 100%; overflow-x: auto; margin-top: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.7; }
+th {
+  text-align: left; font-family: var(--mono); font-weight: 400;
+  font-size: 10px; letter-spacing: .08em; color: var(--muted);
+  text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+td { padding: 10px; border-bottom: 1px solid var(--rule); color: var(--ink2); vertical-align: top; }
+td:first-child { color: var(--ink); }
+td code, p code, li code {
+  font-family: var(--mono); font-size: .9em; color: var(--ink);
+  background: var(--paper2); padding: 1px 4px;
+}
+.table-wrap + p { margin-top: 10px; font-size: 12px; color: var(--muted); }
+
+/* checklist */
+.checks { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; margin: 14px 0 0; padding: 0; list-style: none; }
+.checks li {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--rule);
+  font-size: 13.5px; line-height: 1.7; color: var(--ink2);
+}
+.checks .box {
+  width: 12px; height: 12px; border: 1px solid var(--rule-strong);
+  flex: none; margin-top: 4px;
+}
+.checks b { color: var(--ink); font-weight: 600; }
+
+/* footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 24px 0 40px;
+  font-family: var(--mono); font-size: 10.5px; line-height: 1.9; color: var(--muted);
+}
+.foot p { margin: 0; }
+.foot a { text-decoration: underline; text-underline-offset: .2em; }
+.foot a:hover { color: var(--accent); }
+
+@media (max-width: 920px) {
+  .shell { padding: 0 24px; }
+  .layout { grid-template-columns: 1fr; gap: 34px; padding-top: 32px; }
+  .side { position: static; }
+  .meta { grid-template-columns: 1fr 1fr; }
+  .toc { display: grid; grid-template-columns: 1fr 1fr; column-gap: 22px; }
+  .toc h2 { grid-column: 1 / -1; }
+  .checks { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .shell { padding: 0 18px; }
+  .masthead { padding-top: 38px; }
+  .meta { grid-template-columns: 1fr; gap: 12px; }
+  .section > h2 { font-size: 23px; }
+  .section > h2 em { display: none; }
+  h1 { font-size: 32px; }
+  .deck { font-size: 16px; }
+  .finding { padding: 18px 0 20px; }
+  .evidence { font-size: 11px; padding: 9px 11px; }
+  table { font-size: 12px; }
+  th, td { padding: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}
+@media print {
+  .side { position: static; }
+  .layout { display: block; }
+  .skip { display: none; }
+  a { text-decoration: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="masthead">
+  <div class="shell">
+    <div class="kicker">Design Audit · 2026-11-07</div>
+    <h1>二重奏 · 博客界面设计审计</h1>
+    <p class="deck">视觉方向成立，落地层需要返工。审计对象是已交付的 HTML 设计稿，不是线上站点；以下结论都基于交付快照与实际渲染。</p>
+    <dl class="meta">
+      <div><dt>审计对象</dt><dd><a href="二重奏-博客界面设计.html">二重奏-博客界面设计.html</a></dd></div>
+      <div><dt>交付快照</dt><dd>119,351 bytes · SHA-256 3ac93b8c…f6779</dd></div>
+      <div><dt>覆盖</dt><dd>首页 / 列表 / 文章页 / 搜索 / 关于</dd></div>
+      <div><dt>实测</dt><dd>390 / 900 / 1440 · 明暗双主题</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="shell layout">
+  <aside class="side">
+    <div class="verdict">
+      <strong>保留视觉，重做落地</strong>
+      <p>审美完成度高，但它是演示型单页应用；Hugo 的 URL、SEO、语言、分类、TOC、评论都要在落地层重建。</p>
+      <div class="total"><b>7.3</b><span>/ 10 · 视觉 9.0，落地 5.0</span></div>
+    </div>
+
+    <div class="scores" aria-label="评分">
+      <div class="score"><div class="row"><span>视觉语言</span><b>9.0</b></div><div class="bar"><i style="width:90%"></i></div></div>
+      <div class="score"><div class="row"><span>排版</span><b>8.5</b></div><div class="bar"><i style="width:85%"></i></div></div>
+      <div class="score"><div class="row"><span>图文节奏</span><b>8.5</b></div><div class="bar"><i style="width:85%"></i></div></div>
+      <div class="score"><div class="row"><span>响应式</span><b>8.0</b></div><div class="bar"><i style="width:80%"></i></div></div>
+      <div class="score"><div class="row"><span>与站点一致性</span><b>5.0</b></div><div class="bar"><i style="width:50%"></i></div></div>
+      <div class="score"><div class="row"><span>可实施性</span><b>5.0</b></div><div class="bar"><i style="width:50%"></i></div></div>
+    </div>
+
+    <nav class="toc" aria-label="报告目录">
+      <h2>目录</h2>
+      <a href="#summary"><em>01</em>结论</a>
+      <a href="#good"><em>02</em>做得好的</a>
+      <a href="#p1"><em>03</em>P1 阻断项</a>
+      <a href="#p2"><em>04</em>P2 改进</a>
+      <a href="#p3"><em>05</em>P3 打磨</a>
+      <a href="#decisions"><em>06</em>落地决策</a>
+      <a href="#evidence"><em>07</em>证据</a>
+    </nav>
+
+    <p class="side-note">审计未改动设计稿；快照 digest 与交付版本一致。测量在 390 / 900 / 1440 的真实渲染上完成。</p>
+  </aside>
+
+  <main id="main">
+    <section class="section" id="summary">
+      <h2><em>01</em>结论</h2>
+      <p><strong>这是一份完成度很高的视觉提案，也是一份不能直接上线的实现原型。</strong>最强的地方是把「二重奏」翻译成「页边」：正文是一个声部，日期、图注和留白是第二个声部。暖纸、宋体标题、单一铜金、无卡片无阴影——整页的呼吸感是成立的，读起来像一本安静的册子，而不是又一个 Hugo 默认皮肤。</p>
+      <p>但它是用一套单页应用模拟出来的：五个视图在同一个 HTML，内容由 JavaScript 注入，URL 是 hash。Hugo 站点需要的静态 URL、SEO、无 JS 可达、三语入口、分类/标签页、搜索页的分类中枢、TOC、评论，都没有在这份稿子里落地。原型可以这样演示；站点不能这样实现。</p>
+      <p><strong>建议：视觉方向通过，按 8 个决策拍板后，用 Hugo 静态模板重写落地层。不要把 SPA 结构搬进 PaperMod。</strong></p>
+    </section>
+
+    <section class="section" id="good">
+      <h2><em>02</em>做得好的</h2>
+      <ul class="good">
+        <li><b>概念是可解释的。</b>「页边」不是装饰词：日期、图注、署名都真的挂在正文之外，形成第二个声部；文章页的图注尤其成立。</li>
+        <li><b>字体与颜色克制。</b>宋体标题 + 无衬线正文 + 等宽元信息，暖纸底 + 青铜金；没有渐变、没有卡片阴影、没有 emoji。强调色只出现在圆点、引用边、筛选下划线、搜索高亮。</li>
+        <li><b>首页有编辑节奏。</b>「特稿—近作—目录」三段，一大一小、一图三文，避免了三张等宽卡片的模板感。</li>
+        <li><b>文章页的正文处理成熟。</b>标题、正文、表格、任务清单、代码块、引用、页边图注都有对应排版；表格与清单没有掉队。</li>
+        <li><b>状态完整。</b>明暗双主题、390/900/1440 三档无横向溢出；菜单、搜索、Ctrl/⌘+K、筛选、阅读进度、复制链接都实测可用。</li>
+        <li><b>用的是真内容。</b>文章、标题、摘要、关于页文案来自现有站点，不是 Lorem Ipsum；这使节奏判断是可信的。</li>
+      </ul>
+    </section>
+
+    <section class="section" id="p1">
+      <h2><em>03</em>P1 阻断项</h2>
+      <p>这些不是审美问题，是「照这份稿子实现会坏」的问题。按落地风险排序。</p>
+
+      <article class="finding">
+        <div class="find-head"><span class="badge p1">P1</span><h3>单页应用不是 Hugo 站点的落地结构</h3></div>
+        <p>这份稿子把五个界面写进一个 HTML，用 hash 路由切换；它证明了视觉，但不能证明站点。</p>
+        <div class="evidence"><b>证据</b>5 个 <code>data-view</code>；URL 形如 <code>#/posts/zz-s03</code>；<code>#view-posts</code> 源码里 0 行、0 图；文章正文在 JSON 里；<code>&lt;noscript&gt;</code> 明确写着需要 JavaScript。</div>
+        <p><b>影响：</b>关闭 JS 只剩首页 hero；文章不能独立索引、分享、被 RSS 收录；Hugo 的分页、taxonomy、hreflang 全部被 hash 路由替代。</p>
+        <p class="fix"><b>建议：</b>视觉层保留，结构改成 Hugo 静态模板（<code>index.html</code> / <code>_default/list.html</code> / <code>single.html</code> / <code>search.html</code>）；JS 只做主题、菜单、搜索、进度；文章 URL 用 <code>/posts/&lt;slug&gt;/</code>。</p>
+      </article>
+
+      <article class="finding">
+        <div class="find-head"><span class="badge p1">P1</span><h3>语言、分类、搜索中枢与导航被简化掉了</h3></div>
+        <p>这是一份「单语、单入口、单层目录」的稿子；站点是三语、有 taxonomy、有搜索分类中枢、有留言板的。</p>
+        <div class="evidence"><b>证据</b><code>hreflang</code> 0 处；页头没有语言入口；分类全是 <code>&lt;span&gt;</code>，没有 <code>&lt;a href&gt;</code>；标签链到搜索而不是 tag 页；搜索页没有分类/标签聚合；导航是「文章 / 搜索 / 关于」+ 搜索图标（搜索出现两次）；页脚没有留言板/归档。</div>
+        <p><b>影响：</b>三语入口、分类/标签页、搜索页的分类中枢、留言板全部丢失；与站点 2026-11-06「搜索脱离导航菜单」、taxonomy 与分类链接约定直接冲突。</p>
+        <p class="fix"><b>建议：</b>语言 globe + <code>hreflang</code>；分类/标签恢复真实 <code>&lt;a href&gt;</code>；搜索页恢复分类/标签聚合；导航改「文章 / 归档 + 搜索图标」；页脚补留言板。</p>
+      </article>
+
+      <article class="finding">
+        <div class="find-head"><span class="badge p1">P1</span><h3>列表页和刚定稿的 Casper 堆叠卡相反</h3></div>
+        <p>这版列表是一条很漂亮的文字目录，但它推翻了站点 2026-11-07 刚拍板的 image-top 堆叠卡。</p>
+        <div class="evidence"><b>证据</b><code>.post-row</code> 是 98px / 1fr / 62px / 58px 的纯文字行；<code>#view-posts</code> 源码 0 个 <code>&lt;img&gt;</code>；站点现行列表是 1.818 封面、26/800 标题、16px 三行摘要、4.8vmin 卡距（手机 40px）的 Casper 卡。</div>
+        <p><b>影响：</b>列表失去图文身份，与用户刚签认的方向相反；brief 的「图文内容」只剩首页与文章页。</p>
+        <p class="fix"><b>建议：</b>三选一。(a) <code>/posts/</code> 保留 Casper 卡，这版 ledger 作为 <code>/archives/</code>；(b) ledger 每行加 96–120px 封面缩略图，保留目录感；(c) 明确拍板全站改文字目录。推荐 (a) 或 (b)。</p>
+      </article>
+
+      <article class="finding">
+        <div class="find-head"><span class="badge p1">P1</span><h3>680 宋体 vs 720/18 无衬线：阅读系统要拍板</h3></div>
+        <p>设计的阅读列比站点现行正文窄 40px，标题从无衬线换成了宋体；这是一次系统级改动，不是样式微调。</p>
+        <div class="evidence"><b>证据</b><code>--measure: 680px</code>；站点正文 720px / 18px = 40 个全角字，AGENTS 标注「勿动」；设计标题用 Songti / Palatino；ja/en 没有对应的衬线栈。</div>
+        <p><b>影响：</b>落地会改黄金字阶与行长契约；ja/en 标题可能落回中文字体，三语版面不一致。</p>
+        <p class="fix"><b>建议：</b>拍板 680 还是 720（680 在 WCAG 内，但需重新签认）；补 ja/en 衬线栈（Yu Mincho / Hiragino Mincho / Noto Serif JP；Iowan / Georgia），三语实机看标题。</p>
+      </article>
+
+      <article class="finding">
+        <div class="find-head"><span class="badge p1">P1</span><h3>长篇阅读缺 TOC、更新于、评论</h3></div>
+        <p>文章页只做到「好看地读完」，没有做「读完之前怎么找、读完以后怎么接」。</p>
+        <div class="evidence"><b>证据</b>源码 0 个 toc；文章 kicker 只有分类/日期/时长；0 个 giscus；站点 <code>showtoc = true</code>、更新于在首屏 meta、「相关文章 → 评论」的顺序已定。</div>
+        <p><b>影响：</b>长文没有目录；有时效的文章失去「更新于」；评论区缺失。</p>
+        <p class="fix"><b>建议：</b>把 TOC 放进「页边」：≥1200px 显示在 margin，≤1199px 折叠到标题下；补「更新于」（lastmod &gt; date+1d）；相关文章后接 giscus。</p>
+      </article>
+
+      <article class="finding">
+        <div class="find-head"><span class="badge p1">P1</span><h3>触屏 hover 全部裸露</h3></div>
+        <p>这份稿子有 23 个 <code>:hover</code>，但没有一个 <code>@media (hover:hover)</code> 门控。</p>
+        <div class="evidence"><b>证据</b>正则统计 23 个 <code>:hover</code>、0 个 <code>@media (hover:hover)</code>；站点 2026-11-06 有「分享按钮金态在触屏上粘住」的实测事故，并已把 5 条反馈统一门控。</div>
+        <p><b>影响：</b>触屏点按后下划线、金色、图片缩放会粘住，直到点空白；这与站点现有的 62 项断言直接冲突。</p>
+        <p class="fix"><b>建议：</b>所有非必要 hover 包进 <code>@media (hover:hover)</code>；键盘保留 <code>:focus-visible</code>；代码复制按钮按站点既有例外处理。</p>
+      </article>
+
+      <article class="finding">
+        <div class="find-head"><span class="badge p1">P1</span><h3>内容规则与图片资产未定</h3></div>
+        <p>首页的「特稿 / 近作 / 目录」是这份稿子的灵魂，但它是三段硬编码，不是一套可运营的规则。</p>
+        <div class="evidence"><b>证据</b><code>ORDER</code> 与 <code>META</code> 硬编码；6 篇阅读时长与站点实际值不符（见证据表）；0 个 <code>srcset</code>；配图是设计示意而非文章真实封面；站点 cover.html 已统一 720px / 100vw 的 srcset。</div>
+        <p><b>影响：</b>CMS 无法决定 lead/近作/目录；错误时长会直接上线；手机下载 300–470KB 的大图。</p>
+        <p class="fix"><b>建议：</b>定义 lead/近作/目录规则（weight/featured + 回退）；改成真实阅读时长；换真实/有授权照片；用 Hugo image processing 出 srcset。</p>
+      </article>
+    </section>
+
+    <section class="section" id="p2">
+      <h2><em>04</em>P2 改进</h2>
+      <p>不阻断上线，但会明显影响阅读或维护成本。按影响排序。</p>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">P2 改进项</caption>
+          <thead><tr><th scope="col">问题</th><th scope="col">证据</th><th scope="col">建议</th></tr></thead>
+          <tbody>
+            <tr><td>搜索摘要行宽过长</td><td>摘要 <code>982px</code> @ 14px ≈ 70 个全角字/行；文章页是 680px</td><td>给 <code>.result-row p</code> 加 <code>max-width: 34em</code>（约 620px）</td></tr>
+            <tr><td>列表没有分页</td><td>设计一页 10 篇；站点 <code>pagerSize = 8</code></td><td>补分页，或明确改为每页 10 篇并同步配置</td></tr>
+            <tr><td>缺文章图文三档</td><td>源码 0 处 <code>#wide</code> / <code>#full</code>；站点已有 Casper kg-width 三档</td><td>补两档示例（宽图、全幅），或明确本期不做</td></tr>
+            <tr><td>元信息偏小、用 px</td><td>meta 11.5px；正文用 px，用户字号偏好不缩放</td><td>meta 12px+；正文/元信息改用 rem/em</td></tr>
+            <tr><td>强调色重复</td><td>每个 blockquote 都是金边；一页可出现 3–4 次</td><td>一页最多 2 处金色；其余用 ink / rule 边</td></tr>
+            <tr><td>部分触控目标偏小</td><td>页脚链接 22.1px 高、标签 22.4px、section link 19.5px</td><td>min-height 24px（最好 44px）+ padding，或保证 24px 间距例外</td></tr>
+            <tr><td>断点与站点不一致</td><td>设计用 1080 / 860 / 560；站点主断点 768</td><td>对齐 768，或说明 860 的理由（导航宽度）</td></tr>
+            <tr><td>日期没有 <code>&lt;time&gt;</code></td><td>源码 0 个 <code>&lt;time&gt;</code></td><td>日期/更新用于 <code>&lt;time datetime="…"&gt;</code></td></tr>
+            <tr><td>快捷键文案只写 Ctrl</td><td>搜索框写死 <code>Ctrl K</code>；Mac 用户看到 ⌘K</td><td>按平台显示 <code>⌘K</code> / <code>Ctrl K</code>，或写 <code>Ctrl / ⌘ K</code></td></tr>
+            <tr><td>主题键与站点不同</td><td>设计存 <code>duet-theme</code>；站点用 <code>pref-theme</code></td><td>统一键名或做迁移，避免首访闪主题</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="p3">
+      <h2><em>05</em>P3 打磨</h2>
+      <ul class="good">
+        <li><b>近作右列与封面底部不齐。</b>7 列封面约 427px 高，右列三条约 210px；底部空档约 200px。可底部对齐、补第四条，或把右列改成 2×2。</li>
+        <li><b>英文标题 tracking 偏松。</b>当前 <code>-0.005em</code>；英文 display 建议 <code>-0.02em</code> 左右，CJK 保持 0。</li>
+        <li><b>关于页「写作者」。</b>站点 about 没有职业标签；要么删掉，要么确认这是可对外的事实。</li>
+        <li><b>「Search · 站内」中英不配。</b>可改「Search · 搜索」或「站内搜索」。</li>
+        <li><b>打印深色不完整。</b><code>@media print</code> 只改了 body 颜色，未重置 tokens；深色模式打印可能低对比。</li>
+        <li><b>图片宽高属性过时。</b>HTML 写 2000×1333，实际文件 1800×1200（比例相同，CLS 不受影响，但值应一致）。</li>
+        <li><b><code>.mm-langs</code> 的 aria-label。</b>加在普通 div 上不会稳定暴露；改 <code>role="group"</code> 或去掉。</li>
+        <li><b>theme-color 首帧。</b>meta 初始是浅色，深色模式首帧可能闪一下；把判断放进 head 的首帧脚本。</li>
+      </ul>
+    </section>
+
+    <section class="section" id="decisions">
+      <h2><em>06</em>落地决策</h2>
+      <p>在动手写模板前，需要拍板这 8 件事；否则实现会在半路遇到互相冲突的约束。</p>
+      <ul class="checks">
+        <li><span class="box" aria-hidden="true"></span><span><b>列表形态：</b>Casper 堆叠卡 / 文字目录 / 混合（推荐 a 或 b）</span></li>
+        <li><span class="box" aria-hidden="true"></span><span><b>正文系统：</b>680 宋体 / 720 无衬线；选一个并签认</span></li>
+        <li><span class="box" aria-hidden="true"></span><span><b>首页选文：</b>weight / featured / 最新；定义 lead / 近作 / 目录的规则</span></li>
+        <li><span class="box" aria-hidden="true"></span><span><b>语言入口：</b>header globe + 下拉 / 只放页脚；选一个</span></li>
+        <li><span class="box" aria-hidden="true"></span><span><b>TOC：</b>页边悬浮 / 标题下折叠 / 不做；长文建议前两者</span></li>
+        <li><span class="box" aria-hidden="true"></span><span><b>评论与留言板：</b>本期保留 giscus / 延后；两者都不做需说明</span></li>
+        <li><span class="box" aria-hidden="true"></span><span><b>图片：</b>真实照片清单、授权、srcset 尺寸；替换当前设计示意</span></li>
+        <li><span class="box" aria-hidden="true"></span><span><b>实现：</b>Hugo 静态模板 + 渐进增强，不做 SPA / hash 路由</span></li>
+      </ul>
+    </section>
+
+    <section class="section" id="evidence">
+      <h2><em>07</em>证据</h2>
+      <p>以下数据来自交付快照的源码检查与实际渲染；设计稿未被修改，快照 digest 与交付版本一致。</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">审计测量</caption>
+          <thead><tr><th scope="col">项目</th><th scope="col">结果</th></tr></thead>
+          <tbody>
+            <tr><td>文件 / 快照</td><td>119,351 bytes · SHA-256 <code>3ac93b8c…f6779</code></td></tr>
+            <tr><td>视图</td><td>5 个：home / posts / article / search / about</td></tr>
+            <tr><td>响应式实测</td><td>390 / 900 / 1440 均无横向溢出（scrollWidth − innerWidth = −15，滚动条）</td></tr>
+            <tr><td>文章正文</td><td>680px @ 18px / 1.9；约 37.8 个全角字/行</td></tr>
+            <tr><td>搜索摘要</td><td>982px @ 14px；约 70 个全角字/行（过宽）</td></tr>
+            <tr><td>:hover / hover 门控</td><td>23 / 0</td></tr>
+            <tr><td>hreflang / toc / giscus / srcset / time</td><td>0 / 0 / 0 / 0 / 0</td></tr>
+            <tr><td>列表源码</td><td>0 行、0 图（全部由 JS 注入）</td></tr>
+            <tr><td>触控目标</td><td>页脚链接 22.1px 高；标签 22.4px；section link 19.5px</td></tr>
+            <tr><td>对比度（浅色）</td><td>正文 10.98:1；muted 5.30:1；accent 5.19:1；faint 3.68:1（仅大字号/图标/装饰标点）</td></tr>
+            <tr><td>对比度（深色）</td><td>正文 11.22:1；muted 6.68:1；accent 8.67:1；faint 3.88:1（仅大字号/装饰标点）</td></tr>
+            <tr><td>基础卫生</td><td>0 重复 ID；0 图片缺 alt；0 空 href；0 正 tabindex</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:22px"><strong>阅读时长不一致（设计稿 vs 站点实际）：</strong></p>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">阅读时长对照</caption>
+          <thead><tr><th scope="col">文章</th><th scope="col">设计稿</th><th scope="col">站点</th></tr></thead>
+          <tbody>
+            <tr><td>如何使用 AI 来更新博客</td><td>5 分钟</td><td>1 分钟</td></tr>
+            <tr><td>用 Cloudflare Workers AI…</td><td>9 分钟</td><td>4 分钟</td></tr>
+            <tr><td>你好，世界</td><td>2 分钟</td><td>1 分钟</td></tr>
+            <tr><td>给静态博客加一个不打扰的阅读进度条</td><td>4 分钟</td><td>2 分钟</td></tr>
+            <tr><td>把构建时间从八秒压到两秒…</td><td>3 分钟</td><td>2 分钟</td></tr>
+            <tr><td>配置文件里那行注释…</td><td>4 分钟</td><td>2 分钟</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:22px"><strong>审计方法：</strong>源码静态检查 + 390 / 900 / 1440 实际渲染 + DOM 几何/触控目标测量 + WCAG 对比度计算。未运行 Lighthouse，不把性能分数作为结论；图片未做 srcset 是结构性观察，不是实验室分数。</p>
+    </section>
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="shell">
+    <p>审计对象：<a href="二重奏-博客界面设计.html">原型/二重奏-博客界面设计.html</a> · 快照 3ac93b8c…f6779 · 2026-11-07</p>
+    <p>本报告未修改设计稿。所有「建议」都是落地前的决策项，不是已执行的变更。</p>
+  </div>
+</footer>
+</body>
+</html>

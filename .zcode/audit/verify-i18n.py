@@ -1,0 +1,10 @@
+import re, json
+html = open("/home/piscon/codespace/myblog/原型/二重奏-博客界面设计-交互版.html", encoding="utf-8").read()
+m = re.search(r'<script type="application/json" id="i18n-data">([\s\S]*?)</script>', html)
+d = json.loads(m.group(1).replace("<\\/", "</"))
+print("zh gb tail:", repr(d["zh"]["guestbook"][-70:]))
+print("ja body tail:", repr(d["ja"]["bodies"]["zz-s03"][-70:]))
+print("ja about head:", repr(d["ja"]["about"][:60]))
+vals = [d[k].get("guestbook", "") for k in d] + [d[k].get("about", "") for k in d] + list(d["ja"]["bodies"].values()) + list(d["en"]["bodies"].values())
+print("footer leaked:", any("<footer" in v for v in vals))
+print("giscus leaked:", any("giscus" in v for v in vals))

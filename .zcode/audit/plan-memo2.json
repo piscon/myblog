@@ -1,0 +1,10 @@
+{
+  "out": "r-memo2.json",
+  "steps": [
+    { "viewport": { "width": 1440, "height": 1100, "mobile": false } },
+    { "goto": "http://127.0.0.1:8124/memo.html", "settle": 1200 },
+    { "scrollTo": 420 },
+    { "shot": "m1440b.png" },
+    { "eval": "(() => { const t=document.querySelector('table'); const r=t.getBoundingClientRect(); const cells=[...document.querySelectorAll('tbody tr')].map(tr=>Math.round(tr.getBoundingClientRect().height)); return {tableW:Math.round(r.width), rowHeights:cells, overflowX:document.documentElement.scrollWidth-innerWidth}; })()", "label": "memo-table" }
+  ]
+}

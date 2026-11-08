@@ -1,0 +1,13 @@
+{
+  "out": "r-report.json",
+  "steps": [
+    { "viewport": { "width": 1440, "height": 1000, "dsf": 1, "mobile": false } },
+    { "goto": "http://127.0.0.1:8124/audit.html", "settle": 1200 },
+    { "shot": "r1440-report.png" },
+    { "eval": "(() => ({ h: document.documentElement.scrollHeight, overflowX: document.documentElement.scrollWidth - innerWidth }))()", "label": "report-1440" },
+
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "shot": "r390-report.png" },
+    { "eval": "(() => ({ overflowX: document.documentElement.scrollWidth - innerWidth, cards: document.querySelectorAll('.card').length, tables: document.querySelectorAll('table').length }))()", "label": "report-390" }
+  ]
+}

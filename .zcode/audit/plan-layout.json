@@ -1,0 +1,31 @@
+{
+  "out": "r-layout.json",
+  "steps": [
+    { "viewport": { "width": 320, "height": 720, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1400 },
+    { "evalFile": "measure-layout.js", "label": "w320" },
+
+    { "viewport": { "width": 360, "height": 780, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w360" },
+
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w390" },
+    { "shot": "p390-home.png" },
+
+    { "viewport": { "width": 414, "height": 896, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w414" },
+
+    { "viewport": { "width": 860, "height": 900, "mobile": true } },
+    { "evalFile": "measure-layout.js", "label": "w860" },
+
+    { "viewport": { "width": 861, "height": 900, "mobile": false } },
+    { "evalFile": "measure-layout.js", "label": "w861" },
+
+    { "viewport": { "width": 1200, "height": 900, "mobile": false } },
+    { "evalFile": "measure-layout.js", "label": "w1200" },
+
+    { "viewport": { "width": 1440, "height": 900, "mobile": false } },
+    { "evalFile": "measure-layout.js", "label": "w1440" },
+    { "shot": "p1440-home.png" }
+  ]
+}

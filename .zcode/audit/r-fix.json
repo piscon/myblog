@@ -1,0 +1,861 @@
+[
+ {
+  "label": "w320",
+  "value": {
+   "view": "#/",
+   "vw": 320,
+   "vh": 720,
+   "scrollW": 320,
+   "overflowX": 0,
+   "scrollH": 2894,
+   "header": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 68.6,
+    "right": 320,
+    "bottom": 68.6,
+    "d": "block",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "二重奏 DEUX 文章 关于 简体中文ZH 日本語JA EnglishEN 文章"
+   },
+   "headKids": [
+    {
+     "s": "a.brand",
+     "x": 24,
+     "y": 18,
+     "w": 70,
+     "h": 32,
+     "right": 94,
+     "bottom": 50,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "16px",
+     "txt": "二重奏 DEUX"
+    },
+    {
+     "s": "nav.nav",
+     "x": 0,
+     "y": 0,
+     "w": 0,
+     "h": 0,
+     "right": 0,
+     "bottom": 0,
+     "d": "none",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "文章 关于"
+    },
+    {
+     "s": "div.lang-wrap",
+     "x": 118,
+     "y": 0,
+     "w": 44,
+     "h": 68,
+     "right": 162,
+     "bottom": 68,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "简体中文ZH 日本語JA EnglishEN"
+    },
+    {
+     "s": "#search-link",
+     "x": 164,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 208,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.theme-btn",
+     "x": 210,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 254,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.menu-btn",
+     "x": 256,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 300,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    }
+   ],
+   "menuBtn": {
+    "x": 256,
+    "y": 12,
+    "w": 44,
+    "h": 44,
+    "right": 300,
+    "bottom": 56,
+    "d": "grid",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": ""
+   },
+   "langWrap": {
+    "x": 118,
+    "y": 0,
+    "w": 44,
+    "h": 68,
+    "right": 162,
+    "bottom": 68,
+    "d": "flex",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "简体中文ZH 日本語JA EnglishEN"
+   },
+   "mobileMenuHidden": true,
+   "bleed": [],
+   "clipped": [],
+   "smallTargets": [],
+   "targetCount": 28,
+   "headings": [
+    {
+     "tag": "H1",
+     "fs": "34px",
+     "t": "傍晚六点的琴声"
+    },
+    {
+     "tag": "H2",
+     "fs": "20px",
+     "t": "近作"
+    },
+    {
+     "tag": "H3",
+     "fs": "25px",
+     "t": "菜市场里的天气预报"
+    },
+    {
+     "tag": "H3",
+     "fs": "18px",
+     "t": "修一把不肯合上的伞"
+    },
+    {
+     "tag": "H3",
+     "fs": "18px",
+     "t": "把一张明信片寄丢之后"
+    },
+    {
+     "tag": "H3",
+     "fs": "18px",
+     "t": "把构建时间从八秒压到两秒：一次没什么技术含量的优化"
+    },
+    {
+     "tag": "H2",
+     "fs": "20px",
+     "t": "目录"
+    }
+   ],
+   "bodyFs": "16px",
+   "measure": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "right": 0,
+    "bottom": 0,
+    "d": "block",
+    "v": "visible",
+    "fs": "16.5px",
+    "fw": "400",
+    "lh": "31.02px",
+    "txt": ""
+   }
+  }
+ },
+ {
+  "label": "w390",
+  "value": {
+   "view": "#/",
+   "vw": 390,
+   "vh": 844,
+   "scrollW": 390,
+   "overflowX": 0,
+   "scrollH": 2846,
+   "header": {
+    "x": 0,
+    "y": 0,
+    "w": 390.3,
+    "h": 68.6,
+    "right": 390.3,
+    "bottom": 68.6,
+    "d": "block",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "二重奏 DEUX 文章 关于 简体中文ZH 日本語JA EnglishEN 文章"
+   },
+   "headKids": [
+    {
+     "s": "a.brand",
+     "x": 24,
+     "y": 18,
+     "w": 70,
+     "h": 32,
+     "right": 94,
+     "bottom": 50,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "16px",
+     "txt": "二重奏 DEUX"
+    },
+    {
+     "s": "nav.nav",
+     "x": 0,
+     "y": 0,
+     "w": 0,
+     "h": 0,
+     "right": 0,
+     "bottom": 0,
+     "d": "none",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "文章 关于"
+    },
+    {
+     "s": "div.lang-wrap",
+     "x": 184.3,
+     "y": 0,
+     "w": 44,
+     "h": 68,
+     "right": 228.3,
+     "bottom": 68,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "简体中文ZH 日本語JA EnglishEN"
+    },
+    {
+     "s": "#search-link",
+     "x": 230.3,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 274.3,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.theme-btn",
+     "x": 276.3,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 320.3,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.menu-btn",
+     "x": 322.3,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 366.3,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    }
+   ],
+   "menuBtn": {
+    "x": 322.3,
+    "y": 12,
+    "w": 44,
+    "h": 44,
+    "right": 366.3,
+    "bottom": 56,
+    "d": "grid",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": ""
+   },
+   "langWrap": {
+    "x": 184.3,
+    "y": 0,
+    "w": 44,
+    "h": 68,
+    "right": 228.3,
+    "bottom": 68,
+    "d": "flex",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "简体中文ZH 日本語JA EnglishEN"
+   },
+   "mobileMenuHidden": true,
+   "bleed": [],
+   "clipped": [],
+   "smallTargets": [],
+   "targetCount": 28,
+   "headings": [
+    {
+     "tag": "H1",
+     "fs": "34px",
+     "t": "傍晚六点的琴声"
+    },
+    {
+     "tag": "H2",
+     "fs": "20px",
+     "t": "近作"
+    },
+    {
+     "tag": "H3",
+     "fs": "25px",
+     "t": "菜市场里的天气预报"
+    },
+    {
+     "tag": "H3",
+     "fs": "18px",
+     "t": "修一把不肯合上的伞"
+    },
+    {
+     "tag": "H3",
+     "fs": "18px",
+     "t": "把一张明信片寄丢之后"
+    },
+    {
+     "tag": "H3",
+     "fs": "18px",
+     "t": "把构建时间从八秒压到两秒：一次没什么技术含量的优化"
+    },
+    {
+     "tag": "H2",
+     "fs": "20px",
+     "t": "目录"
+    }
+   ],
+   "bodyFs": "16px",
+   "measure": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "right": 0,
+    "bottom": 0,
+    "d": "block",
+    "v": "visible",
+    "fs": "16.5px",
+    "fw": "400",
+    "lh": "31.02px",
+    "txt": ""
+   }
+  }
+ },
+ {
+  "label": "lang-open-390",
+  "value": {
+   "hidden": false,
+   "x": 170.2857208251953,
+   "right": 366.2857360839844,
+   "w": 196.00001525878906,
+   "y": 68,
+   "bottom": 209.1428680419922,
+   "vw": 390,
+   "expanded": "true",
+   "current": [
+    "简体中文ZH"
+   ]
+  }
+ },
+ {
+  "label": "menu-after-lang",
+  "value": {
+   "langHidden": true,
+   "menuOpen": true,
+   "langExpanded": "false",
+   "menuExpanded": "true",
+   "bodyOverflow": "",
+   "menuH": 156
+  }
+ },
+ {
+  "label": "lang-after-menu",
+  "value": {
+   "langOpen": true,
+   "menuClosed": true,
+   "menuExpanded": "false"
+  }
+ },
+ {
+  "label": "lang-esc",
+  "value": {
+   "langHidden": true,
+   "focus": "icon-btn lang-btn"
+  }
+ },
+ {
+  "label": "w860",
+  "value": {
+   "view": "#/",
+   "vw": 860,
+   "vh": 900,
+   "scrollW": 860,
+   "overflowX": 0,
+   "scrollH": 3332,
+   "header": {
+    "x": 0,
+    "y": 0,
+    "w": 860,
+    "h": 68.6,
+    "right": 860,
+    "bottom": 68.6,
+    "d": "block",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "二重奏 DEUX 文章 关于 简体中文ZH 日本語JA EnglishEN 文章"
+   },
+   "headKids": [
+    {
+     "s": "a.brand",
+     "x": 24,
+     "y": 18,
+     "w": 70,
+     "h": 32,
+     "right": 94,
+     "bottom": 50,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "16px",
+     "txt": "二重奏 DEUX"
+    },
+    {
+     "s": "nav.nav",
+     "x": 0,
+     "y": 0,
+     "w": 0,
+     "h": 0,
+     "right": 0,
+     "bottom": 0,
+     "d": "none",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "文章 关于"
+    },
+    {
+     "s": "div.lang-wrap",
+     "x": 654,
+     "y": 0,
+     "w": 44,
+     "h": 68,
+     "right": 698,
+     "bottom": 68,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "简体中文ZH 日本語JA EnglishEN"
+    },
+    {
+     "s": "#search-link",
+     "x": 700,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 744,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.theme-btn",
+     "x": 746,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 790,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.menu-btn",
+     "x": 792,
+     "y": 12,
+     "w": 44,
+     "h": 44,
+     "right": 836,
+     "bottom": 56,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    }
+   ],
+   "menuBtn": {
+    "x": 792,
+    "y": 12,
+    "w": 44,
+    "h": 44,
+    "right": 836,
+    "bottom": 56,
+    "d": "grid",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": ""
+   },
+   "langWrap": {
+    "x": 654,
+    "y": 0,
+    "w": 44,
+    "h": 68,
+    "right": 698,
+    "bottom": 68,
+    "d": "flex",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "简体中文ZH 日本語JA EnglishEN"
+   },
+   "mobileMenuHidden": true,
+   "bleed": [],
+   "clipped": [],
+   "smallTargets": [],
+   "targetCount": 28,
+   "headings": [
+    {
+     "tag": "H1",
+     "fs": "44px",
+     "t": "傍晚六点的琴声"
+    },
+    {
+     "tag": "H2",
+     "fs": "22px",
+     "t": "近作"
+    },
+    {
+     "tag": "H3",
+     "fs": "25px",
+     "t": "菜市场里的天气预报"
+    },
+    {
+     "tag": "H3",
+     "fs": "19px",
+     "t": "修一把不肯合上的伞"
+    },
+    {
+     "tag": "H3",
+     "fs": "19px",
+     "t": "把一张明信片寄丢之后"
+    },
+    {
+     "tag": "H3",
+     "fs": "19px",
+     "t": "把构建时间从八秒压到两秒：一次没什么技术含量的优化"
+    },
+    {
+     "tag": "H2",
+     "fs": "22px",
+     "t": "目录"
+    }
+   ],
+   "bodyFs": "16px",
+   "measure": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "right": 0,
+    "bottom": 0,
+    "d": "block",
+    "v": "visible",
+    "fs": "17px",
+    "fw": "400",
+    "lh": "31.96px",
+    "txt": ""
+   }
+  }
+ },
+ {
+  "label": "w1440",
+  "value": {
+   "view": "#/",
+   "vw": 1440,
+   "vh": 900,
+   "scrollW": 1425,
+   "overflowX": -15,
+   "scrollH": 2311,
+   "header": {
+    "x": 0,
+    "y": 0,
+    "w": 1425.1,
+    "h": 86.6,
+    "right": 1425.1,
+    "bottom": 86.6,
+    "d": "block",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "二重奏 DEUX 文章 关于 简体中文ZH 日本語JA EnglishEN 文章"
+   },
+   "headKids": [
+    {
+     "s": "a.brand",
+     "x": 162.6,
+     "y": 24.5,
+     "w": 82.7,
+     "h": 37,
+     "right": 245.3,
+     "bottom": 61.5,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "16px",
+     "txt": "二重奏 DEUX"
+    },
+    {
+     "s": "nav.nav",
+     "x": 1004.6,
+     "y": 25.1,
+     "w": 90,
+     "h": 35.8,
+     "right": 1094.6,
+     "bottom": 60.9,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "文章 关于"
+    },
+    {
+     "s": "div.lang-wrap",
+     "x": 1126.6,
+     "y": 0,
+     "w": 44,
+     "h": 86,
+     "right": 1170.6,
+     "bottom": 86,
+     "d": "flex",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": "简体中文ZH 日本語JA EnglishEN"
+    },
+    {
+     "s": "#search-link",
+     "x": 1172.6,
+     "y": 21,
+     "w": 44,
+     "h": 44,
+     "right": 1216.6,
+     "bottom": 65,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.theme-btn",
+     "x": 1218.6,
+     "y": 21,
+     "w": 44,
+     "h": 44,
+     "right": 1262.6,
+     "bottom": 65,
+     "d": "grid",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    },
+    {
+     "s": "button.icon-btn.menu-btn",
+     "x": 0,
+     "y": 0,
+     "w": 0,
+     "h": 0,
+     "right": 0,
+     "bottom": 0,
+     "d": "none",
+     "v": "visible",
+     "fs": "16px",
+     "fw": "400",
+     "lh": "27.2px",
+     "txt": ""
+    }
+   ],
+   "menuBtn": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "right": 0,
+    "bottom": 0,
+    "d": "none",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": ""
+   },
+   "langWrap": {
+    "x": 1126.6,
+    "y": 0,
+    "w": 44,
+    "h": 86,
+    "right": 1170.6,
+    "bottom": 86,
+    "d": "flex",
+    "v": "visible",
+    "fs": "16px",
+    "fw": "400",
+    "lh": "27.2px",
+    "txt": "简体中文ZH 日本語JA EnglishEN"
+   },
+   "mobileMenuHidden": true,
+   "bleed": [],
+   "clipped": [],
+   "smallTargets": [],
+   "targetCount": 29,
+   "headings": [
+    {
+     "tag": "H1",
+     "fs": "58px",
+     "t": "傍晚六点的琴声"
+    },
+    {
+     "tag": "H2",
+     "fs": "22px",
+     "t": "近作"
+    },
+    {
+     "tag": "H3",
+     "fs": "29px",
+     "t": "菜市场里的天气预报"
+    },
+    {
+     "tag": "H3",
+     "fs": "19px",
+     "t": "修一把不肯合上的伞"
+    },
+    {
+     "tag": "H3",
+     "fs": "19px",
+     "t": "把一张明信片寄丢之后"
+    },
+    {
+     "tag": "H3",
+     "fs": "19px",
+     "t": "把构建时间从八秒压到两秒：一次没什么技术含量的优化"
+    },
+    {
+     "tag": "H2",
+     "fs": "22px",
+     "t": "目录"
+    }
+   ],
+   "bodyFs": "16px",
+   "measure": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0,
+    "right": 0,
+    "bottom": 0,
+    "d": "block",
+    "v": "visible",
+    "fs": "18px",
+    "fw": "400",
+    "lh": "34.2px",
+    "txt": ""
+   }
+  }
+ },
+ {
+  "label": "lang-open-1440",
+  "value": {
+   "hidden": false,
+   "x": 974.5714721679688,
+   "right": 1170.5714874267578,
+   "y": 86.00000762939453
+  }
+ }
+]

@@ -1,0 +1,31 @@
+{
+  "out": "r-interact.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html", "settle": 1400 },
+
+    { "eval": "(() => { const f=[...document.querySelectorAll('a[href],button,summary,input,[tabindex]')].filter(el=>{const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=='hidden';}).map(el=>({tag:el.tagName,txt:(el.textContent||el.getAttribute('aria-label')||'').trim().slice(0,14),tab:el.getAttribute('tabindex')})); return f.slice(0,12); })()", "label": "tab-order-top-390" },
+
+    { "click": ".lang-btn", "settle": 400 },
+    { "eval": "(() => { const m=document.getElementById('lang-menu'); return {expanded:document.querySelector('.lang-btn').getAttribute('aria-expanded'), focus:document.activeElement.className||document.activeElement.tagName, roles:[...m.querySelectorAll('a')].map(a=>a.getAttribute('role')), menuRole:m.getAttribute('role'), haspopup:document.querySelector('.lang-btn').getAttribute('aria-haspopup')}; })()", "label": "lang-a11y" },
+    { "key": "ArrowDown", "settle": 300 },
+    { "eval": "(() => ({ focus: document.activeElement.textContent.trim().slice(0,10) || document.activeElement.tagName }))()", "label": "lang-arrowdown" },
+
+    { "key": "Escape", "settle": 300 },
+    { "click": ".menu-btn", "settle": 400 },
+    { "eval": "(() => ({ focus: document.activeElement.textContent.trim().slice(0,12), expanded: document.querySelector('.menu-btn').getAttribute('aria-expanded'), inert: document.getElementById('main').getAttribute('inert') }))()", "label": "menu-open-a11y" },
+    { "key": "Escape", "settle": 300 },
+
+    { "hash": "#/posts", "settle": 800 },
+    { "click": "[data-cat='技术']", "settle": 400 },
+    { "eval": "(() => ({ pressed:[...document.querySelectorAll('[data-cat]')].map(b=>b.textContent.trim()+':'+b.getAttribute('aria-pressed')), count: document.getElementById('list-count').textContent }))()", "label": "filter-state" },
+
+    { "hash": "#/posts/zz-s03", "settle": 800 },
+    { "eval": "(() => { const s=document.querySelector('.toc-inline summary'); return {summaryTag:s.tagName, ariaExpanded:s.getAttribute('aria-expanded'), open:document.querySelector('.toc-inline').open}; })()", "label": "toc-details" },
+    { "click": ".share-btn", "settle": 500 },
+    { "eval": "(() => ({ note: document.getElementById('copy-note')?.textContent?.trim()?.slice(0,20), noteRole: document.getElementById('copy-note')?.getAttribute('role') }))()", "label": "share-copy" },
+
+    { "hash": "#/search", "settle": 800 },
+    { "eval": "(() => { const i=document.getElementById('q'); return {autofocus: document.activeElement===i, type:i.type, value:i.value, label: i.getAttribute('aria-label'), formRole: i.closest('form')?.getAttribute('role') }; })()", "label": "search-focus" }
+  ]
+}

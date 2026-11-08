@@ -1,0 +1,103 @@
+[
+ {
+  "label": "router-scroll",
+  "value": {
+   "before": {
+    "y": 700,
+    "h": "#/posts"
+   },
+   "after": {
+    "y": 0,
+    "h": "#/posts/zz-s03",
+    "title": "傍晚六点的琴声 · 二重奏",
+    "focus": "MAIN."
+   },
+   "back": {
+    "y": 0,
+    "h": "#/posts",
+    "title": "文章 · 二重奏"
+   }
+  }
+ },
+ {
+  "label": "article-chrome-390",
+  "value": {
+   "readbarHidden": false,
+   "readbarW": 143,
+   "tocFloat": {
+    "hidden": true,
+    "display": "none"
+   },
+   "h": "#/posts/ai-update-blog"
+  }
+ },
+ {
+  "label": "toc-inline-390",
+  "value": {
+   "open": true,
+   "h": 180,
+   "summaryText": "目录4 节",
+   "links": 4
+  }
+ },
+ {
+  "label": "search-type",
+  "value": {
+   "rows": 1,
+   "first": "傍晚六点的琴声",
+   "hubHidden": false
+  }
+ },
+ {
+  "label": "search-empty",
+  "value": {
+   "rows": 0,
+   "empty": "block"
+  }
+ },
+ {
+  "label": "views",
+  "value": [
+   {
+    "id": "view-home",
+    "hidden": true,
+    "display": "none"
+   },
+   {
+    "id": "view-posts",
+    "hidden": true,
+    "display": "none"
+   },
+   {
+    "id": "view-article",
+    "hidden": true,
+    "display": "none"
+   },
+   {
+    "id": "view-search",
+    "hidden": false,
+    "display": "block"
+   },
+   {
+    "id": "view-about",
+    "hidden": true,
+    "display": "none"
+   }
+  ]
+ },
+ {
+  "label": "toc-float-1440",
+  "value": {
+   "toc": {
+    "hidden": false,
+    "display": "block",
+    "x": 1193.1429443359375,
+    "y": 120.00000762939453,
+    "w": 200.00001525878906,
+    "h": 171.8303680419922
+   },
+   "active": "一、准时得不像人",
+   "scrollY": 1500
+  }
+ }
+]

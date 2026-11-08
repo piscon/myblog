@@ -1,0 +1,18 @@
+{
+  "out": "r-metrics.json",
+  "steps": [
+    { "viewport": { "width": 390, "height": 844, "mobile": true } },
+    { "goto": "http://127.0.0.1:8124/index.html#/posts", "settle": 1500 },
+    { "eval": "(() => { const b=s=>{const e=document.querySelector(s); if(!e) return null; const r=e.getBoundingClientRect(); return {top:Math.round(r.top+scrollY), h:Math.round(r.height), bottom:Math.round(r.bottom+scrollY)};}; return {pageHead:b('.page-head'), filters:b('.filters'), yearGroup:b('.year-group'), yearLabel:b('.year-label'), firstRow:b('.post-row'), lastRow:b('.post-row:last-child'), listFoot:b('.list-foot')}; })()", "label": "list-rhythm-390" },
+
+    { "hash": "#/posts/zz-s03", "settle": 1000 },
+    { "eval": "(() => { const b=s=>{const e=document.querySelector(s); if(!e) return null; const r=e.getBoundingClientRect(); return {top:Math.round(r.top+scrollY), h:Math.round(r.height)};}; const h2=document.querySelector('.article-body h2'); const t=document.querySelector('.toc-inline'); const d=document.querySelector('.article-deck'); return {deck:b('.article-deck'), toc:b('.toc-inline'), cover:b('.article-cover'), h2:h2?Math.round(getComputedStyle(h2).fontSize.replace('px','')):null, h2Top:h2?Math.round(h2.getBoundingClientRect().top+scrollY):null, bodyTop:b('.article-body'), share:b('.share-row')}; })()", "label": "article-rhythm-390" },
+
+    { "hash": "#/search", "settle": 800 },
+    { "eval": "(() => { const g=s=>{const e=document.querySelector(s); if(!e) return null; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return {w:Math.round(r.width), fs:cs.fontSize, h:Math.round(r.height)};}; return {head:g('.search-head'), form:g('.search-form'), input:g('#q'), hub:g('.tag-hub'), cloud:g('.tag-cloud'), result:g('.result-row')}; })()", "label": "search-geom-390" },
+    { "shot": "f390-search.png" },
+
+    { "hash": "#/about", "settle": 800 },
+    { "shot": "f390-about.png" }
+  ]
+}
