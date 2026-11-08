@@ -1,0 +1,111 @@
+{{- /* SITE OVERRIDE — editorial home (redesign/proto-wiring Phase 2, 2026-11-08).
+       Replaces the theme's profileMode center-hero with the prototype's
+       editorial front page: masthead line → latest-post hero → recent grid →
+       ledger of recent rows. The profileMode config block stays the TEXT
+       source (subtitle = masthead line) and the profileMode buttons row is
+       kept (最新文章/搜索/归档 — the /search/ link on the home page is a
+       feature-check coupling), as is the social_icons partial.
+       Upstream renders home via _default/list.html → index_profile.html;
+       this file shadows nothing, so weekly PRs carry zero re-diff for it.
+       Posts query: site.MainSections (theme convention, language-correct).
+       Home keeps ZERO category <a> links — every category mention is plain
+       text (prototype convention; feature-check「菜单不含分类/标签」greps the
+       home page). Guarded by feature-check「编辑部首页(hero+近作+目录入口)」. */ -}}
+
+{{ define "main" }}
+{{- $main := where site.RegularPages "Section" "in" site.MainSections -}}
+{{- $hero := index $main 0 -}}
+{{- $recent := slice -}}
+{{- range $i, $p := first 4 $main -}}{{- if gt $i 0 -}}{{- $recent = $recent | append $p -}}{{- end -}}{{- end -}}
+{{- $ledger := slice -}}
+{{- range $i, $p := first 9 $main -}}{{- if gt $i 3 -}}{{- $ledger = $ledger | append $p -}}{{- end -}}{{- end -}}
+
+<div class="home">
+  <div class="masthead-line">
+    {{- with site.Params.profileMode }}
+    <span class="mh-primary">{{ .subtitle | markdownify }}</span>
+    {{- end }}
+    <span class="mh-note">Essays &amp; Notes · {{ time.Format "2006" now }}</span>
+  </div>
+
+  {{- with $hero }}
+  <section class="hero">
+    <div class="hero-text">
+      <p class="hero-eyebrow">
+        {{- range first 1 (.GetTerms "categories") -}}<span class="eyebrow-cat">{{ .LinkTitle }}</span><span aria-hidden="true"> / </span>{{- end -}}
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date | time.Format "2006.01.02" }}</time>
+      </p>
+      <h1 class="hero-title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h1>
+      {{- with .Description | default .Summary }}<p class="hero-deck">{{ . }}</p>{{- end }}
+      <div class="hero-actions">
+        <a class="read-link" href="{{ .RelPermalink }}">{{ i18n "homeRead" }}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+        </a>
+        <span class="hero-meta">{{ .Date | time.Format ":date_long" }} · {{ i18n "read_time" .ReadingTime }}</span>
+      </div>
+      {{- partial "social_icons.html" -}}
+    </div>
+    <figure class="hero-figure">
+      <a class="hero-cover" href="{{ .RelPermalink }}" tabindex="-1" aria-hidden="true">{{ partial "cover.html" (dict "cxt" . "IsSingle" false) }}</a>
+    </figure>
+  </section>
+  {{- end }}
+
+  {{- with $recent }}
+  <section class="recent" aria-labelledby="home-recent-title">
+    <div class="section-head">
+      <h2 id="home-recent-title">{{ i18n "homeRecent" }}</h2>
+      <a class="section-link" href="{{ (site.GetPage "/posts").RelPermalink }}">{{ i18n "homeAllPosts" }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="recent-grid">
+      {{- range first 1 . }}
+      <a class="recent-lead" href="{{ .RelPermalink }}">
+        {{- with .Params.cover.image }}<img src="{{ . | absURL }}" loading="lazy" alt="">{{- end }}
+        <h3>{{ .Title }}</h3>
+        {{- with .Description | default .Summary }}<p>{{ . }}</p>{{- end }}
+        <div class="recent-meta">{{ .Date | time.Format "2006.01.02" }} · {{ i18n "read_time" .ReadingTime }}</div>
+      </a>
+      {{- end }}
+      <div class="recent-list">
+        {{- range after 1 . }}
+        <a class="recent-item" href="{{ .RelPermalink }}">
+          <h3>{{ .Title }}</h3>
+          {{- with .Description | default .Summary }}<p>{{ . }}</p>{{- end }}
+          <div class="recent-meta">{{ .Date | time.Format "2006.01.02" }} · {{ i18n "read_time" .ReadingTime }}</div>
+        </a>
+        {{- end }}
+      </div>
+    </div>
+  </section>
+  {{- end }}
+
+  <section class="ledger" aria-labelledby="home-ledger-title">
+    <div class="section-head">
+      <h2 id="home-ledger-title">{{ i18n "homeIndex" }}</h2>
+      <a class="section-link" href="{{ (site.GetPage "/archives").RelPermalink }}">{{ i18n "homeByYear" }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <div class="ledger-list">
+      {{- range $ledger }}
+      <a class="ledger-row" href="{{ .RelPermalink }}">
+        <span class="l-date">{{ .Date | time.Format "2006.01.02" }}</span>
+        <span class="l-title">{{ .Title }}</span>
+        {{- range first 1 (.GetTerms "categories") }}<span class="l-cat">{{ .LinkTitle }}</span>{{- else }}<span class="l-cat" aria-hidden="true"></span>{{- end }}
+        <span class="l-read">{{ i18n "read_time" .ReadingTime }}</span>
+      </a>
+      {{- end }}
+    </div>
+  </section>
+
+  {{- with site.Params.profileMode }}{{- with .buttons }}
+  <div class="buttons home-buttons">
+    {{- range . }}
+    <a class="button" href="{{ trim .url " " }}" rel="noopener" title="{{ .name }}"><span class="button-inner">{{ .name }}</span></a>
+    {{- end }}
+  </div>
+  {{- end }}{{- end }}
+</div>
+{{ end }}

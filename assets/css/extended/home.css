@@ -1,0 +1,395 @@
+/* home.css — editorial homepage (redesign/proto-wiring Phase 2, 2026-11-08).
+   Ports the prototype's front-page values verbatim (原型/二重奏-博客界面
+   设计-交互版.html): masthead line → hero → recent grid → ledger rows.
+   Spacing takes --sp-* tokens (chrome.css); type sizes are prototype px.
+   The .home wrapper widens .main (720px measure is an article-column
+   anchor; the front page is a 1180px editorial canvas, same as the
+   prototype's --max). */
+
+.main:has(> .home) {
+  max-width: 1180px;
+}
+
+.home {
+  padding-top: 0;
+}
+
+/* ---- masthead line --------------------------------------------------- */
+.masthead-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  padding: 26px 0 13px;
+  border-bottom: 1px solid var(--border);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--secondary);
+  text-transform: uppercase;
+}
+
+.masthead-line .mh-primary {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-family: inherit;
+}
+
+.masthead-line .mh-note {
+  white-space: nowrap;
+}
+
+/* ---- hero ------------------------------------------------------------- */
+.hero {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 32px;
+  padding: 74px 0 var(--sp-section);
+  align-items: start;
+}
+
+.hero-text {
+  grid-column: 1 / span 5;
+  padding-top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+}
+
+.hero-eyebrow {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+}
+
+.hero-eyebrow .eyebrow-cat {
+  color: var(--accent);
+}
+
+.hero-title {
+  margin: 16px 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(36px, 4.9vw, 60px);
+  line-height: 1.16;
+  letter-spacing: -0.005em;
+  text-wrap: pretty;
+}
+
+.hero-title a {
+  color: var(--primary);
+}
+
+.hero-deck {
+  margin: 24px 0 0;
+  font-size: 18px;
+  line-height: 1.86;
+  color: var(--secondary);
+  max-width: 30em;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 34px;
+  flex-wrap: wrap;
+}
+
+.read-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  color: var(--primary);
+  border-bottom: 1px solid var(--primary);
+  padding-bottom: 3px;
+}
+
+.read-link svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.25s ease;
+}
+
+@media (hover: hover) {
+  .read-link:hover svg {
+    transform: translateX(3px);
+  }
+}
+
+.hero-meta {
+  font-size: 13px;
+  color: var(--secondary);
+}
+
+.hero-figure {
+  grid-column: 6 / span 7;
+  margin: 0;
+  padding-top: 34px;
+}
+
+.hero-cover {
+  display: block;
+}
+
+/* the cover partial outputs .entry-cover; strip its card margins — the
+   hero owns the rhythm here */
+.hero-cover .entry-cover {
+  margin: 0;
+}
+
+.hero-cover img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+/* social icons ride under the hero text, left-aligned (theme's .profile
+   centering does not apply here) */
+.home .social-icons {
+  justify-content: flex-start;
+  margin-top: auto;
+  padding-top: 42px;
+}
+
+/* ---- section heads ---------------------------------------------------- */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  padding: 22px 0 0;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+}
+
+.section-link {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--secondary);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.section-link svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ---- recent grid ------------------------------------------------------ */
+.recent-grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 48px;
+  margin-top: 34px;
+}
+
+.recent-lead {
+  display: block;
+}
+
+.recent-lead img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.recent-lead h3,
+.recent-item h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.42;
+  text-wrap: pretty;
+}
+
+.recent-lead p,
+.recent-item p {
+  margin: 10px 0 0;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--secondary);
+}
+
+.recent-meta {
+  margin-top: 12px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--secondary);
+}
+
+.recent-lead h3 {
+  margin-top: 20px;
+}
+
+.recent-list {
+  border-top: 1px solid var(--border);
+  margin-top: -6px;
+}
+
+.recent-item {
+  display: block;
+  padding: var(--sp-5) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.recent-item h3 {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* ---- ledger rows ------------------------------------------------------ */
+.ledger-list {
+  margin-top: 18px;
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 74px 62px;
+  align-items: baseline;
+  gap: 20px;
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-row .l-date,
+.ledger-row .l-cat,
+.ledger-row .l-read {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  color: var(--secondary);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-row .l-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--primary);
+}
+
+.ledger-row .l-read {
+  text-align: right;
+}
+
+/* hover = title fades, pointer-only (site touch-latch convention) */
+@media (hover: hover) {
+  .ledger-row:hover .l-title,
+  .recent-item:hover h3,
+  .recent-lead:hover h3 {
+    opacity: 0.9;
+  }
+}
+
+/* ---- trailing buttons (profileMode 最新文章/搜索/归档) ------------------ */
+.home-buttons {
+  margin: var(--sp-7) 0 0;
+  justify-content: flex-start;
+}
+
+/* ---- responsive -------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .hero-text {
+    grid-column: 1 / span 6;
+    align-self: start;
+  }
+
+  .hero-figure {
+    grid-column: 7 / span 6;
+  }
+
+  .recent-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .masthead-line {
+    padding-top: 20px;
+  }
+
+  .masthead-line .mh-note {
+    display: none;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: var(--sp-head) 0 var(--sp-section);
+  }
+
+  .hero-text,
+  .hero-figure {
+    grid-column: 1 / -1;
+  }
+
+  .hero-text {
+    padding-top: 0;
+  }
+
+  .hero-figure {
+    padding-top: 0;
+    /* cover first on phones: the image carries the tap, title right under */
+    order: -1;
+  }
+
+  .hero-title {
+    font-size: clamp(36px, 8vw, 44px);
+  }
+
+  .hero-deck {
+    font-size: 16px;
+  }
+
+  .recent-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+
+  .ledger-row {
+    grid-template-columns: 82px 1fr 54px;
+    gap: 14px;
+  }
+
+  .ledger-row .l-read {
+    display: none;
+  }
+
+  .home .social-icons {
+    padding-top: 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero-actions {
+    gap: 16px;
+  }
+
+  .ledger-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 14px 0;
+  }
+
+  .ledger-row .l-cat {
+    display: none;
+  }
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接线开工 · 第 1 轮进度（Phase 0-1 完成）</title>
+<style>
+:root{--paper:#f7f3ea;--ink:#1a1712;--sub:#6b6455;--rule:#dfd6c4;--gold:#8a5d15;--ok:#2e7d4f}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--font-display,serif);"Iowan Old Style","Palatino Linotype",Palatino,"Songti SC",serif;background:var(--paper);color:var(--ink);line-height:1.75;padding:40px 16px 80px}
+.wrap{max-width:1020px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--gold);font-weight:600}
+h1{font-size:clamp(24px,3vw,32px);margin:8px 0 4px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{background:transparent;border:1px solid var(--rule);border-radius:10px;padding:20px 22px}
+.panel h2{font-size:16px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--rule)}
+li{margin:.4em 0;font-size:14.5px}
+.ok{color:var(--ok);font-weight:700}
+.warn{color:var(--gold);font-weight:700}
+code{background:#efeadf;border-radius:4px;padding:0 4px;font-size:.9em}
+ul{padding-left:1.2em}
+footer{margin-top:28px;color:var(--sub);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">二重奏 · 原型 → Hugo 接线</div>
+<h1>开工第 1 轮：Phase 0-1 完成</h1>
+<div class="meta">2026-11-08 ｜ 分支 <code>redesign/proto-wiring</code>（本地，未 push）｜ commit 344fe99 · acd9145 · e16f1d7</div>
+<div class="grid">
+
+<section class="panel">
+<h2>签认与准备（Phase 0）</h2>
+<ul>
+<li>三项签认按推荐项自动采用：<strong>文字目录 / 衬线 display / TOC 移右</strong>——如有不符本意，随时推翻重做</li>
+<li>基线构建绿（hugo v0.169 extended，70/68/72 页）</li>
+<li>7 视口 × 4 视图基线截图入库 <code>.zcode/audit/baseline/</code>（28 张）</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>令牌与 chrome（Phase 1）</h2>
+<ul>
+<li>新增 <code>chrome.css</code>：<code>--sp-1…9</code> + section/head/tail 令牌；<span class="warn">--u 全站退役换轨</span>（--sp-3/--sp-6）</li>
+<li>纸墨调色板映射主题变量（paper #f7f3ea / ink #1a1712 / rule #dfd6c4），暗色镜像原型</li>
+<li>衬线 display 层：<code>--font-display</code> 按 html[lang] 分语种，上品牌与全部 h1 面；fonts.css 零改动</li>
+<li>accent 改原型铜色 rgb(138,93,21) / rgb(216,171,91)</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>实测排掉的雷</h2>
+<ul>
+<li>主题把 <code>.list</code>/<code>details.toc</code>/标签胶囊/paginav 刷 <code>--code-bg</code>——纸墨下全变黑块；已重刷为 entry/paper 表面 + 发丝边（7 视口截图复核通过）</li>
+<li>theme-color 双 meta 与兜底值同步 #f7f3ea / #16140f</li>
+<li>WSL 默认 node 18 跑不了翻译自测（既有环境坑）——feature-check 现自动升本地 v26</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>状态与下一步</h2>
+<ul>
+<li><span class="ok">feature-check 全绿</span>（63 项，--u 断言已随轨改写为 --sp-*）</li>
+<li>每阶段 commit 前 <code>hugo --gc --minify</code> 过闸；全程未触碰 content/**</li>
+<li>headless chromium 无 CJK 衬线字体——衬线观感需在你真机核验一次</li>
+<li>下一步 Phase 2：编辑部式首页（hero + 近作 + 按年份浏览入口）</li>
+</ul>
+</section>
+
+</div>
+<footer>redesign/proto-wiring · Phase 0-1 ｜ 施工方案：原型/接线施工方案.md</footer>
+</div>
+</body>
+</html>

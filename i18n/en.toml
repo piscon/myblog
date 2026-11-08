@@ -9,3 +9,9 @@ next_page = "Next"
 # "updatedOn"): freshness moved from the article end-matter to the header
 # meta row. Cards and archive rows render it too; ui.css hides it there.
 updatedOn = "Updated on"
+# editorial home (Phase 2, 2026-11-08)
+homeRead = "Read this one"
+homeRecent = "Recent"
+homeAllPosts = "All posts"
+homeIndex = "Index"
+homeByYear = "Browse by year"

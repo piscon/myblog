@@ -8,3 +8,9 @@ next_page = "次の記事"
 # 記事末尾にあった更新日を、ファーストビューの meta 行へ移動。リストカードとアーカイブ
 # 行でもレンダリングされるが、ui.css が .entry-footer/.archive-meta で display:none。
 updatedOn = "最終更新"
+# editorial home (Phase 2, 2026-11-08)
+homeRead = "この一篇を読む"
+homeRecent = "近作"
+homeAllPosts = "すべての記事"
+homeIndex = "目次"
+homeByYear = "年ごとに見る"

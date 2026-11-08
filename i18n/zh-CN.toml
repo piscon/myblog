@@ -10,3 +10,9 @@ next_page = "下一篇"
 # 首屏显示刷新图标+最后修改日期（原「最后更新于」在文末，首屏无时效信号）。列表卡/归档行
 # 同样渲染该条目，由 ui.css 按 .entry-footer/.archive-meta 容器 display:none 关掉。
 updatedOn = "更新于"
+# 编辑部式首页（2026-11-08 Phase 2，layouts/index.html 覆盖）三语文案
+homeRead = "读这篇"
+homeRecent = "近作"
+homeAllPosts = "全部文章"
+homeIndex = "目录"
+homeByYear = "按年份浏览"
