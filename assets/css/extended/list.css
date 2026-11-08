@@ -1,0 +1,212 @@
+/* list.css — year-grouped text directory (redesign/proto-wiring Phase 3,
+   2026-11-08). Ports the prototype's list values verbatim; supersedes the
+   Casper stacked cards (their DOM no longer renders — _default/list.html
+   outputs .year-group/.post-row). Rows are the site's line-separator
+   language: hairlines between rows, whitespace between groups. */
+
+.list-groups {
+  padding-bottom: var(--sp-tail);
+}
+
+.year-group {
+  display: grid;
+  grid-template-columns: 156px 1fr;
+  gap: 40px;
+  padding-top: var(--sp-8);
+}
+
+/* the first group rides close under the page header (band stays tight);
+   later groups take the full section step */
+.year-group:first-child {
+  padding-top: var(--sp-6);
+}
+
+.year-label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 60px;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--secondary);
+  font-variant-numeric: lining-nums;
+}
+
+.year-label small {
+  display: block;
+  margin-top: 10px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--secondary);
+}
+
+.post-row {
+  display: grid;
+  /* 56px fits "11.05" — the year lives in the .year-label heading above,
+     so row dates don't repeat it (title attribute keeps the full date) */
+  grid-template-columns: 56px 1fr 62px 58px;
+  align-items: baseline;
+  gap: 22px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* rows without the cat column (category term pages: constant category) */
+.post-row.no-cat {
+  grid-template-columns: 56px 1fr 58px;
+}
+
+.year-rows .post-row:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.post-row .p-date,
+.post-row .p-cat,
+.post-row .p-read {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.post-row .p-date {
+  letter-spacing: 0.04em;
+}
+
+.post-row .p-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.5;
+  color: var(--primary);
+  text-wrap: pretty;
+}
+
+.post-row .p-cat {
+  letter-spacing: 0.08em;
+}
+
+.post-row .p-read {
+  text-align: right;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* hover = title fade (prototype 0.9), pointer-only (touch latch contract) */
+@media (hover: hover) {
+  .post-row:hover .p-title {
+    opacity: 0.9;
+  }
+}
+
+/* ---- numeric pager (窗口式: first · current±1 · last, ellipsis gaps) ---- */
+.list-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: var(--sp-7) 0 var(--sp-tail);
+}
+
+.pager-num {
+  font-size: 14px;
+  line-height: 34px;
+  min-width: 34px;
+  text-align: center;
+  padding: 0 10px;
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) {
+  .pager-num:hover {
+    border-color: var(--accent);
+    color: var(--primary);
+  }
+}
+
+.pager-num.is-current {
+  background: var(--entry);
+  border-color: var(--accent);
+  color: var(--primary);
+  font-weight: 600;
+  cursor: default;
+}
+
+.pager-gap {
+  color: var(--secondary);
+  padding: 0 var(--sp-1);
+}
+
+/* ---- page header count (total beside the hub title) --------------------- */
+.page-header .page-count {
+  display: block;
+  margin-top: 8px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- responsive ---------------------------------------------------------- */
+@media (max-width: 768px) {
+  .year-group {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding-top: var(--sp-7);
+  }
+
+  .year-group:first-child {
+    padding-top: var(--sp-5);
+  }
+
+  .year-label {
+    font-size: 36px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .year-label small {
+    margin-top: 0;
+  }
+
+  .post-row {
+    grid-template-columns: 1fr auto;
+    gap: 3px 14px;
+  }
+
+  .post-row.no-cat {
+    grid-template-columns: 1fr auto;
+  }
+
+  .post-row .p-date {
+    grid-column: 1 / -1;
+  }
+
+  .post-row .p-cat {
+    display: none;
+  }
+
+  .post-row .p-title {
+    font-size: 18px;
+    grid-row: 2;
+  }
+
+  .post-row .p-read {
+    align-self: baseline;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .post-row .p-read {
+    display: none;
+  }
+}

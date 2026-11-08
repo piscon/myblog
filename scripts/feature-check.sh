@@ -73,7 +73,7 @@ check "404 en 文案分流"         "grep -q 'Page not found' '$OUT/en/404.html'
 # 由 ui.css 容器门控 token 守卫——条目 display:none + 前导 meta-sep 配对隐藏防双 ·
 # （:has(+ .meta-updated)，同 cover.css mobile 门控模式）；extend_post_content 不再
 # 输出 post-lastmod（负断言守删除）
-check "更新于入首屏meta(门控)"  "grep -q 'meta-item meta-updated' '$PAGE' && grep -q '更新于' '$PAGE' && grep -q 'updatedOn' i18n/zh-CN.toml && grep -q 'updatedOn' i18n/ja.toml && grep -q 'updatedOn' i18n/en.toml && grep -q '最終更新' '$OUT/ja/posts/first/index.html' && grep -q 'Updated on' '$OUT/en/posts/first/index.html' && grep -q '.entry-footer .meta-updated' '$OUT'/assets/css/stylesheet.*.css && grep -q 'meta-sep:has(+.meta-updated)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q '最后更新于' '$PAGE' && ! grep -q 'post-lastmod' '$PAGE' && ! grep -q 'post-lastmod' layouts/_partials/extend_post_content.html"
+check "更新于入首屏meta(门控)"  "grep -q 'meta-item meta-updated' '$PAGE' && grep -q '更新于' '$PAGE' && grep -q 'updatedOn' i18n/zh-CN.toml && grep -q 'updatedOn' i18n/ja.toml && grep -q 'updatedOn' i18n/en.toml && grep -q '最終更新' '$OUT/ja/posts/first/index.html' && grep -q 'Updated on' '$OUT/en/posts/first/index.html' && grep -q '.archive-meta .meta-updated' '$OUT'/assets/css/stylesheet.*.css && grep -q 'meta-sep:has(+.meta-updated)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q '最后更新于' '$PAGE' && ! grep -q 'post-lastmod' '$PAGE' && ! grep -q 'post-lastmod' layouts/_partials/extend_post_content.html"
 # 相关文章焦点归位（2026-11-06）：视觉序（ui.css order:5）related 在 footer 后、DOM 序
 # （extend_post_content 钩子在主题 single.html 里的位置）在 footer 前，键盘 Tab 焦点
 # 与视觉脱节（WCAG 2.4.3）。site.js 把节点搬到 footer 后（无 after-footer 钩子，不开
@@ -166,9 +166,10 @@ check "摘要标签(CSS作用域+三语言)" "grep -q '.post-header .post-descri
 # 被 CSS 选中 → grid font-size:0 先帧静音 + .desc-body 显式恢复字号。CSS token 守 minified
 # 选择器（空白剔除、结构保留，同汉堡断言形态），JS token 守 bundle（minifier 不改写字符串字面量）
 check "摘要折叠行(grid+JS包裹)" "grep -q 'html.js .post-header' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-open' '$OUT'/assets/css/stylesheet.*.css && grep -q 'desc-body' '$OUT'/js/site.*.js && grep -q 'desc-open' '$OUT'/js/site.*.js"
-# 列表堆叠卡（2026-11-07 Casper 对标改造）：image-top 堆叠卡依赖主题 DOM 序（cover 先于 header）
-# + :not(.tag-entry) 门控选择器（term 页走主题紧凑行）；负断言 --thumb 根除行式机制残留
-check "列表堆叠卡(CSS门控+DOM序)" "grep -q 'post-entry:not(.tag-entry)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q -- '--thumb' '$OUT'/assets/css/stylesheet.*.css && grep -q '<article class=\"post-entry\">' '$OUT/zh/posts/index.html' && grep -q 'entry-cover' '$OUT/zh/posts/index.html' && [ \"\$(grep -om1 'entry-cover\|entry-header' '$OUT/zh/posts/index.html')\" = 'entry-cover' ]"
+# 列表文字目录（2026-11-08 Phase 3，签认①落地）：年份分组行式 DOM（.year-group/.post-row）
+# + 数字分页器（pagerSize=10，窗口式含首尾±1+省略号）；负断言根除卡片/封面 DOM（堆叠卡机制
+# 与其 CSS 一并退役，cover.css/ui.css 卡片段已删）
+check "列表文字目录(年份分组+分页器)" "grep -q 'year-group' '$OUT/zh/posts/index.html' && grep -q 'post-row' '$OUT/zh/posts/index.html' && grep -q 'p-title' '$OUT/zh/posts/index.html' && ! grep -q 'post-entry' '$OUT/zh/posts/index.html' && ! grep -q 'entry-cover' '$OUT/zh/posts/index.html' && grep -q 'year-group' '$OUT/en/posts/index.html' && grep -q '.list-pager{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.pager-num.is-current' '$OUT'/assets/css/stylesheet.*.css"  # 分页器守 CSS token：现语料恰好 10 篇不出 pager（feature-check -D 含草稿才会 >10，不可依赖）
 # giscus 配色跟随站内主题：初值改写脚本标签属性（依赖 client.js 的 currentScript 语义）+
 # 切换经 html[data-theme] postMessage 转发——主题 head 脚本给 <html> 设 data-theme 是前提
 check "giscus 主题跟随(耦合点)"  "grep -q 'id=\"giscus-script\"' '$PAGE' && grep -q 'iframe.giscus-frame' '$PAGE' && grep -q 'dataset.theme' themes/PaperMod/layouts/_partials/head.html"
@@ -195,7 +196,7 @@ check "聚合标题图标(emoji已除)"  "grep -q 'taxonomy-heading' '$OUT/zh/se
 check "原生分享按钮(手机)"       "grep -q 'navigator.share' '$OUT'/js/site.*.js && grep -q 'style.display' '$OUT'/js/site.*.js && grep -q 'share-buttons' '$PAGE'"
 # cover.html 站点覆盖（tier-3）：sizes 统一 720px/100vw（2026-11-07 堆叠卡改造后列表封面同
 # 为全宽槽位；first.md 有 cover 且 slug 稳定）
-check "封面 sizes(统一720)" "grep -q '720px, 100vw' '$OUT/zh/posts/index.html' && grep -q '720px, 100vw' '$OUT/zh/posts/first/index.html'"
+check "封面 sizes(统一720)" "grep -q '720px, 100vw' '$OUT/zh/index.html' && grep -q '720px, 100vw' '$OUT/zh/posts/first/index.html'"  # 列表页已无封面 DOM（Phase 3 文字目录），720px 断言改守首页 hero 封面 + 文章页
 # 分享并入标签行（2026-11-06）：ui.css 把 post-footer 改 grid——第一行 tags 左/share 右、
 # 第二行 paginav 通栏；分享去盒装、图标 18px 次级色（CSS 压过主题 svg 的 30px 属性宽高，
 # 也压过 site.js 注入的原生分享 svg 26px）。hover 金色门控 @media(hover:hover)（2026-11-06

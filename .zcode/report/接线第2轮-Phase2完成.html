@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接线第 2 轮 · Phase 2 完成</title>
+<style>
+:root{--paper:#f7f3ea;--ink:#1a1712;--sub:#6b6455;--rule:#dfd6c4;--gold:#8a5d15;--ok:#2e7d4f}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Songti SC","Noto Serif SC",serif;background:var(--paper);color:var(--ink);line-height:1.75;padding:40px 16px 80px}
+.wrap{max-width:1020px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--gold);font-weight:600}
+h1{font-size:clamp(24px,3vw,32px);margin:8px 0 4px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{border:1px solid var(--rule);border-radius:10px;padding:20px 22px}
+.panel h2{font-size:16px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--rule)}
+li{margin:.4em 0;font-size:14.5px}
+.ok{color:var(--ok);font-weight:700}
+.warn{color:var(--gold);font-weight:700}
+code{background:#efeadf;border-radius:4px;padding:0 4px;font-size:.9em}
+ul{padding-left:1.2em}
+footer{margin-top:28px;color:var(--sub);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">二重奏 · 原型 → Hugo 接线</div>
+<h1>第 2 轮：Phase 2 编辑部式首页完成</h1>
+<div class="meta">commit 7eb629e + f96f322 ｜ 分支 redesign/proto-wiring（本地）｜ feature-check 全绿</div>
+<div class="grid">
+
+<section class="panel">
+<h2>落地内容</h2>
+<ul>
+<li><code>layouts/index.html</code> 站点覆盖：masthead 行（副标题 + Essays &amp; Notes · 年份）→ hero（最新一篇：眉行/衬线大标题/摘要/读这篇/社交图标 + 右侧封面）→ 近作（1 图文大条 + 2 文字行）→ 目录（5 条行式台账，按年份浏览→归档）→ profileMode 按钮行（最新文章/搜索/归档）</li>
+<li><code>home.css</code>：数值照抄原型（hero 5/7 栅格、标题 clamp(36px,4.9vw,60px)、台账 92/1fr/74/62 列、1080/768/560 三断点）；<code>.main:has(&gt;.home)</code> 放宽 1180px</li>
+<li>三语 i18n 新键：homeRead / homeRecent / homeAllPosts / homeIndex / homeByYear</li>
+<li>手机 hero 封面置顶（order:-1）；hover 金态/淡出全走 @media(hover:hover)</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>排掉的雷</h2>
+<ul>
+<li><span class="warn">index.html 覆盖必须包 {{ define "main" }}</span>——裸内容脱离 baseof，页面无 head/头部/页脚（首跑即暴露，探针定位）</li>
+<li>首页分类一律纯文本——post_meta partial 硬编码分类 &lt;a&gt;，直接复用会撞「菜单不含分类/标签」断言；hero/近作 meta 改内联日期+读时</li>
+<li>改 scripts/feature-check.sh 会丢可执行位——fix-mode.sh 恢复</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>验证</h2>
+<ul>
+<li><span class="ok">hugo --gc --minify 过闸 + feature-check 63 项全绿</span></li>
+<li>三语文案实测渲染（读这篇/この一篇を読む/Read this one 等各命中）</li>
+<li>1440/390 桌面+手机全页截图复核：布局无破、无横向溢出、台账折叠正确</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>下一步</h2>
+<ul>
+<li>Phase 3（1.5d）：签认①落地处——<code>/posts/</code> 年份分组文字目录 + 分页器（pagerSize=10 机制先就位）、archives 台账、tags/categories 索引与 term 页，拆除 Casper 堆叠卡 CSS 与对应断言</li>
+</ul>
+</section>
+
+</div>
+<footer>redesign/proto-wiring · Phase 0-2 完成 ｜ 施工方案：原型/接线施工方案.md</footer>
+</div>
+</body>
+</html>

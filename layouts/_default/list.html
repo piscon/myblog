@@ -1,0 +1,91 @@
+{{- /* SITE OVERRIDE of themes/PaperMod/layouts/_default/list.html
+       (redesign/proto-wiring Phase 3, 2026-11-08). Year-grouped text
+       directory + numeric pager (签认①: supersedes the 2026-11-07 Casper
+       stacked-card list; cards' DOM never renders anymore).
+
+       Serves kind=section (the /posts/ feed) and kind=term (each
+       category/tag's own directory). Taxonomy hubs (/categories/,
+       /tags/) keep the theme's terms-tags chips page — NOT this file.
+       Archives keep their own ledger override (layouts/archives/
+       list.html, full index, no pager).
+
+       Weekly PR coupling: theme's list.html is shadowed wholesale —
+       re-diff it on PaperMod upgrades for header/RSS/markup drift and
+       re-apply here. Guarded by feature-check「列表文字目录」. */ -}}
+
+{{ define "main" }}
+{{- $isTerm := eq .Kind "term" -}}
+{{- $isCatTerm := and $isTerm (eq .Data.Singular "category") -}}
+{{- $pages := .Paginator.Pages -}}
+
+<header class="page-header">
+  {{- if .Title }}
+  <h1>
+    {{ .Title }}
+    {{- if and (or (eq .Kind `term`) (eq .Kind `section`)) (.Param "ShowRssButtonInSectionTermList") }}
+    {{- with .OutputFormats.Get "rss" }}
+    <a href="{{ .RelPermalink }}" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+    {{- end }}
+    {{- end }}
+  </h1>
+  {{- end }}
+  {{- with .Description }}
+  <div class="post-description">
+    {{ . | markdownify }}
+  </div>
+  {{- end }}
+  <span class="page-count">{{ len .Pages }} {{ i18n "postsUnit" }}</span>
+</header>
+
+<div class="list-groups">
+  {{- range $pages.GroupByDate "2006" }}
+  <section class="year-group">
+    <h2 class="year-label">{{ .Key }}<small>{{ len .Pages }} {{ i18n "postsUnit" }}</small></h2>
+    <div class="year-rows">
+      {{- range .Pages }}
+      <a class="post-row{{ if $isCatTerm }} no-cat{{ end }}" href="{{ .RelPermalink }}" title="{{ .Date.Format "2006-01-02" }}">
+        <span class="p-date">{{ .Date | time.Format "01.02" }}</span>
+        <span class="p-title">{{ .Title }}</span>
+        {{- if not $isCatTerm }}
+        {{- range first 1 (.GetTerms "categories") }}<span class="p-cat">{{ .LinkTitle }}</span>{{- else }}<span class="p-cat" aria-hidden="true"></span>{{- end }}
+        {{- end }}
+        <span class="p-read">{{ i18n "read_time" .ReadingTime }}</span>
+      </a>
+      {{- end }}
+    </div>
+  </section>
+  {{- end }}
+</div>
+
+{{- /* Numeric pager: first · window(current±1) · last, ellipsis in the
+       gaps — the decided shape (memory: 页码窗口式含首尾+当前±1+省略号).
+       Hides entirely on a single page. */ -}}
+{{- $pag := .Paginator }}
+{{- if gt $pag.TotalPages 1 }}
+<nav class="list-pager" aria-label="{{ i18n "homeIndex" }}">
+  {{- range $p := $pag.Pagers }}
+  {{- $n := $p.PageNumber }}
+  {{- $cur := $pag.PageNumber }}
+  {{- $delta := sub $n $cur }}
+  {{- if or (eq $n 1) (eq $n $pag.TotalPages) (and (ge $delta -1) (le $delta 1)) }}
+    {{- if eq $n $cur }}
+    <span class="pager-num is-current" aria-current="page">{{ $n }}</span>
+    {{- else }}
+    <a class="pager-num" href="{{ $p.URL }}">{{ $n }}</a>
+    {{- end }}
+  {{- else if and (eq $n 2) (gt $cur 3) }}
+    <span class="pager-gap" aria-hidden="true">…</span>
+  {{- else if and (eq $n (sub $pag.TotalPages 1)) (lt $cur (sub $pag.TotalPages 3)) }}
+    <span class="pager-gap" aria-hidden="true">…</span>
+  {{- end }}
+  {{- end }}
+</nav>
+{{- end }}
+{{ end }}

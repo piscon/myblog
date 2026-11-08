@@ -27,7 +27,7 @@ mediaType = "text/plain"
 isPlainText = true
 
 [pagination]
-  pagerSize = 8
+  pagerSize = 10
 
 # 相关文章：Hugo 内建 Related Content，按 tags/categories 加权
 [related]

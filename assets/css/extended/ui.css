@@ -6,19 +6,10 @@
    --sp-6 = the old 2u anchor headroom). The theme's --gap stays
    page-gutter-only (.main/header/footer padding, menu column-gap). */
 
-.post-entry {
-  /* Term rows (tag-entry) keep the compact gutter; the stacked list
-     cards override to Casper's feed gap below (2026-11-07 verbatim) */
-  margin-bottom: var(--sp-3);
-}
-
-/* Stacked-card separation follows Casper's feed gap verbatim (4.8vmin;
-   40px at ≤768px via cover.css). The u system exited the card interior —
-   card values are Casper px; --u still governs search/term rows and page
-   gutters. Cards have no chrome — rhythm is the only separator. */
-.post-entry:not(.tag-entry) {
-  margin-bottom: 4.8vmin;
-}
+/* The theme's .post-entry list-card DOM no longer renders anywhere:
+   Phase 3 (2026-11-08) pivoted lists to the year-grouped text directory
+   (_default/list.html → .post-row), and the Casper stacked-card rules
+   (ui + cover) were deleted with it. */
 
 /* iOS Safari auto-zooms the viewport when an input with computed font-size
    below 16px gets focus. Form controls do NOT inherit the body size, so
@@ -733,11 +724,9 @@ sup[id^="fnref:"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* Meta rung 14px (φ^-0.5) for archives (+term rows); stacked list cards
-   override to Casper's 13px in cover.css (2026-11-07 verbatim revision).
-   The theme's 13px sat BETWEEN rungs — it now only serves the theme
-   fallback surfaces. */
-.entry-footer {
+/* Meta rung 14px (φ^-0.5) for archive rows. (The old list-card side
+   (.entry-footer) died with the stacked cards, Phase 3.) */
+.archive-meta {
   font-size: 14px;
 }
 
@@ -756,14 +745,12 @@ sup[id^="fnref:"] {
 }
 
 /* Freshness ("meta-updated") belongs to the article header only — the
-   partial feeds cards (.entry-footer) and archive rows (.archive-meta)
-   too, and their compact skeletons stay single-date. Hiding an item
-   must pair-hide its LEADING separator (the meta-sep sibling before
-   it) or the previous item's `·` doubles up — same rule as the mobile
-   meta-read hiding in cover.css. */
-.entry-footer .meta-updated,
+   partial feeds archive rows (.archive-meta) too, and their compact
+   skeleton stays single-date. (The list-card side died with the cards,
+   Phase 3.) Hiding an item must pair-hide its LEADING separator (the
+   meta-sep sibling before it) or the previous item's `·` doubles up —
+   same rule as the mobile meta-read hiding in cover.css. */
 .archive-meta .meta-updated,
-.entry-footer .meta-sep:has(+ .meta-updated),
 .archive-meta .meta-sep:has(+ .meta-updated) {
   display: none;
 }
