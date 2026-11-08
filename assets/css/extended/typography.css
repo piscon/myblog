@@ -220,12 +220,27 @@ html[lang^="ja"] .post-content {
   color: var(--primary);
 }
 
+/* The theme's .md-content pre code (0,2,1) displays code as a padded
+   grid box on its own --code-block-bg !important slab — flatten it so the
+   prototype's single pre slab shows: this reset matches that specificity
+   and wins by source order (--code-block-bg itself is set transparent in
+   chrome.css, the only lever under an !important). color:inherit is
+   critical: the inline-code skin's color would otherwise paint near-black
+   over the dark slab, leaving only token colors visible (zz-s06 report). */
+.md-content pre code,
 .post-content pre code {
-  background: none;
-  border: 0;
+  display: block;
+  margin: 0;
   padding: 0;
   font-size: inherit;
-  line-height: 1.6;
+  color: inherit;
+  line-height: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow-x: visible;
+  word-break: normal;
+  text-align: left;
 }
 
 /* ---- Quotes / rules / tables / media ----------------------------------- */

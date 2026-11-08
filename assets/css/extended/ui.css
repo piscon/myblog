@@ -27,12 +27,18 @@
    system, 2026-11-05). This file loads after it in the extended bundle, so
    redefining those properties here would silently override the system. */
 
-/* Code block separation rides the system's √φ paragraph coefficient
-   (1.272em = 22.9px), same as hr/img/quote in typography.css — the old
-   1.2em was a pre-system straggler */
+/* Code block (full-align: prototype .article-body pre): dark slab,
+   14px/1.75 mono, 20px 22px padding. Base text = --code-ink; syntax
+   colors come from the theme's chroma stylesheet (unchanged). */
 .post-content pre {
-  border-radius: var(--radius);
-  margin: 1.272em 0;
+  margin: var(--sp-6) 0;
+  padding: 20px 22px;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  border-radius: 2px;
+  font-size: 14px;
+  line-height: 1.75;
+  tab-size: 4;
 }
 
 /* Profile buttons spacing */
@@ -494,6 +500,15 @@ details.toc .inner a {
   gap: 32px;
 }
 
+.post-single > .post-footer > .paginav {
+  /* the theme paints the paginav container var(--code-bg) + border (it
+     was covered by the retired chrome pill rule) — strip it back off */
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
 .post-single > .post-footer > .paginav a {
   display: block;
   background: none;
@@ -502,7 +517,18 @@ details.toc .inner a {
   width: auto;
 }
 
-.post-single > .post-footer > .paginav .label {
+/* theme hover paints a grey slab on both surfaces — kill it (the
+   prototype hover signals are the title underline / gold text) */
+.post-single > .post-footer > .paginav a:hover,
+.post-tags a:hover {
+  background: none;
+}
+
+/* theme paginav spans are INVERTED from their names: .title carries the
+   «上一篇/下一篇» label, the unnamed span carries the post title — map them
+   to the prototype's pg-label (mono 12 uppercase) / pg-title (serif 18) */
+.post-single > .post-footer > .paginav .title {
+  display: block;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 12px;
   letter-spacing: 0.14em;
@@ -510,7 +536,7 @@ details.toc .inner a {
   color: var(--secondary);
 }
 
-.post-single > .post-footer > .paginav .title {
+.post-single > .post-footer > .paginav a > span:not(.title) {
   display: block;
   margin-top: 7px;
   font-family: var(--font-display);
@@ -519,7 +545,14 @@ details.toc .inner a {
   color: var(--primary);
 }
 
+/* pin the columns: a missing prev must not pull next into the left cell */
+.post-single > .post-footer > .paginav a.prev {
+  grid-column: 1;
+  text-align: left;
+}
+
 .post-single > .post-footer > .paginav a.next {
+  grid-column: 2;
   text-align: right;
 }
 

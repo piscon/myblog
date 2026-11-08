@@ -53,6 +53,11 @@
   --tertiary: #c8bda6;   /* rule-strong */
   --border: #dfd6c4;     /* rule */
   --code-bg: #221f18;
+  --code-ink: #ece6d8;   /* prototype code-ink: base text on the dark slab */
+  /* the theme paints pre>code its own slab with background:
+     var(--code-block-bg) !important (md-content.css) — transparency is the
+     only way under an !important; the slab lives on the pre (ui.css) */
+  --code-block-bg: transparent;
 }
 
 :root[data-theme="dark"] {
@@ -64,6 +69,8 @@
   --tertiary: #4a4333;
   --border: #342f25;
   --code-bg: #0d0c09;
+  --code-ink: #ece6d8;
+  --code-block-bg: transparent;
 }
 
 /* ---- Serif display layer (签认②, fonts.css untouched) ------------------
