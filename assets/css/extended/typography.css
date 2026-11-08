@@ -37,11 +37,11 @@
    coupling points (content container class + emitted CSS tokens). */
 
 :root {
-  --accent: rgb(176, 128, 32); /* ~4.3:1 on white — ≥3:1 non-text (WCAG 1.4.11) */
+  --accent: rgb(138, 93, 21); /* prototype bronze #8a5d15 — ~5.2:1 on white, ≥3:1 on paper (WCAG 1.4.11) */
 }
 
 :root[data-theme="dark"] {
-  --accent: rgb(219, 168, 75); /* ~7:1 on rgb(29,30,32) */
+  --accent: rgb(216, 171, 91); /* prototype #d8ab5b — ~7.8:1 on #16140f */
 }
 
 /* ---- Title block ---------------------------------------------------- */
@@ -119,7 +119,7 @@ html[lang^="en"] .post-header .post-description::before {
 html.js .post-header {
   display: grid;
   grid-template-columns: 1fr auto;
-  column-gap: calc(var(--u) * 0.618); /* φ⁻¹·u — the card gutter */
+  column-gap: var(--sp-3); /* the card gutter (chrome.css --sp scale) */
   align-items: baseline;
   /* the theme's `margin: 24px auto` is a flex-item trap: .post-single is
      a flex column, and auto inline margins make the item shrink-to-fit

@@ -49,7 +49,11 @@ check() {
 }
 
 # 翻译流水线占位符层离线自测（零 API 调用）：全语料恒等往返 + 旧事故等价攻击拦截
-check "翻译占位符保护层自测" "node scripts/translate.mjs --self-test >/dev/null 2>&1"
+NODE_BIN=node
+if [ "$(node -e 'console.log(parseInt(process.versions.node))' 2>/dev/null || echo 0)" -lt 20 ] && [ -x "$HOME/.nvm/versions/node/v26.13.0/bin/node" ]; then
+  NODE_BIN="$HOME/.nvm/versions/node/v26.13.0/bin/node"  # WSL 默认 node 18 跑不了流水线，升到本地 v26
+fi
+check "翻译占位符保护层自测" "$NODE_BIN scripts/translate.mjs --self-test >/dev/null 2>&1"
 
 check "audio 播放器渲染"        "grep -q '<audio src=\"/audio/feature-check.mp3\"' '$PAGE'"
 check "video 播放器渲染"        "grep -q '<video src=\"/video/feature-check.mp4\"' '$PAGE'"
@@ -140,13 +144,12 @@ check "文章页 feed 发现链接"      "grep -q 'application/rss+xml' '$PAGE'"
 # x-default 挂在多语言文章上（测试文章是单语言，恰好反向断言不误发）
 check "hreflang x-default"       "grep -q 'x-default' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q 'x-default' '$PAGE'"
 check "RSS 列表页入口按钮"        "grep -q 'aria-label=\"RSS\"' '$OUT/zh/posts/index.html' && grep -q 'aria-label=\"RSS\"' '$OUT/zh/archives/index.html'"
-check "theme-color 兜底+双meta"   "grep -q 'name=\"theme-color\" content=\"#1d1e20\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: light)\" content=\"#ffffff\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: dark)\" content=\"#1d1e20\"' '$PAGE'"
+check "theme-color 兜底+双meta"   "grep -q 'name=\"theme-color\" content=\"#16140f\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: light)\" content=\"#f7f3ea\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: dark)\" content=\"#16140f\"' '$PAGE'"
 check "排版体系容器类名(耦合点)"   "grep -q 'post-content md-content' '$PAGE'"
 check "黄金字阶 CSS 进 bundle"    "grep -q 'hanging-punctuation' '$OUT'/assets/css/stylesheet.*.css && grep -q '2.058em' '$OUT'/assets/css/stylesheet.*.css"
-# 间距单位 --u（2026-11-06）：节奏公式（卡距/摘要→meta/搜索结果/折叠标题行 column-gap/锚跳余量）
-# 全部挂 u（20px，≤768px 镜像 14px）。勿迁回 --gap——主题 --gap=24px，此前公式误挂 --gap，
-# 实渲染 φ⁻¹·gap=14.8px 与全体系注释 12.4px 脱节；--gap 只许页面沟槽（.main/页眉/页脚）用
-check "间距单位(--u双断点)" "grep -q -- '--u:20px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--u:14px' '$OUT'/assets/css/stylesheet.*.css"
+# 间距体系 --sp-*（2026-11-08 换轨）：原型实测标尺（4px 网格，chrome.css）退役 --u 双断点；
+# --u 永不再入 bundle（负断言守卫根除），--gap 只许页面沟槽用（约定不变）
+check "间距体系(--sp-*)" "grep -q -- '--sp-3:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--sp-section:96px' '$OUT'/assets/css/stylesheet.*.css && ! grep -q -- '--u:' '$OUT'/assets/css/stylesheet.*.css"
 # 字阶补全（2026-11-06）：归档年份 1.272em（主题继承 16px 与条目同阶，仅靠 margin 撑）+
 # 首页 profileMode h1 显式流式 clamp（主题零样式，原落 UA 默认 36px）
 check "字阶补全(归档年份+首页h1)" "grep -q 'archive-year-header{font-size:1.272em' '$OUT'/assets/css/stylesheet.*.css && grep -q '.profile h1{font-size:clamp(1.35em' '$OUT'/assets/css/stylesheet.*.css"

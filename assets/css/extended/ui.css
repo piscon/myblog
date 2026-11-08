@@ -1,28 +1,15 @@
 /* UI / spacing polish */
 
-/* Spacing unit u (2026-11-06): every rhythm number in this system — card
-   gutter 12.4px, summary→meta step, the 176px optical budget, ~4.8 rows
-   per screen, 2u anchor headroom — is derived from u = 20px. The theme's
-   --gap is 24px (14px ≤768px) and stays page-gutter-only (.main/header/
-   footer padding, menu column-gap); if the rhythms bound to it they would
-   silently compute 14.8px while every comment says 12.4px (this exact
-   drift shipped for a day). Mirroring the mobile step keeps φ⁻¹·u at
-   12.4px desktop / 8.7px mobile. The system carries exactly two gaps:
-   u and φ⁻¹·u. */
-:root {
-  --u: 20px;
-}
-
-@media screen and (max-width: 768px) {
-  :root {
-    --u: 14px;
-  }
-}
+/* Spacing tokens live in chrome.css (--sp-1…9 + section anchors, 2026-11-08):
+   the --u ruler (20px + φ⁻¹·u 12.4px) is retired — every former --u consumer
+   now takes the nearest measured prototype token (--sp-3 = the old φ⁻¹·u,
+   --sp-6 = the old 2u anchor headroom). The theme's --gap stays
+   page-gutter-only (.main/header/footer padding, menu column-gap). */
 
 .post-entry {
-  /* Term rows (tag-entry) keep the compact φ⁻¹·u gutter; the stacked list
+  /* Term rows (tag-entry) keep the compact gutter; the stacked list
      cards override to Casper's feed gap below (2026-11-07 verbatim) */
-  margin-bottom: calc(var(--u) * 0.618);
+  margin-bottom: var(--sp-3);
 }
 
 /* Stacked-card separation follows Casper's feed gap verbatim (4.8vmin;
@@ -294,13 +281,13 @@ html[lang^="en"] body {
 /* Anchor-jump breathing room: browsers scroll [id] targets flush to the
    viewport top edge, so a TOC click lands the heading with zero space
    above it (header is not sticky — pure comfort, no offset to budget).
-   Two u (40px) of scroll-margin reads as comfortable headroom; also
+   --sp-6 (40px) of scroll-margin reads as comfortable headroom; also
    covers footnote round-trips (backref sup in text, footnote li at
    page bottom). */
 :is(h1, h2, h3, h4, h5, h6)[id],
 li[id^="fn:"],
 sup[id^="fnref:"] {
-  scroll-margin-top: calc(var(--u) * 2);
+  scroll-margin-top: var(--sp-6);
 }
 
 /* Floating side TOC on wide screens: docs-standard sidebar on the LEFT of
@@ -322,6 +309,12 @@ sup[id^="fnref:"] {
     transform: translate(-100%, -50%);
     margin: 0;
     overflow-y: auto;
+    /* the theme paints the TOC box var(--code-bg); after the paper/ink
+       reskin that is near-black in LIGHT mode (code blocks are dark on
+       paper). The floating sidebar takes the page surface + hairline. */
+    background: var(--theme);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
   }
 
   details.toc[open] > summary {
@@ -370,7 +363,7 @@ sup[id^="fnref:"] {
   font-size: 14px;
   line-height: 34px;
   padding: 0 14px;
-  background: var(--code-bg);
+  background: var(--entry);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--secondary);
@@ -453,8 +446,8 @@ sup[id^="fnref:"] {
 }
 
 .searchResults {
-  margin: calc(var(--u) * 0.618) 0;
-  gap: calc(var(--u) * 0.618);
+  margin: var(--sp-3) 0;
+  gap: var(--sp-3);
 }
 
 .searchResults li {
@@ -509,13 +502,13 @@ sup[id^="fnref:"] {
    language (14px, code-bg + hairline, like the pagination pills); the
    count flattens to one quiet figure; gold border on hover only */
 .terms-tags {
-  gap: calc(var(--u) * 0.618); /* φ⁻¹·u — was 10px, off-grid */
+  gap: var(--sp-3); /* was 10px, off-grid */
 }
 
 .terms-tags a {
   padding: 4px 10px;
   font-size: 14px;
-  background: var(--code-bg);
+  background: var(--entry);
   border: 1px solid var(--border);
   transition: border-color 0.2s ease;
 }
@@ -529,7 +522,7 @@ sup[id^="fnref:"] {
 /* Article tag pills: same chip language as the term pills, same φ⁻¹·u row
    gap (theme 10px — the last off-grid chip spacing) */
 .post-tags {
-  gap: calc(var(--u) * 0.618);
+  gap: var(--sp-3);
 }
 
 /* Markup is <sup><strong><sup>N</sup></strong></sup> (theme
@@ -759,7 +752,7 @@ sup[id^="fnref:"] {
 }
 
 .archive-month-header {
-  margin: var(--u) 0;
+  margin: var(--sp-4) 0;
 }
 
 /* Freshness ("meta-updated") belongs to the article header only — the

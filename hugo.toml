@@ -112,7 +112,7 @@ isPlainText = true
     safari_pinned_tab = "/branding/favicon.svg"
     # 浏览器 UI 兜底色（深底基线，与 dark 模式 --theme 背景一致）；
     # light/dark 按 prefers-color-scheme 的双 meta 由 extend_head 补发
-    theme_color = "#1d1e20"
+    theme_color = "#16140f"
 
   [params.schema]
     publisherType = "Person"

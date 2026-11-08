@@ -1,0 +1,123 @@
+/* chrome.css — redesign/proto-wiring Phase 1 (2026-11-08).
+   Prototype→site wiring: design tokens, paper/ink palette, serif display.
+   Loads FIRST in the extended bundle (alphabetical order) so every later
+   file consumes these tokens. Source of truth: 原型/二重奏-博客界面设计-
+   交互版.html :root blocks + 留白审计-报告.html measurements. */
+
+/* ---- Spacing scale (prototype --sp-*, 4px grid) ----------------------
+   Retires the --u ruler (20px + φ⁻¹·u 12.4px, dual-breakpoint): the
+   prototype's measured scale wins, tokens are fixed px and carry no
+   mobile variant — only the section anchors compress ≤768px. New rules
+   take a token, never a bare number. */
+:root {
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 28px;
+  --sp-6: 40px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --sp-section: 96px; /* between chapters */
+  --sp-head: 64px;    /* page head top */
+  --sp-tail: 96px;    /* last block → footer rule */
+}
+
+@media screen and (max-width: 768px) {
+  :root {
+    --sp-section: 72px;
+    --sp-head: 48px;
+    --sp-tail: 72px;
+  }
+}
+
+/* ---- Paper/ink palette ------------------------------------------------
+   Prototype token → PaperMod theme-var mapping (theme-vars.css owns the
+   var names; we own the values from here). Dark mirrors the prototype's
+   [data-theme="dark"] block. */
+:root {
+  --theme: #f7f3ea;      /* paper */
+  --entry: #f0eadd;      /* paper-2 */
+  --primary: #1a1712;    /* ink */
+  --secondary: #6b6455;  /* muted */
+  --tertiary: #c8bda6;   /* rule-strong */
+  --border: #dfd6c4;     /* rule */
+  --code-bg: #221f18;
+}
+
+:root[data-theme="dark"] {
+  --theme: #16140f;
+  --entry: #1e1b14;
+  --primary: #ece6d8;
+  --secondary: #a49b87;
+  --tertiary: #4a4333;
+  --border: #342f25;
+  --code-bg: #0d0c09;
+}
+
+/* ---- Serif display layer (签认②, fonts.css untouched) ------------------
+   Zero-byte: system serif stacks only, no @font-face, no download.
+   Latin leads with Iowan/Palatino (macOS/Windows quality serifs);
+   CJK titles pick language-correct mincho/song faces so han glyphs take
+   the right regional form (same reason the sans stacks are lang-scoped).
+   Applied to brand + page/article titles; body stays Inter. */
+:root {
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Songti SC", "Noto Serif CJK SC", "Noto Serif SC", SimSun, serif;
+}
+
+html[lang^="ja"] {
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP",
+    "Source Han Serif JP", "Noto Serif JP", serif;
+}
+
+html[lang^="en"] {
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    serif;
+}
+
+/* Display surfaces: brand text and every page-h1 surface (article title,
+   profile hero, hub titles). Sizes/leading stay owned by typography.css —
+   this only swaps the face. The logo's svg glyph is untouched (it has no
+   text); .logo-text span carries the brand. */
+.logo > a {
+  font-family: var(--font-display);
+}
+
+.post-title,
+.profile h1,
+.page-header h1 {
+  font-family: var(--font-display);
+}
+
+/* ---- Chrome hairlines --------------------------------------------------
+   The prototype's structure language: one hairline rule under the sticky
+   header, one above the footer — no shadows, no cards. */
+.header {
+  border-bottom: 1px solid var(--border);
+}
+
+.footer {
+  border-top: 1px solid var(--border);
+}
+
+/* ---- Pill surfaces -----------------------------------------------------
+   The theme paints tag chips / paginav / inline TOC with var(--code-bg);
+   in the paper palette that is a near-black slab on cream paper (code
+   blocks are deliberately dark — the prototype's --code-bg — but chips
+   are not). All pill surfaces take the entry surface + hairline instead;
+   borders/colors stay owned by the existing ui.css re-skins. */
+.post-tags a,
+.paginav,
+.paginav a,
+details.toc {
+  background: var(--entry);
+}
+
+/* the list-page wrapper is painted var(--code-bg) by the theme (light
+   gray before the reskin — now near-black); the page surface is paper */
+.list {
+  background: var(--theme);
+}

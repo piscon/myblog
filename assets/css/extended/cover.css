@@ -78,13 +78,13 @@
 
 /* Header margin zeroed for every card (grid-era leftover, also what term
    rows had); Casper's vertical rhythm below is scoped to stacked cards so
-   term rows keep the shared 8px/φ⁻¹·u margins untouched. */
+   term rows keep the shared 8px/12px margins untouched. */
 .post-entry > .entry-header {
   margin-bottom: 0;
 }
 
 .post-entry > .entry-content {
-  margin: 8px 0 calc(var(--u) * 0.618);
+  margin: 8px 0 var(--sp-3);
 }
 
 /* Term rows keep the shared clamp at the site's excerpt rung; stacked
