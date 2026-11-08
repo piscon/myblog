@@ -1,106 +1,62 @@
 {{- define "main" }}
 
-{{- /* Single language-aware override of the theme's archives layout, used by
-       the archives sections (content/<lang>/archives/_index.md). Sections do
-       not pick up the theme's layouts/archives.html, so this file mirrors its
-       markup; the only local deltas are the localized strings (年 suffix,
-       numeric month names for zh/ja vs English month names, draft tooltip)
-       derived from the current language. When reviewing weekly PaperMod PRs
-       that touch themes/PaperMod/layouts/archives.html, re-diff it against
-       this file. */ -}}
+{{- /* SITE REWRITE (redesign/align-proto, 2026-11-08). The archives page
+       takes the prototype's form: editorial page head (kicker + title row
+       with the site-wide post total + deck), then the SAME year-group text
+       directory the /posts/ feed uses (60px year label + MM.DD rows) as a
+       full unpaginated index, closed by a list-foot pointing back to the
+       posts feed. The theme's year/month ledger markup (archive-*), its
+       header RSS button and the draft pencil hint are retired — the
+       prototype shows none of them; the RSS feed itself remains reachable
+       via <head> feed discovery and the footer icon.
 
-<header class="page-header">
-  <h1>
-    {{ .Title }}
-    {{- if (.Param "ShowRssButtonInSectionTermList") }}
-    {{- $rss := (.OutputFormats.Get "rss") }}
-    {{- if (eq .Kind `page`) }}
-    {{- $rss = (.Parent.OutputFormats.Get "rss") }}
-    {{- end }}
-    {{- with $rss }}
-    <a href="{{ .RelPermalink }}" title="RSS" aria-label="RSS">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" height="23">
-        <path d="M4 11a9 9 0 0 1 9 9" />
-        <path d="M4 4a16 16 0 0 1 16 16" />
-        <circle cx="5" cy="19" r="1" />
-      </svg>
-    </a>
-    {{- end }}
-    {{- end }}
-  </h1>
-  {{- if .Description }}
-  <div class="post-description">
-    {{ .Description }}
-  </div>
-  {{- end }}
-</header>
+       Weekly PR coupling: this file previously MIRRORED the theme's
+       layouts/archives.html — it no longer does (markup deliberately
+       diverged), so re-diffing on PaperMod upgrades is unnecessary; just
+       skim the theme file for regressions. Guarded by feature-check
+       「归档出口页(年份分组)」. */ -}}
 
 {{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections }}
-
 {{- if site.Params.ShowAllPagesInArchive }}
 {{- $pages = site.RegularPages }}
 {{- end }}
+{{- $pre := i18n "countPre" -}}
 
-{{- $lang := .Site.Language.Lang }}
-{{- $monthNames := slice "January" "February" "March" "April" "May" "June"
-  "July" "August" "September" "October" "November" "December" }}
-{{- $draftTitle := "Draft" }}
-{{- if eq $lang "zh" }}
-{{- $draftTitle = "草稿" }}
-{{- else if eq $lang "ja" }}
-{{- $draftTitle = "下書き" }}
-{{- end }}
+<header class="page-header">
+  <p class="kicker">{{ i18n "archivesKicker" }}</p>
+  <div class="title-row">
+    <h1>{{ .Title }}</h1>
+    <span class="page-count">{{ if $pre }}{{ $pre }} {{ end }}{{ len $pages }} {{ i18n "postsUnit" }}</span>
+  </div>
+  <p class="page-deck">{{ i18n "archivesDeck" }}</p>
+</header>
 
-{{- range $pages.GroupByPublishDate "2006" }}
-{{- if ne .Key "0001" }}
-<div class="archive-year">
-  {{- $year := replace .Key "0001" "" }}
-  <h2 class="archive-year-header" id="{{ $year }}">
-    <a class="archive-header-link" href="#{{ $year }}">
-      {{- $year -}}{{ if ne $lang "en" }}年{{ end }}
-    </a>
-    <sup class="archive-count">&nbsp;{{ len .Pages }}</sup>
-  </h2>
-  {{- range .Pages.GroupByDate "01" }}
-  <div class="archive-month">
-    <h3 class="archive-month-header" id="{{ $year }}-{{ .Key }}">
-      <a class="archive-header-link" href="#{{ $year }}-{{ .Key }}">
-        {{- if eq $lang "en" }}
-        {{- index $monthNames (sub (int .Key) 1) -}}
-        {{- else }}
-        {{- printf "%d月" (int .Key) -}}
-        {{- end }}
-      </a>
-      <sup class="archive-count">&nbsp;{{ len .Pages }}</sup>
-    </h3>
-    <div class="archive-posts">
+<div class="list-groups">
+  {{- range $pages.GroupByPublishDate "2006" }}
+  {{- if ne .Key "0001" }}
+  <section class="year-group">
+    <h2 class="year-label">{{ .Key }}<small>{{ len .Pages }} {{ i18n "postsUnit" }}</small></h2>
+    <div class="year-rows">
       {{- range .Pages }}
-      {{- if eq .Kind "page" }}
-      <div class="archive-entry">
-        <h3 class="archive-entry-title entry-hint-parent">
-          {{- .Title | markdownify }}
-          {{- if .Draft }}
-          <span class="entry-hint" title="{{ $draftTitle }}">
-            <svg xmlns="http://www.w3.org/2000/svg" height="15" viewBox="0 -960 960 960" fill="currentColor">
-              <path
-                d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
-            </svg>
-          </span>
-          {{- end }}
-        </h3>
-        <div class="archive-meta">
-          {{- partial "post_meta.html" . -}}
-        </div>
-        <a class="entry-link" aria-label="post link to {{ .Title | plainify }}" href="{{ .Permalink }}"></a>
-      </div>
-      {{- end }}
+      <a class="post-row" href="{{ .RelPermalink }}" title="{{ .Date.Format "2006-01-02" }}">
+        <span class="p-date">{{ .Date | time.Format "01.02" }}</span>
+        <span class="p-title">{{ .Title }}</span>
+        {{- range first 1 (.GetTerms "categories") }}<span class="p-cat">{{ .LinkTitle }}</span>{{- else }}<span class="p-cat" aria-hidden="true"></span>{{- end }}
+        <span class="p-read">{{ i18n "read_time" .ReadingTime }}</span>
+      </a>
       {{- end }}
     </div>
-  </div>
+  </section>
+  {{- end }}
   {{- end }}
 </div>
-{{- end }}
-{{- end }}
+
+{{- /* prototype archives list-foot: sorting note left, all-posts right. */ -}}
+<div class="list-foot">
+  <span>{{ i18n "newestFirst" }}</span>
+  {{- with site.GetPage "/posts" }}
+  <a href="{{ .RelPermalink }}">{{ i18n "homeAllPosts" }}</a>
+  {{- end }}
+</div>
 
 {{- end }}{{/* end main */}}

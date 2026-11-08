@@ -73,7 +73,7 @@ check "404 en 文案分流"         "grep -q 'There is nothing here' '$OUT/en/40
 # 由 ui.css 容器门控 token 守卫——条目 display:none + 前导 meta-sep 配对隐藏防双 ·
 # （:has(+ .meta-updated)，同 cover.css mobile 门控模式）；extend_post_content 不再
 # 输出 post-lastmod（负断言守删除）
-check "更新于入首屏meta(门控)"  "grep -q 'meta-item meta-updated' '$PAGE' && grep -q '更新于' '$PAGE' && grep -q 'updatedOn' i18n/zh-CN.toml && grep -q 'updatedOn' i18n/ja.toml && grep -q 'updatedOn' i18n/en.toml && grep -q '最終更新' '$OUT/ja/posts/first/index.html' && grep -q 'Updated on' '$OUT/en/posts/first/index.html' && grep -q '.archive-meta .meta-updated' '$OUT'/assets/css/stylesheet.*.css && grep -q 'meta-sep:has(+.meta-updated)' '$OUT'/assets/css/stylesheet.*.css && ! grep -q '最后更新于' '$PAGE' && ! grep -q 'post-lastmod' '$PAGE' && ! grep -q 'post-lastmod' layouts/_partials/extend_post_content.html"
+check "更新于入首屏meta(门控)"  "grep -q 'meta-item meta-updated' '$PAGE' && grep -q '更新于' '$PAGE' && grep -q 'updatedOn' i18n/zh-CN.toml && grep -q 'updatedOn' i18n/ja.toml && grep -q 'updatedOn' i18n/en.toml && grep -q '最終更新' '$OUT/ja/posts/first/index.html' && grep -q 'Updated on' '$OUT/en/posts/first/index.html' && ! grep -q '最后更新于' '$PAGE' && ! grep -q 'post-lastmod' '$PAGE' && ! grep -q 'post-lastmod' layouts/_partials/extend_post_content.html"
 # 相关文章焦点归位（2026-11-06）：视觉序（ui.css order:5）related 在 footer 后、DOM 序
 # （extend_post_content 钩子在主题 single.html 里的位置）在 footer 前，键盘 Tab 焦点
 # 与视觉脱节（WCAG 2.4.3）。site.js 把节点搬到 footer 后（无 after-footer 钩子，不开
@@ -131,8 +131,10 @@ check "留言板(giscus)"           "test -f '$OUT/zh/guestbook/index.html' && t
 check "语言切换全名显示"        "grep -q '日本語' '$OUT/zh/index.html' && grep -q 'English' '$OUT/zh/index.html' && grep -q '日本語' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q '.js .lang-menu:not(:has(.current-lang)){visibility:hidden' '$OUT'/assets/css/stylesheet.*.css"
 check "aliases 跳转页生成"      "test -f '$OUT/zh/posts/alias-test/index.html'"
 check "llms.txt 站点索引生成"    "test -f '$OUT/zh/llms.txt' && grep -q 'Feature health check' '$OUT/zh/llms.txt'"
-check "归档页 zh 本地化(年/月)"  "grep -q 'archive-year-header' '$OUT/zh/archives/index.html' && grep -q '2026年' '$OUT/zh/archives/index.html' && grep -q '11月' '$OUT/zh/archives/index.html'"
-check "归档页 en 本地化(月名)"   "grep -q 'archive-year-header' '$OUT/en/archives/index.html' && grep -q 'November' '$OUT/en/archives/index.html'"
+# 归档出口页（align-proto B 重写）：kicker/deck/title-row + 年份分组行 + list-foot，
+# 主题 archive-* 台账 DOM 负断言根除；三语 kicker 逐字守卫
+check "归档出口页(年份分组)"   "grep -q 'class=\"kicker\"' '$OUT/zh/archives/index.html' && grep -q 'page-deck' '$OUT/zh/archives/index.html' && grep -q 'year-group' '$OUT/zh/archives/index.html' && grep -q 'post-row' '$OUT/zh/archives/index.html' && grep -q 'list-foot' '$OUT/zh/archives/index.html' && ! grep -q 'archive-year-header' '$OUT/zh/archives/index.html'"
+check "归档页三语刊头"         "grep -q 'Archive · 归档' '$OUT/zh/archives/index.html' && grep -q 'Archive · アーカイブ' '$OUT/ja/archives/index.html' && grep -q 'Archive · Index' '$OUT/en/archives/index.html' && grep -q '按时间倒序' '$OUT/zh/archives/index.html'"
 check "YouTube nocookie iframe"  "grep -q 'youtube-nocookie.com/embed/dQw4w9WgXcQ' '$PAGE'"
 check "B站 iframe 播放器"         "grep -q 'player.bilibili.com/player.html?bvid=BV1xx411c7mD' '$PAGE'"
 check "分类进元信息行"            "grep -q 'href=.*categories/demo' '$PAGE'"
@@ -143,7 +145,7 @@ check "RSS 全文(content:encoded)" "grep -q 'content:encoded' '$OUT/zh/posts/in
 check "文章页 feed 发现链接"      "grep -q 'application/rss+xml' '$PAGE'"
 # x-default 挂在多语言文章上（测试文章是单语言，恰好反向断言不误发）
 check "hreflang x-default"       "grep -q 'x-default' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q 'x-default' '$PAGE'"
-check "RSS 列表页入口按钮"        "grep -q 'aria-label=\"RSS\"' '$OUT/zh/posts/index.html' && grep -q 'aria-label=\"RSS\"' '$OUT/zh/archives/index.html'"
+check "RSS 列表页入口按钮"        "grep -q 'aria-label=\"RSS\"' '$OUT/zh/posts/index.html' && grep -q 'aria-label=\"RSS\"' '$OUT/zh/categories/demo/index.html' && ! grep -q 'aria-label=\"RSS\"' '$OUT/zh/archives/index.html'"
 check "theme-color 兜底+双meta"   "grep -q 'name=\"theme-color\" content=\"#16140f\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: light)\" content=\"#f7f3ea\"' '$PAGE' && grep -q 'media=\"(prefers-color-scheme: dark)\" content=\"#16140f\"' '$PAGE'"
 check "排版体系容器类名(耦合点)"   "grep -q 'post-content md-content' '$PAGE'"
 check "黄金字阶 CSS 进 bundle"    "grep -q 'hanging-punctuation' '$OUT'/assets/css/stylesheet.*.css && grep -q '2.058em' '$OUT'/assets/css/stylesheet.*.css"
@@ -152,7 +154,7 @@ check "黄金字阶 CSS 进 bundle"    "grep -q 'hanging-punctuation' '$OUT'/ass
 check "间距体系(--sp-*)" "grep -q -- '--sp-3:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--sp-section:96px' '$OUT'/assets/css/stylesheet.*.css && ! grep -q -- '--u:' '$OUT'/assets/css/stylesheet.*.css"
 # 字阶补全（2026-11-06）：归档年份 1.272em（主题继承 16px 与条目同阶，仅靠 margin 撑）+
 # 首页 profileMode h1 显式流式 clamp（主题零样式，原落 UA 默认 36px）
-check "字阶补全(归档年份+首页h1)" "grep -q 'archive-year-header{font-size:1.272em' '$OUT'/assets/css/stylesheet.*.css && grep -q '.profile h1{font-size:clamp(1.35em' '$OUT'/assets/css/stylesheet.*.css"
+check "字阶补全(年份衬线+首页h1)" "grep -q 'font-size:60px;line-height:.95' '$OUT'/assets/css/stylesheet.*.css && grep -q '.profile h1{font-size:clamp(1.35em' '$OUT'/assets/css/stylesheet.*.css"
 # 标题梯子全流式（2026-11-06）：h1-h5 与 title 共享 1.2vw 斜率压缩（intercept≈峰值×0.534、
 # floor≈峰值×0.656 且 ≥1em）——修「流式标题×固定梯子」窄视口层级倒挂（手机 title 24.3px
 # 曾低于正文 h2 29.1px，<~777px 全手机命中；<~1088px 低于正文 h1）

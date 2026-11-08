@@ -797,41 +797,17 @@ sup[id^="fnref:"] {
    across entries when scanning lists (works on system fonts too,
    graceful no-op where unsupported) */
 .post-meta,
-.entry-footer,
-.archive-meta {
+.entry-footer {
   font-variant-numeric: tabular-nums;
 }
 
-/* Meta rung 14px (φ^-0.5) for archive rows. (The old list-card side
-   (.entry-footer) died with the stacked cards, Phase 3.) */
-.archive-meta {
-  font-size: 14px;
-}
-
-/* Archive page (theme utilitarian layout): the year heading inherited the
-   16px list size and stood out by margin only — promote it one ladder
-   rung (1.272em × 16px context = 20.3px = φ^0.25), month header margins
-   onto u (theme 25px is off-grid). The 40px year top margin is 2u already;
-   the 10px/5px entry-row chrome stays theme (row leading, not section
-   rhythm). */
-.archive-year-header {
-  font-size: 1.272em;
-}
-
-.archive-month-header {
-  margin: var(--sp-4) 0;
-}
-
-/* Freshness ("meta-updated") belongs to the article header only — the
-   partial feeds archive rows (.archive-meta) too, and their compact
-   skeleton stays single-date. (The list-card side died with the cards,
-   Phase 3.) Hiding an item must pair-hide its LEADING separator (the
-   meta-sep sibling before it) or the previous item's `·` doubles up —
-   same rule as the mobile meta-read hiding in cover.css. */
-.archive-meta .meta-updated,
-.archive-meta .meta-sep:has(+ .meta-updated) {
-  display: none;
-}
+/* The archive-side meta rules died with the archives ledger itself
+   (align-proto B, 2026-11-08): the archives page now rides the same
+   year-group/post-row directory as the posts feed and renders no meta
+   row at all (.archive-meta can never render; its 14px rung, the
+   1.272em year-header promotion and the meta-updated pair-hiding are
+   gone with it — the sep-pairing rule survives only in typography.css's
+   article-side mobile hiding). */
 
 /* Language switcher: current language marked (injected by site.js);
    the whole list stays constant across languages. The gold check is the
