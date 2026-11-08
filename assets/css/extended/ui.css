@@ -475,22 +475,130 @@ sup[id^="fnref:"] {
   }
 }
 
-/* Input: the theme's 2px tertiary border + bold text shout → quiet
-   field. Focus is covered by the global :focus-visible accent outline
+/* Input + field (align-proto): the pill field is retired for the
+   prototype's underline form — one hairline-strong bottom rule spans
+   magnifier + input + kbd chip; gold takes over on focus-within. Focus
+   is also covered by the global :focus-visible accent outline
    (typography.css) — text inputs match :focus-visible on any focus. */
-.searchbox input {
-  padding: 10px 14px;
-  font-weight: 500;
-  background: var(--entry);
-  border: 1px solid var(--border);
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0 15px;
+  border-bottom: 1px solid var(--primary);
 }
 
-/* Desktop: the prototype's big quiet field (22px); the 16px floor below
-   stays for phones (iOS zoom threshold — see the audit note). */
+.search-field:focus-within {
+  border-bottom-color: var(--accent);
+}
+
+.search-field svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  fill: none;
+  stroke: var(--secondary);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.searchbox input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0;
+  font-weight: 500;
+  background: transparent;
+  border: 0;
+}
+
+/* Desktop: the prototype's big quiet field (22px serif); the 16px floor
+   below stays for phones (iOS zoom threshold — see the audit note). */
 @media screen and (min-width: 769px) {
   .searchbox input {
     font-size: 22px;
-    padding: 12px 16px;
+    font-family: var(--font-display);
+  }
+}
+
+/* Shortcut chip at the field's right edge, mono small-caps voice;
+   dropped on narrow phones (prototype ≤560px). */
+.search-kbd {
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--secondary);
+  border: 1px solid var(--tertiary);
+  border-radius: 3px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 560px) {
+  .search-kbd {
+    display: none;
+  }
+}
+
+/* The meta row under the field: hint left, live result count right
+   (site.js feature 16 updates it; server-side it shows the corpus
+   total). */
+.search-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 18px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--secondary);
+}
+
+/* Empty state (feature 16): prototype shape — serif title quoting the
+   failed query, a hint line, and underline suggestion chips that refill
+   the input. */
+.empty-state {
+  padding: 72px 0 80px;
+  border-top: 1px solid var(--border);
+}
+
+.empty-state h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+}
+
+.empty-state p {
+  margin: 12px 0 0;
+  color: var(--secondary);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.empty-state .hint-links {
+  margin-top: 18px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.empty-state .hint-links button {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  color: var(--secondary);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--tertiary);
+  padding: 0 0 2px;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .empty-state .hint-links button:hover {
+    color: var(--accent);
   }
 }
 

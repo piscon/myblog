@@ -278,6 +278,10 @@ check "词条文字云(taxonomy覆盖)"   "grep -q 'term-index-cloud' '$OUT/zh/t
 check "term返回链+kicker"          "grep -q 'term-back' '$OUT/zh/categories/demo/index.html' && grep -q '全部分类' '$OUT/zh/categories/demo/index.html' && grep -q 'class=\"kicker\"' '$OUT/zh/categories/demo/index.html'"
 # 列表出口行(list-foot)+刊头：/posts/ kicker/deck + list-foot 双出口（排序注记 | RSS 全文）
 check "列表出口行(list-foot)"      "grep -q 'class=\"kicker\"' '$OUT/zh/posts/index.html' && grep -q 'page-deck' '$OUT/zh/posts/index.html' && grep -q 'list-foot' '$OUT/zh/posts/index.html' && grep -q 'RSS 全文' '$OUT/zh/posts/index.html' && grep -q '.list-foot{display:flex' '$OUT'/assets/css/stylesheet.*.css"
+# 搜索页刊头（align-proto C）：kicker + Ctrl/⌘K kbd 芯片 + search-meta 行（aria-live 计数）
+check "搜索页刊头(kbd+meta)"       "grep -q 'class=\"kicker\"' '$OUT/zh/search/index.html' && grep -q 'Ctrl / ⌘ K' '$OUT/zh/search/index.html' && grep -q 'search-meta' '$OUT/zh/search/index.html' && grep -q 'aria-live=\"polite\"' '$OUT/zh/search/index.html' && grep -q '.search-field{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.search-meta{display:flex' '$OUT'/assets/css/stylesheet.*.css"
+# 搜索空态（feature 16）：JS 空态面板 + 建议词回填 input 事件 + CSS token
+check "搜索空态(回填建议)"         "grep -q 'empty-state' assets/js/site.js && grep -q \"input.dispatchEvent(new Event('input', { bubbles: true }))\" assets/js/site.js && grep -q '.empty-state .hint-links button' '$OUT'/assets/css/stylesheet.*.css"
 
 FAILED=0
 {

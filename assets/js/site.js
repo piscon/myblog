@@ -1,5 +1,8 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Fourteen self-gating features — each activates only when its DOM exists:
+   Sixteen self-gating features — each activates only when its DOM exists
+   (15 was reserved for a back-to-top button; the theme's #top-link
+   already ships one and chrome.css reshapes it to the prototype form
+   instead — no JS needed):
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content; touch panning is
       blocked on the overlay (iOS ignores root overflow:hidden)
@@ -617,3 +620,88 @@
     }, 250);
   }
 })();
+
+  /* 16. Search page companion — the .search-meta count tracks typing
+     live (found-N while querying, corpus total when idle), and a
+     no-match query renders the prototype's empty state: serif title
+     quoting the query, a hint line, and underline suggestion chips
+     that refill the input and re-dispatch the fastsearch input event.
+     Gated on #searchInput; no search page, no-op. */
+  (function () {
+    var input = document.getElementById('searchInput');
+    var box = document.getElementById('searchbox');
+    if (!input || !box) return;
+    var countEl = document.getElementById('search-count');
+    var results = document.getElementById('searchResults');
+    var lang = (document.documentElement.getAttribute('lang') || 'zh').slice(0, 2);
+    var m = ((countEl && countEl.textContent) || '').match(/\d+/);
+    var total = m ? parseInt(m[0], 10) : 0;
+    var found = {
+      zh: function (n) { return '找到 ' + n + ' 篇'; },
+      ja: function (n) { return n + ' 件見つかりました'; },
+      en: function (n) { return n + ' found'; }
+    };
+    var idle = {
+      zh: function (n) { return '共 ' + n + ' 篇'; },
+      ja: function (n) { return '全 ' + n + ' 件'; },
+      en: function (n) { return n + ' entries'; }
+    };
+    var fmtFound = found[lang] || found.en;
+    var fmtIdle = idle[lang] || idle.en;
+    var titled = {
+      zh: function (q) { return '没有找到「' + q + '」'; },
+      ja: function (q) { return '「' + q + '」は見つかりません'; },
+      en: function (q) { return 'No results for \u201C' + q + '\u201D'; }
+    };
+    var hints = {
+      zh: ['琴声', '散步', 'Hugo', 'AI'],
+      ja: ['ピアノ', 'Hugo', 'AI'],
+      en: ['piano', 'Hugo', 'AI']
+    };
+    var hintText = {
+      zh: '换一个短一点的词，或者从这些开始。',
+      ja: 'もっと短い語に変えるか、ここから始めてみてください。',
+      en: 'Try a shorter term, or start from these.'
+    };
+    var tip = titled[lang] || titled.en;
+    var hint = hintText[lang] || hintText.en;
+    var panel = null;
+
+    function clearPanel() {
+      if (panel) { panel.remove(); panel = null; }
+    }
+
+    function sync() {
+      var q = input.value.trim();
+      var hits = results.querySelectorAll('li').length;
+      if (countEl) countEl.textContent = q ? fmtFound(hits) : fmtIdle(total);
+      clearPanel();
+      if (q && hits === 0) {
+        panel = document.createElement('div');
+        panel.className = 'empty-state';
+        var h = document.createElement('h2');
+        h.textContent = tip(q);
+        var p = document.createElement('p');
+        p.textContent = hint;
+        var links = document.createElement('div');
+        links.className = 'hint-links';
+        (hints[lang] || hints.en).forEach(function (word) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = word;
+          b.addEventListener('click', function () {
+            input.value = word;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+          });
+          links.appendChild(b);
+        });
+        panel.appendChild(h);
+        panel.appendChild(p);
+        panel.appendChild(links);
+        box.appendChild(panel);
+      }
+    }
+
+    input.addEventListener('input', sync);
+  })();
