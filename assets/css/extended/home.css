@@ -6,10 +6,6 @@
    anchor; the front page is a 1180px editorial canvas, same as the
    prototype's --max). */
 
-.main:has(> .home) {
-  max-width: 1180px;
-}
-
 .home {
   padding-top: 0;
 }

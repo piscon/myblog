@@ -22,6 +22,12 @@
   --sp-section: 96px; /* between chapters */
   --sp-head: 64px;    /* page head top */
   --sp-tail: 96px;    /* last block → footer rule */
+  /* prototype page gutters (full-align R2): the theme's --gap (24px, zmedia
+     drops it to 14px) becomes the prototype's 40px/24px pair, and .wrap's
+     max gets a token — every container formula (#wide/#full, TOC float,
+     .main) now reads the same numbers the prototype uses */
+  --gap: 40px;
+  --max: 1180px;
 }
 
 @media screen and (max-width: 768px) {
@@ -29,6 +35,7 @@
     --sp-section: 72px;
     --sp-head: 48px;
     --sp-tail: 72px;
+    --gap: 24px;
   }
 }
 
@@ -95,8 +102,347 @@ html[lang^="en"] {
 /* ---- Chrome hairlines --------------------------------------------------
    The prototype's structure language: one hairline rule under the sticky
    header, one above the footer — no shadows, no cards. */
-.header {
+/* ---- Header (full-align R2: the prototype's site-head, rendered
+   natively by layouts/_partials/header.html — brand two-part, nav
+   文章/关于, head-actions theme→search→lang→menu, globe panel at every
+   width, mobile menu dropdown). Prototype classnames, site tokens:
+   --paper→--theme, --ink→--primary, --ink-2/--muted→--secondary,
+   --rule→--border, --paper-2→--entry, --display→--font-display. */
+.site-head {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--theme);
   border-bottom: 1px solid var(--border);
+  transition: background-color 0.3s ease;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .site-head {
+    background: color-mix(in srgb, var(--theme) 88%, transparent);
+    backdrop-filter: blur(10px);
+  }
+}
+
+.head-inner {
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gap);
+}
+
+.skip {
+  position: fixed;
+  left: 16px;
+  top: -80px;
+  z-index: 200;
+  background: var(--primary);
+  color: var(--theme);
+  padding: 10px 16px;
+  font-size: 14px;
+  transition: top 0.2s ease;
+}
+
+.skip:focus {
+  top: 12px;
+}
+
+.brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  line-height: 1;
+  flex-shrink: 0;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.brand-cn {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.06em;
+}
+
+.brand-en {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  color: var(--secondary);
+  padding-left: 2px;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap; /* no-JS phones: the row wraps instead of overflowing */
+  align-items: center;
+  gap: 34px;
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.nav a {
+  position: relative;
+  font-size: 14px;
+  color: var(--secondary);
+  padding: 6px 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.nav a[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+.nav a[aria-current="page"] {
+  color: var(--primary);
+}
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--secondary);
+  background: none;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.icon-btn svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-btn[aria-current="page"] {
+  color: var(--primary);
+  background: var(--entry);
+}
+
+/* moon/sun swap follows the theme head script's html[data-theme] */
+.theme-btn .i-sun {
+  display: none;
+}
+
+html[data-theme="dark"] .theme-btn .i-sun {
+  display: block;
+}
+
+html[data-theme="dark"] .theme-btn .i-moon {
+  display: none;
+}
+
+.lang-wrap {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.lang-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 196px;
+  background: var(--theme);
+  border: 1px solid var(--border);
+  padding: 4px 0;
+  z-index: 60;
+}
+
+.lang-menu[hidden] {
+  display: none;
+}
+
+.lang-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+.lang-menu a em {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+}
+
+.lang-menu a[aria-current="true"] {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.lang-menu a[aria-current="true"] em {
+  color: var(--accent);
+}
+
+.menu-btn {
+  display: none;
+}
+
+.mobile-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: var(--theme);
+  border-bottom: 1px solid var(--border);
+  padding: 6px var(--gap) 20px;
+  /* a dropdown, not a sheet: it scrolls itself instead of pushing the
+     page (100dvh keeps iOS toolbars honest) */
+  max-height: calc(100vh - 68px);
+  max-height: calc(100dvh - 68px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mobile-menu[hidden] {
+  display: none;
+}
+
+.mobile-menu a.mm-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.mobile-menu a.mm-link span:last-child {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--secondary);
+}
+
+.mobile-menu a.mm-link:focus-visible {
+  outline: none;
+  background: var(--entry);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+@media (max-width: 768px) {
+  .head-inner {
+    min-height: 68px;
+  }
+
+  .brand-cn {
+    font-size: 22px;
+  }
+
+  .brand-en {
+    font-size: 10px;
+  }
+
+  /* html.js gate (extend_head first-paint script): no JS keeps the theme
+     pattern's fallback — the nav row wraps instead of a dead button */
+  .js .nav {
+    display: none;
+  }
+
+  .js .menu-btn {
+    display: grid;
+  }
+
+  /* the 196px lang panel anchors to .head-actions so it can never run
+     off the left edge at 320px */
+  .lang-wrap {
+    position: static;
+  }
+
+  .head-actions {
+    position: relative;
+  }
+
+  .lang-menu {
+    top: 100%;
+    right: 0;
+  }
+}
+
+@media (hover: hover) {
+  .icon-btn:hover,
+  .nav a:hover {
+    color: var(--primary);
+  }
+
+  .nav a:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* ---- Containers (full-align R2): every view sits in the prototype's
+   .wrap width — .main drops the 720px cap for 1180 (padding rides the
+   theme's --gap, now 40/24 like the prototype's gutters). Article pages
+   re-narrow: .post-single keeps the 720px measure centered; the about
+   spread re-widens (its 224px rail needs the room) and its prose column
+   takes the prototype's 660px. */
+.main {
+  max-width: var(--max);
+}
+
+.main > .post-single {
+  max-width: var(--main-width);
+  margin-inline: auto;
+}
+
+.main > .post-single:has(> .about-side) {
+  max-width: none;
+}
+
+.post-single:has(> .about-side) .post-content {
+  max-width: 660px;
+}
+
+/* search view: everything centers at the prototype's 860px measure
+   (.search-head's constraint, applied per top-level child since the
+   partial keeps the theme's page-header/searchbox/hub structure) */
+.main:has(> #searchbox) > * {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .footer {

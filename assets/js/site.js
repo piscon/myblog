@@ -1,22 +1,25 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Seventeen self-gating features — each activates only when its DOM exists
+   Fifteen self-gating features — each activates only when its DOM exists
    (15 was reserved for a back-to-top button; the theme's #top-link
    already ships one and chrome.css reshapes it to the prototype form
-   instead — no JS needed):
+   instead — no JS needed. 11/12 were retired when the header went
+   native — layouts/_partials/header.html renders the prototype's
+   site-head, brand/nav/search/globe markup and all; the numbers keep
+   their holes for changelog stability):
    1. Reading progress bar — only on article pages (article.post-single)
    2. Lightbox — clicks on images inside .post-content; touch panning is
       blocked on the overlay (iOS ignores root overflow:hidden)
    3. TOC scrollspy — highlights the .toc entry of the heading in view
    4. Ctrl/Cmd+K — focus the search input on the search page, otherwise
-      jump to the current language's search page (the injected header
-      icon's link is the language-correct source of truth)
-   5. Language switcher — PaperMod only renders the OTHER languages, so
-      the list members swap on every switch; prepend the current language
-      (from <html lang>) at its weight position, marked non-clickable,
-      retargeted to the same page via the head hreflang links. Phones fold
-      the row into a globe toggle whose panel mirrors the hamburger's;
-      desktop keeps the inline names. Falls back to the theme's behavior
-      without JS. Language names mirror hugo.toml labels.
+      jump to the header's native search link (.search-toggle — build-
+      time language-correct permalink straight from the partial)
+   5. Language panel — the header renders all languages natively
+      (globe at every width, panel with full name + code, current
+      aria-current from the template); this script keeps same-page
+      switching (hrefs rewritten against the head hreflang links,
+      untranslated pages keep the language homepage — never a 404)
+      and the panel mechanics (toggle, mutual exclusion with the
+      mobile menu, outside click, Escape). JS off → homepage links.
    6. Floating side TOC — wide screens (≥1280px) pin the toc beside the
       content column and force the details open; below the breakpoint the
       inline collapsed details is restored (see ui.css media block).
@@ -24,19 +27,13 @@
       X/Telegram link flow (both unreachable from mainland phones): the
       theme's intent links are hidden under the same gate and the sheet
       entry is injected first. Desktop keeps the icon links.
-   8. Right action cluster + mobile hamburger — a .nav-actions wrapper
-      appended last in .header-nav becomes the row's flush-right edge
-      (flex space-between) and receives the moved #menu first, then the
-      search icon (feature 11 slots it before the toggle) and the
-      hamburger itself: ☰ keeps the absolute right edge on phones,
-      search hugs it as the high-frequency neighbor, menu items join
-      the cluster on desktop. ui.css (≤768px) collapses #menu via the
-      html.js gate (set by extend_head's first-paint inline script — a
-      :has(>.menu-toggle) hide only matched after this script ran,
-      flashing the theme's wrapped menu on every page transition; the
-      hide rule covers BOTH DOM states, pre-wrap and wrapped) and
-      .menu-open opens the panel. Outside clicks and Escape close it.
-      No JS → no wrapper, the theme's inline wrapped menu stays.
+   8. Mobile menu panel + nav current marker — the menu DOM is native
+      (feature 5's partial); the panel mechanics (toggle, aria-expanded,
+      mutual exclusion with the language panel, outside click, Escape)
+      live here, plus the aria-current="page" stamp the cached partial
+      cannot do per page (path-prefix match drives the underline).
+      ≤768px the inline .nav hides and the menu button shows, keyed on
+      html.js — no JS keeps the theme's wrapped nav, not a dead button.
    9. Related-after-footer — moves .post-related after .post-footer so
       DOM/tab order matches the visual flex order (ui.css order:5 places
       it last but its DOM slot — the extend_post_content hook — is before
@@ -51,23 +48,6 @@
       and the body restores the size). aria-label follows the page
       language, same map as the hamburger. No JS → no toggle, the
       description stays the stacked block under the title.
-   11. Header search icon — search left the nav menu (hugo.toml) and
-      lives on as a standalone icon in feature 8's right cluster,
-      between #menu and the hamburger (the OS header pattern: search is
-      the rightmost high-frequency entry, ☰ the absolute edge; the
-      low-frequency theme/lang toggles stay by the logo on the left).
-      The language-correct URL comes from the head link[rel=search]
-      that extend_head emits. accesskey=/ keeps the theme's Alt+/
-      contract that used to ride on the menu item. No JS → no icon
-      (homepage profile button and direct URL still reach the search
-      page).
-   12. Logo identity per breakpoint — desktop keeps the brand text,
-      phones swap it for a Feather home glyph (one 20px icon family
-      across the header). The text is wrapped into a span so CSS can
-      switch text↔icon at the breakpoint; the .logo-home class only
-      exists after this script ran, doubling as the no-JS gate. The
-      anchor keeps its title tooltip and accesskey=h. No JS → the
-      theme's text logo stays at every width.
    13. Search page, no autofocus — the theme's fastsearch enables+
       focus()es the input on window load (soft keyboard on phones,
       categories pushed below the fold); the shadowed .focus swallows
@@ -209,125 +189,50 @@
     }
   });
 
-  /* 5. Language switcher: stable full list (all languages, current marked),
-     switching to the SAME page in the target language. Data source is the
-     head hreflang links the theme emits on every page (<link rel=alternate
-     hreflang> per translation, self included): a translated page gets its
-     sibling permalink, an untranslated one keeps the theme's language
-     homepage link (never a 404). JS disabled → theme default (homepage
-     links). On phones (≤768px, ui.css) the inline row is replaced by an
-     injected globe toggle that opens the list as a full-width panel under
-     the header — the hamburger panel's geometry; desktop keeps the inline
-     full names. The switcher is marked translate=no so Chrome Translate
-     never mangles language names or re-prompts off them. */
+  /* 5. Language panel — the header renders the full list natively now
+     (layouts/_partials/header.html: one 44px globe at EVERY width, the
+     196px panel with full name + code, current language aria-current
+     stamped at build time — a cached partial is per-language, so that
+     is template-safe). This script keeps two things: (a) same-page
+     switching — hrefs rewritten against the head hreflang links (a
+     translated page gets its sibling permalink; an untranslated one
+     keeps the language homepage, never a 404; JS off → homepage
+     links), and (b) the panel mechanics — toggle, mutual exclusion
+     with the mobile menu (feature 8), outside click, Escape.
+     translate=no lives in the template. */
   var langMenu = document.querySelector('.lang-menu');
+  var langBtn = document.querySelector('.lang-btn');
+  var mobileMenu = document.getElementById('mobile-menu');
+  var menuBtn = document.querySelector('.menu-btn');
+  var closeLang, closeMenu;
   if (langMenu) {
-    langMenu.setAttribute('translate', 'no');
-    langMenu.classList.add('notranslate');
-    var docLang = (document.documentElement.getAttribute('lang') || '').slice(0, 2);
-    var langMeta = {
-      zh: { name: '简体中文', order: 0 },
-      ja: { name: '日本語', order: 1 },
-      en: { name: 'English', order: 2 }
-    };
-    /* this page's per-language permalinks from head (x-default and the RSS
-       alternates carry no 2-letter hreflang, so they drop out) */
     var pageLangs = {};
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(function (l) {
       var m = (l.getAttribute('hreflang') || '').match(/^[a-z]{2}(?=-|$)/i);
-      if (m && langMeta[m[0].toLowerCase()] && l.href) pageLangs[m[0].toLowerCase()] = l.href;
+      if (m && l.href) pageLangs[m[0].toLowerCase()] = l.href;
     });
-    /* tag each anchor with its target language BEFORE rewriting hrefs —
-       theme hrefs are always language homepages (/zh/ style) */
     langMenu.querySelectorAll('a').forEach(function (a) {
-      var m = (a.getAttribute('href') || '').match(/\/(zh|ja|en)\/?$/);
-      if (!m) return;
-      var lang = m[1];
-      a.dataset.lang = lang;
-      if (pageLangs[lang]) a.href = pageLangs[lang];
+      var lang = a.dataset.langLink;
+      if (lang && pageLangs[lang]) a.href = pageLangs[lang];
     });
-    var meta = langMeta[docLang];
-    var listed = meta && langMenu.querySelector('a[data-lang="' + docLang + '"]');
-    if (meta && !listed) {
-      var li = document.createElement('li');
-      li.className = 'current-lang';
-      var label = document.createElement('span');
-      label.setAttribute('aria-current', 'true');
-      label.textContent = meta.name;
-      /* gold check = the "you are here" mark on both surfaces (desktop
-         inline suffix / phone panel row right edge) — weight alone was
-         indistinguishable from the 500 links */
-      label.insertAdjacentHTML('beforeend',
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
-        ' width="14" height="14" fill="none" stroke="currentColor"' +
-        ' stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"' +
-        ' aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>');
-      li.appendChild(label);
-      var before = null;
-      langMenu.querySelectorAll('a').forEach(function (a) {
-        if (before) return;
-        if (a.dataset.lang && langMeta[a.dataset.lang].order > meta.order) before = a.parentElement;
-      });
-      langMenu.insertBefore(li, before);
-    }
-    /* Mobile globe (≤768px): the theme's inline row collapses into one
-       icon — the list opens as the hamburger panel's twin (same geometry,
-       same outside-click/Escape contract, and the two header panels are
-       mutually exclusive: opening one closes the other). The button goes
-       after the list inside .logo-switches, so the header row reads
-       logo · theme · globe; ui.css does the breakpoint switch (the list
-       hides, the button shows, .lang-open renders the panel). Desktop
-       keeps the inline names and display:none's the button. */
-    var headerNav = document.querySelector('.header-nav');
-    var switchWrap = langMenu.closest('.logo-switches');
-    if (headerNav && switchWrap) {
-      langMenu.id = 'lang-menu';
-      var langToggle = document.createElement('button');
-      langToggle.type = 'button';
-      langToggle.className = 'lang-toggle';
-      langToggle.setAttribute('aria-controls', 'lang-menu');
-      langToggle.setAttribute('aria-expanded', 'false');
-      langToggle.setAttribute('aria-label', {
-        zh: '语言',
-        ja: '言語',
-        en: 'Language'
-      }[docLang] || 'Language');
-      langToggle.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
-        ' width="20" height="20" fill="none" stroke="currentColor"' +
-        ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
-        ' aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2"' +
-        ' y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10' +
-        ' 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1' +
-        ' 4-10z"/></svg>';
-      var setLangOpen = function (open) {
-        langMenu.classList.toggle('lang-open', open);
-        langToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      };
-      langToggle.addEventListener('click', function () {
-        var open = !langMenu.classList.contains('lang-open');
-        if (open) {
-          var mt = headerNav.querySelector('.menu-toggle');
-          if (mt) {
-            headerNav.classList.remove('menu-open');
-            mt.setAttribute('aria-expanded', 'false');
-          }
-        }
-        setLangOpen(open);
-      });
-      document.addEventListener('click', function (e) {
-        if (langMenu.classList.contains('lang-open') &&
-            !langMenu.contains(e.target) && !langToggle.contains(e.target)) {
-          setLangOpen(false);
-        }
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && langMenu.classList.contains('lang-open')) {
-          setLangOpen(false);
-        }
-      });
-      switchWrap.appendChild(langToggle);
-    }
+  }
+  if (langMenu && langBtn) {
+    closeLang = function () {
+      langMenu.hidden = true;
+      langBtn.setAttribute('aria-expanded', 'false');
+    };
+    langBtn.addEventListener('click', function () {
+      var open = langMenu.hidden;
+      if (open && closeMenu) closeMenu();
+      langMenu.hidden = !open;
+      langBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!langMenu.hidden && !langMenu.contains(e.target) && !langBtn.contains(e.target)) closeLang();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !langMenu.hidden) closeLang();
+    });
   }
 
   /* 6. Floating side TOC on wide screens */
@@ -386,73 +291,40 @@
     shareButtons.insertBefore(shareLi, shareButtons.firstChild);
   }
 
-  /* 8. Right action cluster + mobile hamburger: .nav-actions goes last
-     in the space-between .header-nav row (flush-right edge) and takes,
-     in order, the moved #menu (desktop: 文章 归档), the search icon
-     (feature 11 inserts it before the toggle) and the hamburger — ☰
-     keeps the absolute right edge on phones, search hugs it, menu
-     items ride the same cluster on desktop. ui.css (≤768px) does the
-     collapsing via the html.js gate (set by extend_head's first-paint
-     inline script — a :has(>.menu-toggle) hide only matched after this
-     script ran, flashing the theme's wrapped menu on every page
-     transition; the hide rule covers both DOM states, pre-wrap and
-     wrapped) and the .menu-open panel. Outside clicks and Escape close
-     it; navigating away resets it naturally. aria-label follows the
-     page language. */
-  var nav = document.querySelector('.header-nav');
-  var menuList = document.getElementById('menu');
-  if (nav && menuList) {
-    var actions = document.createElement('div');
-    actions.className = 'nav-actions';
-    actions.appendChild(menuList);
-    nav.appendChild(actions);
-    var toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'menu-toggle';
-    toggle.setAttribute('aria-controls', 'menu');
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', {
-      zh: '菜单',
-      ja: 'メニュー',
-      en: 'Menu'
-    }[(document.documentElement.getAttribute('lang') || 'zh').slice(0, 2)] || 'Menu');
-    toggle.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
-      ' width="20" height="20" fill="none" stroke="currentColor"' +
-      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
-      ' aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/>' +
-      '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18"' +
-      ' x2="21" y2="18"/></svg>';
-    var setOpen = function (open) {
-      nav.classList.toggle('menu-open', open);
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) {
-        /* the header hosts two panels (menu + language) — mutually
-           exclusive: opening one closes the other (mirrored inside
-           feature 5's lang toggle) */
-        var openLang = document.querySelector('.lang-menu.lang-open');
-        if (openLang) {
-          openLang.classList.remove('lang-open');
-          var lt = document.querySelector('.lang-toggle');
-          if (lt) lt.setAttribute('aria-expanded', 'false');
-        }
-      }
+  /* 8. Mobile menu panel + nav current marker — the header's DOM is
+     native (feature 5's partial), so all that is left of the old
+     nav-actions/hamburger injection is the panel mechanics for
+     .mobile-menu (toggle, aria-expanded, mutual exclusion with the
+     language panel, outside click, Escape) plus the current-page
+     marker the cached partial cannot stamp: nav links get
+     aria-current="page" by path-prefix match, which drives the
+     prototype's underline (.nav a[aria-current]). ≤768px the inline
+     .nav hides and the menu button shows, both keyed on html.js
+     (extend_head's first-paint script) — no JS keeps the theme's
+     wrapped nav instead of a dead button. */
+  if (mobileMenu && menuBtn) {
+    closeMenu = function () {
+      mobileMenu.hidden = true;
+      menuBtn.setAttribute('aria-expanded', 'false');
     };
-    toggle.addEventListener('click', function () {
-      setOpen(!nav.classList.contains('menu-open'));
+    menuBtn.addEventListener('click', function () {
+      var open = mobileMenu.hidden;
+      if (open && closeLang) closeLang();
+      mobileMenu.hidden = !open;
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     document.addEventListener('click', function (e) {
-      if (nav.classList.contains('menu-open') && !nav.contains(e.target)) {
-        setOpen(false);
-      }
+      if (!mobileMenu.hidden && !mobileMenu.contains(e.target) && !menuBtn.contains(e.target)) closeMenu();
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && nav.classList.contains('menu-open')) {
-        setOpen(false);
-      }
+      if (e.key === 'Escape' && !mobileMenu.hidden) closeMenu();
     });
-    actions.appendChild(toggle);
   }
+  var here = location.pathname.replace(/\/(zh|ja|en)\//, '/');
+  document.querySelectorAll('.nav a').forEach(function (a) {
+    var t = new URL(a.href).pathname.replace(/\/(zh|ja|en)\//, '/');
+    if (here === t || here.indexOf(t) === 0) a.setAttribute('aria-current', 'page');
+  });
 
   /* 9. Related posts after the footer: the visual order (ui.css) shows
      related LAST (order:5, after tags/share/paginav), but its DOM slot
@@ -506,70 +378,6 @@
       descToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     desc.appendChild(descToggle);
-  }
-
-  /* 11. Header search icon: search left the nav menu and lives on as a
-     standalone icon inside feature 8's .nav-actions cluster, slotted
-     between #menu and the hamburger — the OS header pattern (search is
-     the rightmost high-frequency entry, ☰ the absolute edge; the
-     low-frequency theme/lang toggles stay by the logo on the left).
-     The link[rel=search] from extend_head is the language-correct
-     permalink; no link → no icon (self-gating, same as every feature
-     above). accesskey=/ preserves the Alt+/ shortcut the theme used to
-     attach to the menu item, and the tooltip carries the same hint.
-     ui.css sizes it like every header icon (20px Feather glyph, 12px
-     padding = a 44px tap target). The :not([type]) skips the OpenSearch
-     link — extend_head emits a second link[rel=search] carrying the
-     OpenSearch MIME type, and this icon wants the plain permalink. */
-  var searchLink = document.querySelector('link[rel="search"]:not([type])');
-  var navActions = document.querySelector('.nav-actions');
-  if (searchLink && navActions) {
-    var searchToggle = document.createElement('a');
-    searchToggle.className = 'search-toggle';
-    searchToggle.href = searchLink.href;
-    searchToggle.setAttribute('accesskey', '/');
-    var searchLabel = {
-      zh: '搜索',
-      ja: '検索',
-      en: 'Search'
-    }[(document.documentElement.getAttribute('lang') || 'zh').slice(0, 2)] || 'Search';
-    searchToggle.title = searchLabel + ' (Alt + /)';
-    searchToggle.setAttribute('aria-label', searchLabel);
-    searchToggle.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
-      ' width="20" height="20" fill="none" stroke="currentColor"' +
-      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
-      ' aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21"' +
-      ' y1="21" x2="16.65" y2="16.65"/></svg>';
-    navActions.insertBefore(searchToggle, navActions.querySelector('.menu-toggle'));
-  }
-
-  /* 12. Logo identity per breakpoint: desktop keeps the brand text,
-     phones swap it for a Feather home glyph (every header icon then
-     shares one 20px form — ui.css unifies the sizes; the theme's 17px
-     moon/sun attributes included). The text is wrapped into a span so
-     CSS can switch text↔icon at the breakpoint (a bare text node
-     can't be styled); the .logo-home class only exists after this
-     script ran, doubling as the no-JS gate. The anchor keeps its title
-     tooltip and accesskey=h; the title text becomes the accessible
-     name on phones, where the text is hidden. No JS → the theme's
-     text logo stays at every width. */
-  var logoLink = document.querySelector('.logo > a');
-  if (logoLink) {
-    logoLink.classList.add('logo-home');
-    if (!logoLink.getAttribute('aria-label')) {
-      logoLink.setAttribute('aria-label', logoLink.title);
-    }
-    var logoText = document.createElement('span');
-    logoText.className = 'logo-text';
-    while (logoLink.firstChild) logoText.appendChild(logoLink.firstChild);
-    logoLink.appendChild(logoText);
-    logoText.insertAdjacentHTML('beforebegin',
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' +
-      ' width="20" height="20" fill="none" stroke="currentColor"' +
-      ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
-      ' aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2' +
-      ' 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>');
   }
 
   /* 13. Search page, no autofocus: visitors mostly land on /search/ for

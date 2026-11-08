@@ -87,20 +87,14 @@ check "搜索页输入框存在"        "grep -q 'searchInput' '$OUT/zh/search/i
 # 删除（主题仅对指向 search 布局页的菜单项附 accesskey=/ 与 "(Alt + /)" tooltip，该串从
 # 静态首页消失即菜单项已除；注入图标的 title 是运行时 JS 生成，不污染静态 HTML）；头部
 # 改为 site.js 注入 .search-toggle（右侧高频位：.nav-actions 组内、☰ 之前——OS 头部惯例，
-# 手机端不进汉堡面板），语言正确的 URL 数据源是 extend_head 每页发的 link[rel=search]
-# （head 作数据源，同语言切换器 hreflang 模式）；Ctrl+K 回退同步改 .search-toggle
-check "搜索图标(头部独立入口)"  "grep -q 'rel=\"search\"' '$PAGE' && grep -q 'search-toggle' '$OUT'/js/site.*.js && grep -q '.search-toggle{display:inline-flex' '$OUT'/assets/css/stylesheet.*.css && ! grep -q '(Alt + /)' '$OUT/zh/index.html'"
-# 头部图标统一(20px Feather+home logo，2026-11-06)：所有头部图标一个形态——logo 文本换
-# Feather home（js 加 .logo-home 类留断言钩子；title/aria-label/accesskey=h 保留），主题
-# moon/sun 的 17px 属性由 CSS 压到统一 20px（选择器列表是唯一 token：五槽一体，拆散即
-# 失去统一约束）；theme-toggle padding 0 .4rem → 12px（44px 触控目标，bundle 后加载同
-# 特异性源序胜出——断言必须钉住站点层这条，防止回退到主题值）。同日晚补**图标间距节奏**：
-# 主题默认三值不一（.logo 0.55rem→🏠↔🌓 20.8px、.logo-switches 0.4rem→🌓↔🌐 30.4px）——
-# 统一为相邻图标对恒 24px glyph 间距（=菜单项 column-gap；图标自带 12px padding，wrapper
-# 要么 12px（桌面菜单文字↔搜索）要么 0（手机 🔍↔☰）；| 两侧各 12px 配平靠 .nav-sep
-# padding-right；≥769px 搜索 margin-right -12px 贴内容右缘对称贴左的 🏠）——spacing token
-# 六条入断言防回退
-check "头部图标统一(20px+home)"  "grep -q 'logo-home' '$OUT'/js/site.*.js && grep -q 'logo-text' '$OUT'/js/site.*.js && grep -q '#theme-toggle svg,.lang-toggle svg' '$OUT'/assets/css/stylesheet.*.css && grep -q '.theme-toggle{padding:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo{column-gap:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-switches{gap:0' '$OUT'/assets/css/stylesheet.*.css && grep -q '.nav-sep{padding-right:.35rem' '$OUT'/assets/css/stylesheet.*.css && grep -q '.nav-actions{display:flex;align-items:center;gap:12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '@media screen and (min-width:769px){.search-toggle{margin-right:-12px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.nav-actions{gap:0' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-home svg{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-home .logo-text{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.logo-home svg{display:block' '$OUT'/assets/css/stylesheet.*.css"
+# 搜索图标（full-align 头部重建）：header partial 原生渲染语言正确的搜索入口
+# （构建期 site.GetPage，无需 JS 注入），accesskey=/ 保留；不带 (Alt + /) 可见文案
+check "搜索图标(头部原生)"      "grep -q 'id=\"search-link\"' '$PAGE' && grep -q 'rel=\"search\"' '$PAGE' && ! grep -q '(Alt + /)' '$OUT/zh/index.html' && grep -q 'class=\"skip\"' '$PAGE'"
+# 头部重建（full-align，原型 site-head）：brand 两段（衬线 二重奏 + mono DEUX）、
+# nav 仅 文章/关于（data-nav 标记，归档已从菜单退役）、head-actions 四件
+# theme→search→lang→menu 证据序、44px icon-btn 19px glyph 统一形态；
+# logo-switches 旧 DOM 负断言根除
+check "头部重建(原型site-head)" "grep -q 'class=\"brand\"' '$PAGE' && grep -q 'brand-en\">DEUX' '$PAGE' && grep -q 'data-nav=\"posts\"' '$PAGE' && grep -q 'data-nav=\"about\"' '$PAGE' && ! grep -q 'data-nav=\"archives\"' '$PAGE' && ! grep -q 'logo-switches' '$PAGE' && grep -q 'id=\"theme-toggle\"' '$PAGE' && grep -q '.site-head{position:sticky;top:0' '$OUT'/assets/css/stylesheet.*.css && grep -q '.brand-cn{font-family:var(--font-display)' '$OUT'/assets/css/stylesheet.*.css && grep -q '.icon-btn{width:44px;height:44px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.icon-btn svg{width:19px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.head-inner{min-height:86px' '$OUT'/assets/css/stylesheet.*.css"
 # 搜索页不自动聚焦(2026-11-06)：主题 fastsearch 在 window load 的 initSearch 里 enable+focus
 # 输入框——手机弹软键盘把分类中枢挤出首屏，而访客主要来的是看分类。fastsearch 是主题资产
 # 不可改；init 的 focus 只能靠顺序区分（输入框 disabled 到 load 为止、不可点，故必然是元素
@@ -125,16 +119,18 @@ check "OpenSearch(浏览器站内搜索)"  "test -f '$OUT/zh/opensearch.xml' && 
 # 入口在各语言 footer.text（无菜单项，头部保持极简）
 check "留言板(giscus)"           "test -f '$OUT/zh/guestbook/index.html' && test -f '$OUT/ja/guestbook/index.html' && test -f '$OUT/en/guestbook/index.html' && grep -q '/zh/guestbook/' '$OUT/zh/index.html' && grep -q '/ja/guestbook/' '$OUT/ja/index.html' && grep -q 'id=\"giscus-script\"' '$OUT/zh/guestbook/index.html' && ! grep -q '<details id=\"toc\"' '$OUT/zh/guestbook/index.html'"
 # 语言切换器：主题裸输出仅「其他语言」全名（zh 首页/文章页静态可验）；site.js 注入全量常驻
-# 列表+当前语言标记。FOUC 门控（全视口）：注入完成前（无 .current-lang 条目）以
-# .js+.lang-menu:not(:has(.current-lang)) 先行 visibility:hidden——首帧到注入之间不再闪现
-# 主题裸开关（visibility 不位移、裸链接不可点；JS 禁用无 .js 类走主题回退）；token 守 bundle
-check "语言切换全名显示"        "grep -q '日本語' '$OUT/zh/index.html' && grep -q 'English' '$OUT/zh/index.html' && grep -q '日本語' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q '.js .lang-menu:not(:has(.current-lang)){visibility:hidden' '$OUT'/assets/css/stylesheet.*.css"
+# 语言面板（full-align）：常驻 globe+196px 面板（全名+代码 em），当前语言构建期
+# aria-current（partialCached 按语言缓存故模板安全）；FOUC 门随 JS 注入体系一并退役
+check "语言面板(全名+代码)"     "grep -q '<span>简体中文</span><em>ZH</em>' '$PAGE' && grep -q '<span>日本語</span><em>JA</em>' '$PAGE' && grep -q 'data-lang-link=\"zh\" aria-current=\"true\"' '$PAGE' && grep -q '.lang-menu{position:absolute;right:0;top:100%;width:196px' '$OUT'/assets/css/stylesheet.*.css"
 check "aliases 跳转页生成"      "test -f '$OUT/zh/posts/alias-test/index.html'"
 check "llms.txt 站点索引生成"    "test -f '$OUT/zh/llms.txt' && grep -q 'Feature health check' '$OUT/zh/llms.txt'"
 # 归档出口页（align-proto B 重写）：kicker/deck/title-row + 年份分组行 + list-foot，
 # 主题 archive-* 台账 DOM 负断言根除；三语 kicker 逐字守卫
 check "归档出口页(年份分组)"   "grep -q 'class=\"kicker\"' '$OUT/zh/archives/index.html' && grep -q 'page-deck' '$OUT/zh/archives/index.html' && grep -q 'year-group' '$OUT/zh/archives/index.html' && grep -q 'post-row' '$OUT/zh/archives/index.html' && grep -q 'list-foot' '$OUT/zh/archives/index.html' && ! grep -q 'archive-year-header' '$OUT/zh/archives/index.html'"
 check "归档页三语刊头"         "grep -q 'Archive · 归档' '$OUT/zh/archives/index.html' && grep -q 'Archive · アーカイブ' '$OUT/ja/archives/index.html' && grep -q 'Archive · Index' '$OUT/en/archives/index.html' && grep -q '按时间倒序' '$OUT/zh/archives/index.html'"
+# 容器统一（full-align R2）：原型 --gap 40/24 与 --max 1180 令牌接管，
+# .main 全页型 1180、文章列回 720 居中、about 摊开
+check "容器统一(wrap1180)"      "grep -q -- '--max:1180px' '$OUT'/assets/css/stylesheet.*.css && grep -q -- '--gap:40px' '$OUT'/assets/css/stylesheet.*.css && grep -q '.main{max-width:var(--max)' '$OUT'/assets/css/stylesheet.*.css && grep -q '.main>.post-single{max-width:var(--main-width)' '$OUT'/assets/css/stylesheet.*.css && grep -q '.post-single:has(>.about-side) .post-content{max-width:660px' '$OUT'/assets/css/stylesheet.*.css"
 check "YouTube nocookie iframe"  "grep -q 'youtube-nocookie.com/embed/dQw4w9WgXcQ' '$PAGE'"
 check "B站 iframe 播放器"         "grep -q 'player.bilibili.com/player.html?bvid=BV1xx411c7mD' '$PAGE'"
 check "分类进元信息行"            "grep -q 'href=.*categories/demo' '$PAGE'"
@@ -181,7 +177,7 @@ check "元信息行条目类名+图标"    "grep -q 'meta-item meta-date' '$PAGE
 check "作者已移除(head保留)"     "! grep -q 'meta-author' '$PAGE' && ! grep -q 'meta-author' '$OUT/zh/posts/index.html' && ! grep -q 'meta-author' '$OUT/zh/archives/index.html' && grep -q 'name=\"author\"' '$PAGE' && ! grep -q '在 GitHub 上改进本文' '$PAGE'"
 # 语言切换同页化：head hreflang 互译链接（主题每页无条件发出）是 site.js 运行时重写
 # href 为同页译文 URL 的数据源——HTML 守数据源、JS bundle 守重写逻辑（含 data-lang 打标）
-check "语言切换同页(数据源+JS)"  "grep -q 'hreflang=\"ja\"' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q 'hreflang=\"en\"' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q 'hreflang' '$OUT'/js/site.*.js && grep -q 'data-lang' '$OUT'/js/site.*.js"
+check "语言切换同页(数据源+JS)"  "grep -q 'hreflang=\"ja\"' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q 'hreflang=\"en\"' '$OUT/zh/posts/ai-update-blog/index.html' && grep -q 'hreflang' '$OUT'/js/site.*.js && grep -q 'langLink' '$OUT'/js/site.*.js"
 # 语言列表已收敛：文章页/搜索页无任何翻译列表 DOM（translation_list 空 stub 压掉主题 partial），
 # 语言入口仅头部切换器一处；stub 文件须存在且不得把主题列表逻辑克隆回来
 check "语言列表已收敛(仅头部)"   "! grep -q 'i18n_list' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q 'meta-lang' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q '语言:' '$OUT/zh/posts/ai-update-blog/index.html' && ! grep -q 'i18n_list' '$OUT/zh/search/index.html' && test -f layouts/_partials/translation_list.html && ! grep -q 'i18n_list' layouts/_partials/translation_list.html"
@@ -212,17 +208,14 @@ check "分享并入标签行(bundle)"   "grep -q 'grid-area:share' '$OUT'/assets
 # 展开为下拉面板（面板选择器 (1,3,0) 天然压过隐藏 (1,2,0)，不再依赖源序）——JS 禁用时无
 # .js 类，主题折行菜单原样回退；.js 由 extend_head 首帧前内联脚本打上（:has(>.menu-toggle)
 # 版本要等 site.js 注入按钮才成立，每次页面跳转都闪一帧折行菜单——FOUC 事故后改定，耦合点
-# 含该脚本）。耦合点=主题 .header-nav/#menu 类名 + 自建 .nav-actions；minified CSS token、
-# 首帧脚本与 aria-expanded 属性名（minifier 不改写属性名）守 bundle
-check "汉堡菜单(手机)"           "grep -q '.js .header-nav>#menu,.js .nav-actions>#menu{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.menu-open .nav-actions>#menu{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q 'documentElement.classList.add(.js.)' '$PAGE' && grep -q 'menu-toggle' '$OUT'/js/site.*.js && grep -q 'nav-actions' '$OUT'/js/site.*.js && grep -q 'aria-expanded' '$OUT'/js/site.*.js"
-# 手机端语言globe（2026-11-06）：≤768px 内联切换行（原 ZH/JA/EN 短码，双标签 span 已删）收纳为
-# site.js 注入的 .lang-toggle（Feather globe，aria-controls=#lang-menu，.logo-switches 末位），
-# 点开为汉堡面板同几何的通栏下拉（.lang-open，全名行、当前语言加粗不可点）。隐藏规则
-# .js .lang-menu,.js .nav-sep{display:none 与面板规则同特异性 (0,2,0)，面板必须排其后靠源序
-# 取胜（同汉堡契约）；桌面 .lang-toggle 基础 display:none 保留内联全名。双面板互斥在 JS 层
-# （开启一方关闭另一方）。JS token 守 bundle（类名字面量不经 minifier），CSS token 守
-# 收纳/面板/按钮三端
-check "语言globe(手机)"          "grep -q 'lang-toggle' '$OUT'/js/site.*.js && grep -q 'lang-open' '$OUT'/js/site.*.js && grep -q 'aria-current' '$OUT'/js/site.*.js && grep -q '.js .lang-menu,.js .nav-sep{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-menu.lang-open{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-toggle{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.lang-menu li.current-lang svg{width:.9em' '$OUT'/assets/css/stylesheet.*.css"
+# 汉堡面板（full-align）：.mobile-menu 原生 DOM（header partial），≤768px .nav 隐藏与
+# .menu-btn 显现都挂 html.js 门（无 JS 回退折行 nav 而非死按钮）；面板机制与互斥在
+# feature 5/8（site.js），首帧脚本 token 继续守 extend_head
+check "汉堡面板(手机)"          "grep -q '.js .nav{display:none' '$OUT'/assets/css/stylesheet.*.css && grep -q '.js .menu-btn{display:grid' '$OUT'/assets/css/stylesheet.*.css && grep -q '.mobile-menu{position:absolute' '$OUT'/assets/css/stylesheet.*.css && grep -q 'documentElement.classList.add(.js.)' '$PAGE' && grep -q 'menu-btn' '$OUT'/js/site.*.js && grep -q 'mobile-menu' '$OUT'/js/site.*.js && grep -q 'aria-expanded' '$OUT'/js/site.*.js"
+# 语言globe 常驻（full-align）：全视口一个 globe（不再分桌面内联/手机注入两态），
+# 面板开合与汉堡互斥（closeLang/closeMenu 闭包），同页切换走 data-lang-link+hreflang
+# 重写（JS 禁用回退语言首页，永不 404）
+check "语言globe(常驻+互斥)"    "grep -q 'lang-btn' '$OUT'/js/site.*.js && grep -q 'data-lang-link' '$PAGE' && grep -q 'langLink' '$OUT'/js/site.*.js && grep -q '.lang-wrap{position:static' '$OUT'/assets/css/stylesheet.*.css && grep -Fq '.lang-menu[hidden]{display:none' '$OUT'/assets/css/stylesheet.*.css"
 # 文章导航（2026-11-06）：站点 i18n/{zh-CN,ja,en}.toml 平面键覆盖主题 prev_page/next_page
 # （「上一页/下一页」→「上一篇/下一篇」；ja/en 顺带文章化）。文件名规则系实证：zh 必须
 # locale 全名 zh-CN.toml（zh.toml 平局输给主题 zh.yaml）、ja/en 必须基名（ja-JP.toml 会把

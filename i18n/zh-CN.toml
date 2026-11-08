@@ -40,3 +40,12 @@ backCats = "全部分类"
 newestFirst = "按时间倒序"
 rssFull = "RSS 全文"
 footGuestbook = "留言板"
+# 头部重建（2026-11-08 redesign/full-align，layouts/_partials/header.html 覆盖）
+# 原型 site-head 结构的无障碍文案键
+skipContent = "跳到正文"
+navLabel = "主导航"
+brandHome = "二重奏，返回首页"
+themeToggleAria = "切换明暗主题"
+searchAria = "搜索（Ctrl 或 Command 加 K）"
+langToggleAria = "切换语言"
+menuToggleAria = "打开菜单"

@@ -180,11 +180,6 @@ isPlainText = true
       pageRef = '/posts'
       weight = 10
     [[languages.zh.menu.main]]
-      identifier = "archives"
-      name = '归档'
-      pageRef = '/archives'
-      weight = 40
-    [[languages.zh.menu.main]]
       identifier = "about"
       name = '关于'
       pageRef = '/about'
@@ -225,11 +220,6 @@ isPlainText = true
       pageRef = '/posts'
       weight = 10
     [[languages.ja.menu.main]]
-      identifier = "archives"
-      name = 'アーカイブ'
-      pageRef = '/archives'
-      weight = 40
-    [[languages.ja.menu.main]]
       identifier = "about"
       name = 'About'
       pageRef = '/about'
@@ -269,11 +259,6 @@ isPlainText = true
       name = 'Posts'
       pageRef = '/posts'
       weight = 10
-    [[languages.en.menu.main]]
-      identifier = "archives"
-      name = 'Archives'
-      pageRef = '/archives'
-      weight = 40
     [[languages.en.menu.main]]
       identifier = "about"
       name = 'About'
