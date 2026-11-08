@@ -1,5 +1,5 @@
 /* Site-layer enhancements, loaded fingerprinted from extend_head.
-   Sixteen self-gating features — each activates only when its DOM exists
+   Seventeen self-gating features — each activates only when its DOM exists
    (15 was reserved for a back-to-top button; the theme's #top-link
    already ships one and chrome.css reshapes it to the prototype form
    instead — no JS needed):
@@ -704,4 +704,88 @@
     }
 
     input.addEventListener('input', sync);
+  })();
+
+  /* 17. Identity pages — the prototype's about/guestbook heads. /about/
+     gets the side rail (avatar, name, role, GitHub/Email/X links — same
+     accounts as hugo.toml socialIcons) injected before .post-header;
+     ui.css grids .post-single via :has() (224px rail + content column,
+     ≤768px stacks back to one column). No JS → the theme's single-column
+     article stays. /guestbook/ gets a kicker + "giscus" count row as a
+     SIBLING above .post-header (inside the header is the summary-fold
+     grid with explicit rows — a sibling can't disturb it). Both pages
+     are CMS content served by the theme's single.html; injecting here
+     keeps that template un-overridden. */
+  (function () {
+    var single = document.querySelector('.post-single');
+    var header = single && single.querySelector('.post-header');
+    if (!single || !header) return;
+    var lang = (document.documentElement.getAttribute('lang') || 'zh').slice(0, 2);
+    var path = location.pathname;
+
+    if (/\/about\/?$/.test(path)) {
+      if (single.querySelector('.about-side')) return;
+      var role = {
+        zh: '三语博客 · 日常与技术',
+        ja: '三言語ブログ · 日常と技術',
+        en: 'Trilingual blog · essays & tech'
+      }[lang] || 'Trilingual blog · essays & tech';
+      var links = [
+        { href: 'https://github.com/piscon', label: 'GitHub', icon: '<path d="M9 19c-4 1.5-4-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C7.7 2.8 6.7 3.1 6.7 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 5.3 9.5c0 4.6 2.7 5.7 5.5 6-.5.6-.5 1.2-.5 2V21"></path>' },
+        { href: 'mailto:hello@deux.top', label: 'hello@deux.top', icon: '<rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path>' },
+        { href: 'https://x.com/deux_top', label: '@deux_top', icon: '<path d="M4 4l16 16M20 4L4 20"></path>' }
+      ];
+      var aside = document.createElement('aside');
+      aside.className = 'about-side';
+      var img = document.createElement('img');
+      img.src = '/images/about-avatar.jpg';
+      img.alt = '二重奏';
+      img.width = 104;
+      img.height = 104;
+      var name = document.createElement('p');
+      name.className = 'about-name';
+      name.textContent = '二重奏';
+      var roleEl = document.createElement('p');
+      roleEl.className = 'about-role';
+      roleEl.textContent = role;
+      var nav = document.createElement('nav');
+      nav.className = 'about-links';
+      nav.setAttribute('aria-label', 'social');
+      links.forEach(function (l) {
+        var a = document.createElement('a');
+        a.href = l.href;
+        if (l.href.indexOf('https:') === 0) {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+        a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + l.icon + '</svg>';
+        a.appendChild(document.createTextNode(' ' + l.label));
+        nav.appendChild(a);
+      });
+      aside.appendChild(img);
+      aside.appendChild(name);
+      aside.appendChild(roleEl);
+      aside.appendChild(nav);
+      single.insertBefore(aside, header);
+      return;
+    }
+
+    if (/\/guestbook\/?$/.test(path)) {
+      if (single.querySelector('.gb-head')) return;
+      var head = document.createElement('div');
+      head.className = 'gb-head';
+      var kick = document.createElement('p');
+      kick.className = 'kicker';
+      kick.textContent = {
+        zh: 'Guestbook · 留言',
+        ja: 'Guestbook · ゲストブック',
+        en: 'Guestbook · Notes'
+      }[lang] || 'Guestbook · Notes';
+      var count = document.createElement('span');
+      count.className = 'page-count';
+      count.textContent = 'giscus';
+      head.appendChild(kick);
+      head.appendChild(count);
+      single.insertBefore(head, header);
+    }
   })();

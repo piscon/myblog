@@ -1076,3 +1076,107 @@ sup[id^="fnref:"] {
     overflow: hidden;
   }
 }
+
+/* ---- identity pages (align-proto E, site.js feature 17) ------------------
+   The prototype's about view: a sticky side rail (104px round avatar,
+   display-serif name, mono role line, GitHub/Email/X links) beside the
+   article column; the two-column grid keys on :has(>.about-side) so it
+   only exists when the rail does — no JS, no rail, the theme's single
+   column stays. guestbook gets the shared kicker + a "giscus" count on
+   one baseline row above the header (a sibling of .post-header — the
+   header itself is the summary-fold grid with explicit rows). Colors
+   map the prototype's --ink-2/--muted onto --secondary. */
+.post-single:has(> .about-side) {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+.post-single:has(> .about-side) > :not(.about-side) {
+  grid-column: 2;
+}
+
+.about-side {
+  grid-column: 1;
+  grid-row: 1 / span 20;
+  position: sticky;
+  top: 118px;
+}
+
+.about-side img {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.about-name {
+  margin: 18px 0 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.about-role {
+  margin: 6px 0 0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--secondary);
+  text-transform: uppercase;
+}
+
+.about-links {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 14px;
+}
+
+.about-links a {
+  color: var(--secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-links svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+}
+
+@media (hover: hover) {
+  .about-links a:hover {
+    color: var(--accent);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .post-single:has(> .about-side) {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .post-single:has(> .about-side) > :not(.about-side) {
+    grid-column: 1;
+  }
+
+  .about-side {
+    grid-row: auto;
+    position: static;
+    margin-bottom: var(--sp-5);
+  }
+}
+
+.gb-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: var(--sp-head);
+}

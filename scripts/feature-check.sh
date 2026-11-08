@@ -285,6 +285,9 @@ check "搜索空态(回填建议)"         "grep -q 'empty-state' assets/js/site
 # 页脚单行（align-proto D，_partials/footer.html 覆盖）：©+CC 左 / 留言板+RSS 图标右，
 # Powered by 负断言；top-link 重塑 44px 发丝圆钮 token
 check "页脚单行(图标+无Powered)"   "grep -q 'foot-meta' '$OUT/zh/tags/index.html' && grep -q 'foot-icons' '$OUT/zh/tags/index.html' && grep -q 'aria-label=\"留言板\"' '$OUT/zh/tags/index.html' && grep -q 'aria-label=\"RSS 全文\"' '$OUT/zh/tags/index.html' && grep -q 'aria-label=\"ゲストブック\"' '$OUT/ja/tags/index.html' && grep -q 'deed.zh' '$OUT/zh/tags/index.html' && ! grep -q 'Powered by' '$OUT/zh/tags/index.html' && grep -q '.foot-meta{display:flex' '$OUT'/assets/css/stylesheet.*.css && grep -q '.top-link{bottom:20px' '$OUT'/assets/css/stylesheet.*.css"
+# 身份页刊头（align-proto E，feature 17）：about 侧栏注入+grid(:has)/guestbook kicker+giscus
+# 计数行——内容页走主题 single.html，DOM 由 site.js 注入，守 JS 字面量+CSS token+头像资产
+check "身份页刊头(about侧栏+gb)"   "grep -q 'about-side' assets/js/site.js && grep -q '/images/about-avatar.jpg' assets/js/site.js && test -f static/images/about-avatar.jpg && grep -q '.post-single:has(>.about-side){display:grid' '$OUT'/assets/css/stylesheet.*.css && grep -q 'gb-head' assets/js/site.js && grep -q '.gb-head{display:flex' '$OUT'/assets/css/stylesheet.*.css"
 
 FAILED=0
 {
