@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接线第 4 轮 · Phase 4 完成</title>
+<style>
+:root{--paper:#f7f3ea;--ink:#1a1712;--sub:#6b6455;--rule:#dfd6c4;--gold:#8a5d15;--ok:#2e7d4f}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Songti SC","Noto Serif SC",serif;background:var(--paper);color:var(--ink);line-height:1.75;padding:40px 16px 80px}
+.wrap{max-width:1020px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--gold);font-weight:600}
+h1{font-size:clamp(24px,3vw,32px);margin:8px 0 4px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{border:1px solid var(--rule);border-radius:10px;padding:20px 22px}
+.panel h2{font-size:16px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--rule)}
+li{margin:.4em 0;font-size:14.5px}
+.ok{color:var(--ok);font-weight:700}
+code{background:#efeadf;border-radius:4px;padding:0 4px;font-size:.9em}
+ul{padding-left:1.2em}
+footer{margin-top:28px;color:var(--sub);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">二重奏 · 原型 → Hugo 接线</div>
+<h1>第 4 轮：Phase 4 文章页完成（签认③落地）</h1>
+<div class="meta">commit 0297a3e + 2f868c0 ｜ 分支 redesign/proto-wiring（本地）｜ feature-check 全绿</div>
+<div class="grid">
+
+<section class="panel">
+<h2>TOC 浮层 左→右（纯 CSS，签认③）</h2>
+<ul>
+<li><code>details.toc[open]</code> 定位镜像：<code>left: calc(50% + (var(--main-width)/2) + var(--gap))</code> + 仅 <code>translateY(-50%)</code>，240px 宽 / 1280px 断点 / 独立滚动全保留</li>
+<li>浮层形态换原型款：透明底 + 左侧发丝线 + 14px 内衬，不再带盒（&lt;1280px 内联折叠条不受影响）</li>
+<li>DOM/模板零改动——single.html 未覆盖，JS-off 回退内联折叠条照旧</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>边界间距对齐原型</h2>
+<ul>
+<li>文章头部落点 = 原型 page-head 步进：<code>--sp-head</code>（桌面 64 / 手机 48px，原主题 24px）</li>
+<li>正文呼吸 = 原型 article-body 70px 的近值：<code>--sp-8</code> 64px（原 10px）；内容→footer 30px 与后续补偿边界未动（flex 不塌缩，重算过）</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>保留项验证</h2>
+<ul>
+<li>图文三档破格（#wide/#full）、封面 srcset（720px/100vw）、giscus 主题跟随、相关文章焦点归位、灯箱滚动锁——全部未触碰，断言全绿</li>
+<li>DOM 几何探针实测：position fixed、left 1104px（列右缘+gap）、透明底、左 1px 线、垂直居中 ✓</li>
+<li>1440 截图复核：TOC 与正文/封面无遮挡重叠</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>下一步</h2>
+<ul>
+<li>Phase 5（1d）：搜索页视觉对齐原型（kicker/页头）、404 出口页改造、关于/留言板微调</li>
+<li>Phase 6（1d）：§4 七条新断言落位（含「TOC 右浮」「编辑部首页」「404 出口页」）、全量回归、上线准备</li>
+</ul>
+</section>
+
+</div>
+<footer>redesign/proto-wiring · Phase 0-4 完成 ｜ 施工方案：原型/接线施工方案.md</footer>
+</div>
+</body>
+</html>

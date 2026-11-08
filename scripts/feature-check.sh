@@ -65,7 +65,7 @@ check "og:video meta"          "grep -q 'property=\"og:video\"' '$PAGE'"
 check "品牌 favicon 引用"       "grep -q '/branding/favicon.ico' '$PAGE' && grep -q 'from = \"/favicon.ico\"' netlify.toml && grep -q 'to = \"/branding/favicon.ico\"' netlify.toml"
 check "og:image 品牌图"         "grep -q 'branding/og-default.jpg' '$PAGE'"
 check "自定义 404 页存在"        "test -f '$OUT/zh/404.html'"
-check "404 en 文案分流"         "grep -q 'Page not found' '$OUT/en/404.html'"
+check "404 en 文案分流"         "grep -q 'There is nothing here' '$OUT/en/404.html' && grep -q 'ここには何もありません' '$OUT/ja/404.html' && grep -q '这里什么都没有' '$OUT/zh/404.html'"  # Phase 5 出口页重写后仍守三语分流
 # 时效入首屏（2026-11-06）：meta 行「更新于」条目（post_meta.html，Lastmod>+1d 守卫，
 # i18n updatedOn 三语键）替代文末 post-lastmod 行——修订过的文章首屏不再只显示旧日期。
 # 三语渲染经 first.md 实页验证（其 Lastmod>Date+1d，首屏必出更新条目）。卡片/归档行

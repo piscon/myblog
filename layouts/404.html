@@ -1,99 +1,149 @@
-{{- /* Standalone 404 page (no theme coupling). Rendered per language by
-       Hugo; Netlify routes /ja/* and /en/* 404s to the localized copies and
-       everything else falls through to /zh/404.html (see netlify.toml). */ -}}
+{{- /* SITE OVERRIDE — standalone 404 exit page (redesign/proto-wiring
+       Phase 5, 2026-11-08). No theme coupling; rendered per language by
+       Hugo, Netlify routes /ja/* and /en/* 404s to the localized copies
+       and everything else falls through to /zh/404.html (netlify.toml).
+       Form follows the prototype's .notfound: huge mono 404 in
+       rule-strong, one serif sentence, THREE exits (home / posts /
+       search — the decided 出口 set) over a hairline rule, then the
+       three most recent posts of the current language. All copy lives
+       inline per $lang (this file renders outside the theme i18n
+       context; greppable strings double as the Phase 6 assertion). */ -}}
 {{- $lang := .Site.Language.Lang }}
-{{- $title := "Page not found" }}
-{{- $subtitle := "There is nothing here…" }}
+{{- $msg := "There is nothing here. The address may have drifted, or the page may have retired." }}
 {{- $home := "Back to home" }}
+{{- $posts := "All posts" }}
+{{- $search := "Search" }}
+{{- $recent := "Recent" }}
 {{- if eq $lang "zh" }}
-{{- $title = "页面未找到" }}
-{{- $subtitle = "这里什么都没有……" }}
+{{- $msg = "这里什么都没有。地址可能变了，页面也可能已经退役。" }}
 {{- $home = "返回首页" }}
+{{- $posts = "全部文章" }}
+{{- $search = "搜索" }}
+{{- $recent = "最近" }}
 {{- else if eq $lang "ja" }}
-{{- $title = "ページが見つかりません" }}
-{{- $subtitle = "ここには何もありません……" }}
+{{- $msg = "ここには何もありません。アドレスが変わったか、ページが引退した可能性があります。" }}
 {{- $home = "ホームへ戻る" }}
+{{- $posts = "すべての記事" }}
+{{- $search = "検索" }}
+{{- $recent = "最近" }}
 {{- end }}
+{{- $recentPages := first 3 (where .Site.RegularPages "Section" "in" .Site.MainSections) }}
 <!DOCTYPE html>
-<html lang="{{ .Site.Language.Lang | default "zh-CN"}}">
+<html lang="{{ .Site.Language.Lang | default "zh-CN" }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>404 - {{ .Site.Title }}</title>
-  <link rel="icon" href="{{ "/branding/favicon.ico" | absURL}}">
+  <link rel="icon" href="{{ "/branding/favicon.ico" | absURL }}">
   <style>
     :root {
-      --bg: #0d1117;
-      --fg: #e6edf3;
-      --secondary: #8b949e;
-      --primary: #58a6ff;
+      --paper: #f7f3ea;
+      --ink: #1a1712;
+      --ink-2: #3b3529;
+      --muted: #6b6455;
+      --rule: #dfd6c4;
+      --rule-strong: #c8bda6;
+      --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Noto Serif CJK SC", "Noto Serif SC", "Hiragino Mincho ProN", "Yu Mincho", serif;
+      --mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
     }
-    @media (prefers-color-scheme: light) {
+    @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #ffffff;
-        --fg: #24292f;
-        --secondary: #57606a;
-        --primary: #0969da;
+        --paper: #16140f;
+        --ink: #ece6d8;
+        --ink-2: #d3c9b6;
+        --muted: #a49b87;
+        --rule: #342f25;
+        --rule-strong: #4a4333;
       }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.75;
     }
-    .not-found {
-      text-align: center;
-      padding: 2rem 1rem;
-      max-width: 480px;
-    }
-    .not-found-code {
-      font-size: clamp(3rem, 10vw, 5rem);
-      font-weight: 700;
+    .notfound { max-width: 680px; margin: 0 auto; padding: 88px 24px 96px; }
+    .notfound-code {
+      font-family: var(--mono);
+      font-size: clamp(64px, 14vw, 120px);
       line-height: 1;
-      background: linear-gradient(135deg, #7c3aed, #06b6d4);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 1rem;
+      letter-spacing: .04em;
+      color: var(--rule-strong);
     }
-    .not-found-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+    .notfound-msg {
+      margin: 22px 0 0;
+      max-width: 34em;
+      font-family: var(--display);
+      font-size: 22px;
+      line-height: 1.7;
+      color: var(--ink);
     }
-    .not-found-subtitle {
-      color: var(--secondary);
-      margin-bottom: 2rem;
-      font-size: 0.95rem;
+    .notfound-actions {
+      display: flex; flex-wrap: wrap; gap: 14px 30px;
+      margin-top: 30px; padding-top: 22px;
+      border-top: 1px solid var(--rule);
     }
-    .not-found-home {
-      display: inline-block;
-      padding: 0.6rem 1.5rem;
-      border: 1px solid var(--primary);
-      border-radius: 999px;
-      color: var(--primary);
+    .notfound-actions a {
+      display: inline-flex; align-items: center; gap: 8px;
+      min-height: 44px; font-size: 14px; color: var(--ink-2);
       text-decoration: none;
-      font-size: 0.95rem;
-      transition: all 0.2s;
     }
-    .not-found-home:hover {
-      background: var(--primary);
-      color: var(--bg);
+    .notfound-actions svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+    .notfound-recent { margin-top: 40px; }
+    .notfound-recent h2 {
+      margin: 0 0 14px;
+      font-family: var(--mono); font-weight: 400; font-size: 12px;
+      letter-spacing: .16em; color: var(--muted); text-transform: uppercase;
+    }
+    .notfound-recent ul { list-style: none; }
+    .notfound-recent li { border-bottom: 1px solid var(--rule); }
+    .notfound-recent li:first-child { border-top: 1px solid var(--rule); }
+    .notfound-recent a {
+      display: flex; align-items: baseline; gap: 20px;
+      padding: 14px 0; color: var(--ink); text-decoration: none;
+    }
+    .notfound-recent time { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .notfound-recent .nf-title { font-family: var(--display); font-size: 18px; line-height: 1.5; }
+    @media (hover: hover) {
+      .notfound-recent a:hover .nf-title { opacity: .9; }
     }
   </style>
 </head>
 <body>
-  <div class="not-found">
-    <div class="not-found-code">404</div>
-    <div class="not-found-title">{{ $title }}</div>
-    <div class="not-found-subtitle">{{ $subtitle }}</div>
-    <a class="not-found-home" href="{{ .Site.Home.RelPermalink }}">{{ $home }}</a>
-  </div>
+  <main class="notfound">
+    <p class="notfound-code" aria-hidden="true">404</p>
+    <p class="notfound-msg">{{ $msg }}</p>
+    <nav class="notfound-actions" aria-label="404">
+      <a href="{{ .Site.Home.RelPermalink }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg>
+        <span>{{ $home }}</span>
+      </a>
+      <a href="{{ (.Site.GetPage "/posts").RelPermalink }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+        <span>{{ $posts }}</span>
+      </a>
+      <a href="{{ (.Site.GetPage "/search").RelPermalink }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span>{{ $search }}</span>
+      </a>
+    </nav>
+    {{- with $recentPages }}
+    <section class="notfound-recent">
+      <h2>{{ $recent }}</h2>
+      <ul>
+        {{- range . }}
+        <li>
+          <a href="{{ .RelPermalink }}">
+            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date | time.Format "2006.01.02" }}</time>
+            <span class="nf-title">{{ .Title }}</span>
+          </a>
+        </li>
+        {{- end }}
+      </ul>
+    </section>
+    {{- end }}
+  </main>
 </body>
 </html>
