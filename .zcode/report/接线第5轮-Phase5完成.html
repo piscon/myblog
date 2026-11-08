@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>接线第 5 轮 · Phase 5 完成</title>
+<style>
+:root{--paper:#f7f3ea;--ink:#1a1712;--sub:#6b6455;--rule:#dfd6c4;--gold:#8a5d15;--ok:#2e7d4f}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Songti SC","Noto Serif SC",serif;background:var(--paper);color:var(--ink);line-height:1.75;padding:40px 16px 80px}
+.wrap{max-width:1020px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:.35em;color:var(--gold);font-weight:600}
+h1{font-size:clamp(24px,3vw,32px);margin:8px 0 4px}
+.meta{color:var(--sub);font-size:13px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{border:1px solid var(--rule);border-radius:10px;padding:20px 22px}
+.panel h2{font-size:16px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--rule)}
+li{margin:.4em 0;font-size:14.5px}
+.ok{color:var(--ok);font-weight:700}
+code{background:#efeadf;border-radius:4px;padding:0 4px;font-size:.9em}
+ul{padding-left:1.2em}
+footer{margin-top:28px;color:var(--sub);font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">二重奏 · 原型 → Hugo 接线</div>
+<h1>第 5 轮：Phase 5 完成</h1>
+<div class="meta">commit 0745787 + bc90451 ｜ 分支 redesign/proto-wiring（本地）｜ feature-check 全绿</div>
+<div class="grid">
+
+<section class="panel">
+<h2>404 出口页（重写）</h2>
+<ul>
+<li>原型 notfound 形态：mono 大号 404（rule-strong 色）+ 衬线一句话 + <strong>三出口</strong>（返回首页 / 全部文章 / 搜索，44px 触控目标）+ 发丝线 + <strong>最近 3 篇</strong>（当前语言）</li>
+<li>纸墨双模式内联 CSS（prefers-color-scheme 镜像）；文案内联 $lang 三语——404 渲染脱离主题 i18n 语境，grep 串即「404 出口页」断言素材</li>
+<li>「404 en 文案分流」断言升级为三语字符串守卫</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>搜索 / 中心页 / 评论壳</h2>
+<ul>
+<li><code>.page-header</code>（搜索/归档/索引/list 共用）页头落点 = <code>--sp-head</code> 步进</li>
+<li>搜索输入框桌面 22px（原型大输入框形态）；手机 16px floor 保留（iOS 缩放阈值，不动）</li>
+<li>评论壳间距 token 化：giscus-wrapper margin-top 2rem → <code>var(--sp-7)</code>（「评论壳样式」断言素材）</li>
+<li>关于/留言板内容 CMS 管理——判定零改动 no-op</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>验证</h2>
+<ul>
+<li><span class="ok">hugo 过闸 + feature-check 全绿</span></li>
+<li>404 zh 亮/暗双模式截图复核：形态完全对齐原型</li>
+</ul>
+</section>
+
+<section class="panel">
+<h2>下一步：Phase 6（收尾）</h2>
+<ul>
+<li>§4 七条新断言落位（列表文字目录已入；剩 编辑部首页 / 404 出口 / TOC 右浮 / 评论壳 等补齐）</li>
+<li>全量回归（6 视口对照原型）→ 上线材料：deploy preview + curl 抽查清单交给你执行</li>
+</ul>
+</section>
+
+</div>
+<footer>redesign/proto-wiring · Phase 0-5 完成 ｜ 施工方案：原型/接线施工方案.md</footer>
+</div>
+</body>
+</html>
